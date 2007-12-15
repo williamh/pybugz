@@ -10,8 +10,8 @@ Simple command-line interface to bugzilla to allow:
 
 Requirements
 ------------
- - Python 2.4
- - ElementTree
+ - Python 2.4 or later
+ - ElementTree (only for Python 2.4)
 
 Classes
 -------
@@ -20,7 +20,7 @@ Classes
 
 """
 
-__version__ = '0.6.11'
+__version__ = '0.7.1'
 __author__ = 'Alastair Tse <http://www.liquidx.net/>'
 __contributors__ = []
 __revision__ = '$Id: $'
@@ -48,10 +48,10 @@ class BugzConfig:
         'list': 'buglist.cgi',
         'show': 'show_bug.cgi',
         'attach': 'attachment.cgi',
-        'post': 'post_bug.cgi',        
+        'post': 'post_bug.cgi',
         'modify': 'process_bug.cgi',
         'attach_post': 'attachment.cgi',
-    }        
+    }
 
     headers = {
         'Accept': '*/*',
@@ -115,9 +115,11 @@ class BugzConfig:
         'bug_status': ['NEW', 'ASSIGNED', 'REOPENED'],
         'bug_severity': [],
         'priority': [],
+        'emaillongdesc1': '1',
         'emailassigned_to1':'1',
         'emailtype1': 'substring',
         'email1': '',
+        'emaillongdesc2': '1',
         'emailassigned_to2':'1',
         'emailreporter2':'1',
         'emailcc2':'1',
@@ -163,7 +165,7 @@ class BugzConfig:
         'dup_id': '',     # only valid for knob=duplicate
         'assigned_to': '',# only valid for knob=reassign
         'form_name': 'process_bug',
-        'comment':''        
+        'comment':''
         }
 
     }
@@ -188,6 +190,7 @@ class BugzConfig:
 
         'columns': [
         'bugid',
+        'alias',
         'severity',
         'priority',
         'arch',
@@ -197,6 +200,24 @@ class BugzConfig:
         'desc'
         ],
 
+        'column_alias': {
+        'bug_id': 'bugid',
+        'alias': 'alias',
+        'bug_severity': 'severity',
+        'priority': 'priority',
+        'op_sys': 'arch', #XXX: Gentoo specific?
+        'assigned_to': 'assignee',
+        'assigned_to_realname': 'assignee', #XXX: Distinguish from assignee?
+        'bug_status': 'status',
+        'resolution': 'resolution',
+        'short_desc': 'desc',
+        'short_short_desc': 'desc',
+        },
+        # Novell: bug_id,"bug_severity","priority","op_sys","bug_status","resolution","short_desc"
+        # Gentoo: bug_id,"bug_severity","priority","op_sys","assigned_to","bug_status","resolution","short_short_desc"
+        # Redhat: bug_id,"alias","bug_severity","priority","rep_platform","assigned_to","bug_status","resolution","short_short_desc"
+        # Mandriva: 'bug_id', 'bug_severity', 'priority', 'assigned_to_realname', 'bug_status', 'resolution', 'keywords', 'short_desc'
+
         'resolution': {
         'fixed': 'FIXED',
         'invalid': 'INVALID',
@@ -204,6 +225,7 @@ class BugzConfig:
         'lated': 'LATER',
         'needinfo': 'NEEDINFO',
         'wontfix': 'WONTFIX',
+        'upstream': 'UPSTREAM',
         },
 
         'severity': [
@@ -223,7 +245,7 @@ class BugzConfig:
         4:'P4',
         5:'P5',
         }
-        
+
     }
 
 import csv
@@ -232,15 +254,23 @@ import re
 import mimetypes
 import locale
 import commands
+import base64
+import readline
 
 from optparse import OptionParser, make_option, BadOptionError
 from cStringIO import StringIO
 from urlparse import urlsplit, urljoin
 from urllib import urlencode
 from urllib2 import build_opener, HTTPCookieProcessor, Request
-from elementtree import ElementTree
 from cookielib import LWPCookieJar, CookieJar
-from xml.parsers.expat import ExpatError
+
+try:
+    # Python standard library implementation
+    from xml.etree import ElementTree
+except ImportError:
+    # Old stand-alone implementation
+    from elementtree import ElementTree
+
 #
 # Global configuration
 #
@@ -251,7 +281,7 @@ except NameError:
     config = BugzConfig()
 
 #
-# Auxillary functions 
+# Auxillary functions
 #
 
 def raw_input_block():
@@ -311,7 +341,7 @@ def launch_editor(initial_text, comment_prefix = 'BUGZ:'):
         result = os.system("%s \"%s\"" % (editor, name))
         if result != 0:
             raise RuntimeError('Unable to launch editor: %s' % editor)
-        
+
         new_text = open(name).read()
         new_text = re.sub('(?m)^%s.*\n' % comment_prefix, '', new_text)
         os.unlink(name)
@@ -322,7 +352,7 @@ def launch_editor(initial_text, comment_prefix = 'BUGZ:'):
 def block_edit(comment):
     editor = (os.environ.get('BUGZ_EDITOR') or
               os.environ.get('EDITOR'))
-    
+
     if not editor:
         print comment + ': (Press Ctrl+D to end)'
         new_text = raw_input_block()
@@ -330,7 +360,7 @@ def block_edit(comment):
 
     initial_text = '\n'.join(['BUGZ: %s'%line for line in comment.split('\n')])
     new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text)
-    
+
     if new_text.strip():
         return new_text
     else:
@@ -397,7 +427,7 @@ class LaxOptionParser(OptionParser):
             return OptionParser._match_long_opt(self, opt)
         except BadOptionError, e:
             raise KeyError
-        
+
     def _process_short_opts(self, rargs, values):
         arg = rargs.pop(0)
         stop = False
@@ -419,9 +449,9 @@ class LaxOptionParser(OptionParser):
                 nargs = option.nargs
                 if len(rargs) < nargs:
                     if nargs == 1:
-                        self.error(_("%s option requires an argument") % opt)
+                        self.error("%s option requires an argument" % opt)
                     else:
-                        self.error(_("%s option requires %d arguments")
+                        self.error("%s option requires %d arguments"
                                    % (opt, nargs))
                 elif nargs == 1:
                     value = rargs.pop(0)
@@ -460,7 +490,7 @@ class LaxOptionParser(OptionParser):
                 del rargs[0]
             else:
                 return
-                    
+
 #
 # Bugz specific exceptions
 #
@@ -475,10 +505,10 @@ class BugzError(Exception):
 def modify_opt_fixed(opt, opt_str, val, parser):
     parser.values.status = 'RESOLVED'
     parser.values.resolution = 'FIXED'
-        
+
 def modify_opt_invalid(opt, opt_str, val, parser):
     parser.values.status = 'RESOLVED'
-    parser.values.resolution = 'INVALID'        
+    parser.values.resolution = 'INVALID'
 
 
 #
@@ -546,9 +576,9 @@ class Bugz:
     @ivar forget: forget user/password after session.
     @ivar authenticated: is this session authenticated already
     """
-    
+
     def __init__(self, base, user = None, password = None, forget = False,
-                 always_auth = False):
+                 always_auth = False, httpuser = None, httppassword = None ):
         """
         {user} and {password} will be prompted if an action needs them
         and they are not supplied.
@@ -588,6 +618,8 @@ class Bugz:
         self.opener = build_opener(HTTPCookieProcessor(self.cookiejar))
         self.user = user
         self.password = password
+        self.httpuser = httpuser
+        self.httppassword = httppassword
         self.forget = forget
         self.always_auth = always_auth
 
@@ -610,7 +642,7 @@ class Bugz:
         @param status_msg: status message to print
         @type  status_msg: string
         """
-        return        
+        return
 
     def get_input(self, prompt):
         """Default input handler. Expected to be override by the
@@ -637,8 +669,11 @@ class Bugz:
         req_url = urljoin(self.base, config.urls['auth'])
         req_url += '?GoAheadAndLogIn=1'
         req = Request(req_url, None, config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
-        re_request_login = re.compile(r'<title>Log in to Bugzilla</title>')
+        re_request_login = re.compile(r'<title>.*Log in to Bugzilla</title>')
         if not re_request_login.search(resp.read()):
             self.log('Already logged in.')
             self.authenticated = True
@@ -658,19 +693,22 @@ class Bugz:
 
         req_url = urljoin(self.base, config.urls['auth'])
         req = Request(req_url, urlencode(qparams), config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
         if resp.info().has_key('Set-Cookie'):
             self.authenticated = True
             if not self.forget:
                 self.cookiejar.save()
-                os.chmod(self.cookiejar.filename, 0700)                
+                os.chmod(self.cookiejar.filename, 0700)
             return True
         else:
             raise RuntimeError("Failed to login")
 
     def search(self, query, comments = False, order = 'number',
                assigned_to = None, reporter = None, cc = None,
-               whiteboard = None, keywords = None,
+               commenter = None, whiteboard = None, keywords = None,
                status = [], severity = [], priority = [], product = [],
                component = []):
         """Search bugzilla for a bug.
@@ -679,19 +717,21 @@ class Bugz:
         @type  query: string
         @param order: what order to returns bugs in.
         @type  order: string
-        
+
         @keyword assigned_to: email address which the bug is assigned to.
         @type    assigned_to: string
         @keyword reporter: email address matching the bug reporter.
         @type    reporter: string 
         @keyword cc: email that is contained in the CC list
         @type    cc: string
+        @keyword commenter: email of a commenter.
+        @type    commenter: string
 
         @keyword whiteboard: string to search in status whiteboard (gentoo?)
         @type    whiteboard: string
         @keyword keywords: keyword to search for
         @type    keywords: string
-       
+
         @keyword status: bug status to match. default is ['NEW', 'ASSIGNED',
                          'REOPENED'].
         @type    status: list
@@ -719,10 +759,12 @@ class Bugz:
         qparams['order'] = config.choices['order'].get(order, 'Bug Number')
         qparams['bug_severity'] = severity or []
         qparams['priority'] = priority or []
-        if status != None:
-            qparams['bug_status'] = [s.upper() for s in status]
-        else:
+        if status == None:
             qparams['bug_status'] = ['NEW', 'ASSIGNED', 'REOPENED']
+        elif [s.upper() for s in status] == ['ALL']:
+            qparams['bug_status'] = config.choices['status']
+        else:
+            qparams['bug_status'] = [s.upper() for s in status]
         qparams['product'] = product or ''
         qparams['component'] = component or ''
         qparams['status_whiteboard'] = whiteboard or ''
@@ -731,7 +773,7 @@ class Bugz:
         # hoops to jump through for emails, since there are
         # only two fields, we have to figure out what combinations
         # to use if all three are set.
-        unique = list(set([assigned_to, cc, reporter]))
+        unique = list(set([assigned_to, cc, reporter, commenter]))
         unique = [u for u in unique if u]
         if len(unique) < 3:
             for i in range(len(unique)):
@@ -741,6 +783,7 @@ class Bugz:
                 qparams['emailassigned_to%d' % n] = int(e == assigned_to)
                 qparams['emailreporter%d' % n] = int(e == reporter)
                 qparams['emailcc%d' % n] = int(e == cc)
+                qparams['emaillongdesc%d' % n] = int(e == commenter)
         else:
             raise AssertionError('Cannot set assigned_to, cc, and '
                                  'reporter in the same query')
@@ -749,18 +792,29 @@ class Bugz:
         req_url = urljoin(self.base, config.urls['list'])
         req_url += '?' + req_params
         req = Request(req_url, None, config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
 
         # parse the results into dicts.
         results = []
-        for row in csv.reader(resp):
+        columns = []
+        rows = []
+        for r in csv.reader(resp): rows.append(r)
+        for field in rows[0]:
+            if config.choices['column_alias'].has_key(field):
+                columns.append(config.choices['column_alias'][field])
+            else:
+                self.log('Unknown field: ' + field)
+                columns.append(field)
+        for row in rows[1:]:
             fields = {}
-            columns = config.choices['columns']
-            for i in range(len(row)):
+            for i in range(min(len(row), len(columns))):
                 fields[columns[i]] = row[i]
             results.append(fields)
 
-        return results[1:]
+        return results
 
     def get(self, bugid):
         """Get an ElementTree representation of a bug.
@@ -777,21 +831,15 @@ class Bugz:
         req_url = urljoin(self.base,  config.urls['show'])
         req_url += '?' + req_params
         req = Request(req_url, None, config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
 
         fd = StringIO(resp.read())
         # workaround for ill-defined XML templates in bugzilla 2.20.2
         parser = ForcedEncodingXMLTreeBuilder(encoding = 'ISO-8859-1')
-        try:
-            etree = ElementTree.parse(fd, parser)
-        except ExpatError, e:
-            expat_err = str(e)
-            fd.seek(0)
-            line_e = fd.readlines()[e.lineno-1]
-            raise RuntimeError('Bugzilla output invalid at line: %d\n'
-                               '   Line Content: %s' % (e.lineno, [line_e]))
-
-        
+        etree = ElementTree.parse(fd, parser)
         bug = etree.find('.//bug')
         if bug and bug.attrib.has_key('error'):
             return None
@@ -852,7 +900,7 @@ class Bugz:
         if not self.authenticated:
             self.auth()
 
-            
+
         buginfo = Bugz.get(self, bugid)
         if not buginfo:
             return False
@@ -862,15 +910,15 @@ class Bugz:
         qparams = config.params['modify'].copy()
         qparams['id'] = bugid
         qparams['knob'] = 'none'
-        
+
         # copy existing fields
         FIELDS = ('bug_file_loc', 'bug_severity', 'short_desc', 'bug_status',
-                  'status_whiteboard', 'keywords', 
+                  'status_whiteboard', 'keywords',
                   'op_sys', 'priority', 'version', 'target_milestone',
                   'assigned_to', 'rep_platform', 'product', 'component')
 
         FIELDS_MULTI = ('blocked', 'dependson')
-        
+
         for field in FIELDS:
             try:
                 qparams[field] = buginfo.find('.//%s' % field).text
@@ -886,14 +934,14 @@ class Bugz:
             status = status.upper()
         if resolution:
             resolution = resolution.upper()
-            
+
         if status == 'RESOLVED' and status != qparams['bug_status']:
             qparams['knob'] = 'resolve'
             if resolution:
                 qparams['resolution'] = resolution
             else:
                 qparams['resolution'] = 'FIXED'
-                
+
             modified.append(('status', status))
             modified.append(('resolution', qparams['resolution']))
         elif status == 'REOPENED' and status != qparams['bug_status']:
@@ -901,15 +949,15 @@ class Bugz:
             modified.append(('status', status))
         elif status == 'VERIFIED' and status != qparams['bug_status']:
             qparams['knob'] = 'verified'
-            modified.append(('status', status))            
+            modified.append(('status', status))
         elif status == 'CLOSED' and status != qparams['bug_status']:
             qparams['knob'] = 'closed'
-            modified.append(('status', status))                        
+            modified.append(('status', status))
         elif duplicate:
             qparams['knob'] = 'duplicate'
             qparams['dup_id'] = duplicate
             modified.append(('status', 'RESOLVED'))
-            modified.append(('resolution', 'DUPLICATE'))   
+            modified.append(('resolution', 'DUPLICATE'))
         elif assigned_to:
             qparams['knob'] = 'reassign'
             qparams['assigned_to'] = assigned_to
@@ -955,11 +1003,11 @@ class Bugz:
         if add_dependson:
             for bug_id in add_dependson:
                 qparams['dependson'].append(str(bug_id))
-                changed_dependson = True                
+                changed_dependson = True
         if add_blocked:
             for bug_id in add_blocked:
                 qparams['blocked'].append(str(bug_id))
-                changed_blocked = True                
+                changed_blocked = True
 
         qparams['dependson'] = ','.join(qparams['dependson'])
         qparams['blocked'] = ','.join(qparams['blocked'])
@@ -978,6 +1026,9 @@ class Bugz:
         req_params = urlencode(qparams, True)
         req_url = urljoin(self.base, config.urls['modify'])
         req = Request(req_url, req_params, config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
 
         try:
             resp = self.opener.open(req)
@@ -1001,6 +1052,9 @@ class Bugz:
         req_url = urljoin(self.base, config.urls['attach'])
         req_url += '?' + req_params
         req = Request(req_url, None, config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
 
         try:
@@ -1012,7 +1066,7 @@ class Bugz:
         except:
             return {}
 
-    def post(self, title, description, url = '', assigned_to = ''):
+    def post(self, title, description, url = '', assigned_to = '', cc = ''):
         """Post a bug
 
         @param title: title of the bug.
@@ -1023,6 +1077,8 @@ class Bugz:
         @type url: string
         @keyword assigned_to: optional email to assign bug to
         @type assigned_to: string.
+        @keyword cc: option list of CC'd emails
+        @type: string
 
         @rtype: int
         @return: the bug number, or 0 if submission failed.
@@ -1034,15 +1090,19 @@ class Bugz:
         qparams['short_desc'] = title
         qparams['comment'] = description
         qparams['assigned_to']  = assigned_to
+        qparams['cc'] = cc
         qparams['bug_file_loc'] = url
 
         req_params = urlencode(qparams, True)
         req_url = urljoin(self.base, config.urls['post'])
         req = Request(req_url, req_params, config.headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
 
         try:
-            re_bug = re.compile(r'<title>Bug ([0-9]+) Submitted</title>')
+            re_bug = re.compile(r'<title>.*Bug ([0-9]+) Submitted</title>')
             bug_match = re_bug.search(resp.read())
             if bug_match:
                 return int(bug_match.group(1))
@@ -1087,6 +1147,9 @@ class Bugz:
         req_headers['Content-length'] = len(body)
         req_url = urljoin(self.base, config.urls['attach_post'])
         req = Request(req_url, body, req_headers)
+        if self.httpuser and self.httppassword:
+            base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
 
         # TODO: return attachment id and success?
@@ -1096,7 +1159,7 @@ class Bugz:
                 return True
         except:
             pass
-        
+
         return False
 
 class PrettyBugz(Bugz):
@@ -1108,6 +1171,10 @@ class PrettyBugz(Bugz):
                             help = 'Username for commands requiring authentication'),
         'password': make_option('-p', '--password', type='string',
                                 help = 'Password for commands requiring authentication'),
+        'httpuser': make_option('-H', '--httpuser', type='string',
+                            help = 'Username for basic http auth'),
+        'httppassword': make_option('-P', '--httppassword', type='string',
+                                help = 'Password for basic http auth'),
         'forget': make_option('-f', '--forget', action='store_true',
                               help = 'Forget login after execution'),
         'columns': make_option('--columns', type='int', default = 0,
@@ -1120,15 +1187,15 @@ class PrettyBugz(Bugz):
         'quiet': make_option('-q', '--quiet', action='store_true',
                              default = False, help = 'Quiet mode'),
     }
-        
+
     def __init__(self, base, user = None, password =None, forget = False,
                  columns = 0, encoding = '', always_auth = False,
-                 quiet = False):
-        
+                 quiet = False, httpuser = None, httppassword = None ):
+
         self.quiet = quiet
         self.columns = columns or get_cols()
 
-        Bugz.__init__(self, base, user, password, forget, always_auth)
+        Bugz.__init__(self, base, user, password, forget, always_auth, httpuser, httppassword)
 
         self.log("Using %s " % self.base)
 
@@ -1137,7 +1204,7 @@ class PrettyBugz(Bugz):
                 self.enc = locale.getdefaultlocale()[1]
             except:
                 self.enc = 'utf-8'
-            
+
             if not self.enc:
                 self.enc = 'utf-8'
         else:
@@ -1179,7 +1246,7 @@ class PrettyBugz(Bugz):
         else:
             self.log(log_msg)
 
-        
+
         result = Bugz.search(self, search_term, **kwds)
 
         if result == None:
@@ -1188,22 +1255,26 @@ class PrettyBugz(Bugz):
         if len(result) == 0:
             self.log('No bugs found.')
             return
-        
+
         for row in result:
-            assignee = row['assignee'].split('@')[0]
             desc = row['desc'][:self.columns - 30]
-            print '%7s %-20s %s' % (row['bugid'], assignee, desc)
+            if row.has_key('assignee'): # Novell does not have 'assignee' field
+                assignee = row['assignee'].split('@')[0]
+                print '%7s %-20s %s' % (row['bugid'], assignee, desc)
+            else:
+                print '%7s %s' % (row['bugid'], desc)
 
     search.args = "<search term> [options..]"
     search.options = {
         'order': make_option('-o', '--order', type='choice',
                              choices = config.choices['order'].keys(),
                              default = 'number'),
-        'assigned_to': make_option('-a', '--assigned-to', 
+        'assigned_to': make_option('-a', '--assigned-to',
                                 help = 'email the bug is assigned to'),
-        'reporter': make_option('-r', '--reporter', 
+        'reporter': make_option('-r', '--reporter',
                                    help = 'email the bug was reported by'),
         'cc': make_option('--cc',help = 'Restrict by CC email address'),
+        'commenter': make_option('--commenter',help = 'email that commented the bug'),
         'status': make_option('-s', '--status', action='append',
                               help = 'Bug status (for multiple choices,'
                               'use --status=NEW --status=ASSIGNED)'),
@@ -1231,7 +1302,7 @@ class PrettyBugz(Bugz):
             int(bugid)
         except ValueError:
             raise BugzError("bugid must be a number.")
-        
+
         self.log('Getting bug %s ..' % bugid)
 
         result = Bugz.get(self, bugid)
@@ -1244,7 +1315,7 @@ class PrettyBugz(Bugz):
         # see the tag.
         FIELDS = (
             ('short_desc', 'Title'),
-            ('assigned_to', 'Assignee'),            
+            ('assigned_to', 'Assignee'),
             ('creation_ts', 'Reported'),
             ('delta_ts', 'Updated'),
             ('bug_status', 'Status'),
@@ -1261,13 +1332,13 @@ class PrettyBugz(Bugz):
             ('status_whiteboard', 'Whiteboard'),
             ('keywords', 'Keywords'),
         )
-            
+
         for field, name in FIELDS + MORE_FIELDS:
             try:
                 value = result.find('//%s' % field).text
             except AttributeError:
                 continue
-            print '%-12s: %s' % (name, value.encode(self.enc, 'replace'))
+            print '%-12s: %s' % (name, value.encode(self.enc))
 
         # Print out the cc'ed people
         cced = result.findall('.//cc')
@@ -1287,8 +1358,8 @@ class PrettyBugz(Bugz):
 
         print '%-12s: %d' % ('Comments', len(bug_comments))
         print '%-12s: %d' % ('Attachments', len(bug_attachments))
-        print '%-12s: %s' % ('URL', '%s%s?id=%s' % (self.base,
-                                                    config.urls['show'],
+        print '%-12s: %s' % ('URL', '%s?id=%s' % (urljoin(self.base,
+                                                    config.urls['show']),
                                                     bugid))
         print
 
@@ -1304,22 +1375,24 @@ class PrettyBugz(Bugz):
             i = 0
             wrapper = textwrap.TextWrapper(width = self.columns)
             for comment in bug_comments:
-                who = comment.find('.//who').text.encode(self.enc,
-                                                         'replace')
-                when = comment.find('.//bug_when').text.encode(self.enc,
-                                                               'replace')
+                try:
+                    who = comment.find('.//who').text.encode(self.enc)
+                except AttributeError:
+                    # Novell doesn't use 'who' on xml
+                    who = ""
+                when = comment.find('.//bug_when').text.encode(self.enc)
                 what =  comment.find('.//thetext').text
                 print '\n[Comment #%d] %s : %s'  % (i, who, when)
                 print '-' * (self.columns - 1)
-                i += 1                
 
                 # print wrapped version
                 for line in what.split('\n'):
                     if len(line) < self.columns:
-                        print line.encode(self.enc, 'replace')
+                        print line.encode(self.enc)
                     else:
                         for shortline in wrapper.wrap(line):
-                            print shortline.encode(self.enc, 'replace')
+                            print shortline.encode(self.enc)
+                i += 1
             print
 
     get.args = "<bug_id> [options..]"
@@ -1330,23 +1403,29 @@ class PrettyBugz(Bugz):
     }
 
     def post(self, title = None, description = None, assigned_to = None,
-             url = None,  emerge_info = None, description_from = None):
+             cc = None, url = None,  emerge_info = None, description_from = None):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
         if not self.authenticated:
             self.auth()
-            
+
         self.log('Press Ctrl+C at any time to abort.')
 
-        # check for title
+        #
+        #  Check all bug fields.
+        #  XXX: We use "if not <field>" for mandatory fields
+        #       and "if <field> is None" for optional ones.
+        #
+
+	# check for title
         if not title:
             while not title or len(title) < 1:
                 title = self.get_input('Enter title: ')
         else:
             print 'Enter title:', title
 
-        # check for description
+        # load description from file if possible
         if description_from:
             try:
                 description = open(description_from, 'r').read()
@@ -1354,6 +1433,7 @@ class PrettyBugz(Bugz):
                 raise BugzError('Unable to read from file: %s: %s' % \
                                 (description_from, e))
 
+        # check for description
         if not description:
             description = block_edit('Enter bug description: ')
         else:
@@ -1361,43 +1441,52 @@ class PrettyBugz(Bugz):
             print description
 
         # check for optional URL
-        if not url:
+        if url is None:
             url = self.get_input('Enter URL (optional): ')
         else:
             self.log('Enter URL (optional): %s' % url)
 
         # check for default assignee
-        if not assigned_to:
+        if assigned_to is None:
             assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional):'
             assigned_to = self.get_input(assigned_msg)
         else:
             self.log('Enter assignee (optional): %s' % assigned_to)
+
+        # check for CC list
+        if cc is None:
+            cc_msg = 'Enter a CC list (comma separated) (optional):'
+            cc = self.get_input(cc_msg)
+        else:
+            self.log('Enter a CC list (optional): %s' % cc)
 
         # print submission confirmation
         print '-' * (self.columns - 1)
         print 'Title       : ' + title
         print 'URL         : ' + url
         print 'Assigned to : ' + assigned_to
+        print 'CC          : ' + cc
         print 'Description : '
         print description
         print '-' * (self.columns - 1)
-        
+
         if emerge_info == None:
             ask_emerge = raw_input('Include output of emerge --info (Y/n)?')
             if ask_emerge[0] in ('y', 'Y'):
                 emerge_info = True
-            
+
         if emerge_info:
             import commands
             emerge_info_output = commands.getoutput('%s --info' % EMERGE)
             description = description + '\n' + emerge_info_output
-        
+
         confirm = raw_input('Confirm bug submission (y/N)?')
         if confirm[0] not in ('y', 'Y'):
             self.log('Submission aborted')
             return
 
-        result = Bugz.post(self, title, description, url, assigned_to)
+
+        result = Bugz.post(self, title, description, url, assigned_to, cc)
         if result != None:
             self.log('Bug %d submitted' % result)
         else:
@@ -1410,16 +1499,17 @@ class PrettyBugz(Bugz):
                                    help = 'Description of the bug'),
         'description_from': make_option('-F' , '--description-from',
                                         help = 'Description from contents of'
-                                        'file'),
+                                        ' file'),
         'emerge_info': make_option('-e', '--emerge-info', action="store_true",
                                    help = 'Include emerge --info'),
         'assigned_to': make_option('-a', '--assigned-to',
                                    help = 'Assign bug to someone other than '
                                    'the default assignee'),
+        'cc': make_option('--cc', help = 'Add a list of emails to CC list'),
         'url': make_option('-U', '--url', 
                            help = 'URL associated with the bug'),
     }
-                                   
+
 
     def modify(self, bugid, **kwds):
         """Modify an existing bug (eg. adding a comment or changing resolution.)"""
@@ -1435,7 +1525,7 @@ class PrettyBugz(Bugz):
                                     (comment_from, e))
 
             del kwds['comment_from']
-            
+
         if 'comment_editor' in kwds:
             if kwds['comment_editor']:
                 kwds['comment'] = block_edit('Enter comment:')
@@ -1498,11 +1588,11 @@ class PrettyBugz(Bugz):
     def attachment(self, attachid, view = False):
         """ Download or view an attachment given the id."""
         self.log('Getting attachment %s' % attachid)
-        
+
         result = Bugz.attachment(self, attachid)
         if not result:
             raise RuntimeError('Unable to get attachment')
-            
+
         action = {True:'Viewing', False:'Saving'}
         self.log('%s attachment: "%s"' % (action[view], result['filename']))
         safe_filename = os.path.basename(re.sub(r'\.\.', '',
@@ -1513,7 +1603,7 @@ class PrettyBugz(Bugz):
         else:
             if os.path.exists(result['filename']):
                 raise RuntimeError('Filename already exists')
-            
+
             open(safe_filename, 'wb').write(result['fd'].read())
 
     attachment.args = "<attachid> [-v]"
@@ -1523,7 +1613,7 @@ class PrettyBugz(Bugz):
                             help = "Print attachment rather that save")
     }
 
-    def attach(self, bugid, filename, content_type = 'text/plain'):
+    def attach(self, bugid, filename, content_type = 'text/plain', description = None):
         """ Attach a file to a bug given a filename. """
         if not self.authenticated:
             self.auth()
@@ -1531,17 +1621,18 @@ class PrettyBugz(Bugz):
         import os
         if not os.path.exists(filename):
             raise BugzError('File not found: %s' % filename)
-
-        description = block_edit('Enter description (optional)')
-
+        if not description:
+            description = block_edit('Enter description (optional)')
         result = Bugz.attach(self, bugid, filename, description, filename,
                              content_type)
 
-    attach.args = "<bugid> <filename> [-c=<mimetype>]"
+    attach.args = "<bugid> <filename> [-c=<mimetype>] [-d=<description>]"
     attach.options = {
         'content_type': make_option('-c', '--content_type',
                                     default='text/plain',
-                                    help = 'Mimetype of the file (default: text/plain)')
+                                    help = 'Mimetype of the file (default: text/plain)'),
+        'description': make_option('-d', '--description',
+                                    help = 'A description of the attachment.')
     }
 
     @classmethod
@@ -1552,13 +1643,15 @@ class PrettyBugz(Bugz):
         print '  -b, --base <bugzilla_url>    Bugzilla base URL'
         print '  -u, --user <username>        User name (if required)'
         print '  -p, --password <password>    Password (if required)'
+        print '  -H, --httpuser <username>       Basic http auth User name (if required)'
+        print '  -P, --httppassword <password>   Basic http auth Password (if required)'
         print '  -f, --forget                 Do not remember authentication'
         print '  --columns <columns>          Number of columns to use when'
         print '                               displaying output'
         print '  -A, --always-auth            Authenticate on every command.'
         print '  -q, --quiet                  Do not display status messages.'
         print
-        
+
         if cmd == None:
             print 'Subcommands:'
             print '  search      Search for bugs in bugzilla'
@@ -1593,11 +1686,11 @@ class PrettyBugz(Bugz):
                                       description = cmd_desc,
                                       option_list = cmd_options)
                 print 'Subcommand Options for %s:' % cmd
-                parser.print_help()                
+                parser.print_help()
             except:
                 print 'Unknown subcommand: %s' % cmd
 
-                
+
 def main():
     import sys
     import getopt
@@ -1620,7 +1713,7 @@ def main():
         cmd_options = {}
         cmd_args = ''
         cmd_func = getattr(PrettyBugz, cmd, None)
-        
+
         if cmd_func:
             cmd_options = getattr(cmd_func, "options", {})
             cmd_args = getattr(cmd_func, "args", "[options]")
@@ -1669,13 +1762,13 @@ def main():
         except RuntimeError, e:
             print ' ! Error: %s' % e
             sys.exit(-1)
-        
+
     except KeyboardInterrupt:
         print
         print 'Stopped.'
     except:
         raise
-    
+
 if __name__ == "__main__":
     try:
         main()
