@@ -1066,7 +1066,7 @@ class Bugz:
         except:
             return {}
 
-    def post(self, title, description, url = '', assigned_to = '', cc = ''):
+    def post(self, title, description, url = '', assigned_to = '', cc = '', keywords = ''):
         """Post a bug
 
         @param title: title of the bug.
@@ -1078,6 +1078,8 @@ class Bugz:
         @keyword assigned_to: optional email to assign bug to
         @type assigned_to: string.
         @keyword cc: option list of CC'd emails
+        @type: string
+        @keyword keywords: option list of bugzilla keywords
         @type: string
 
         @rtype: int
@@ -1092,6 +1094,7 @@ class Bugz:
         qparams['assigned_to']  = assigned_to
         qparams['cc'] = cc
         qparams['bug_file_loc'] = url
+        qparams['keywords'] = keywords
 
         req_params = urlencode(qparams, True)
         req_url = urljoin(self.base, config.urls['post'])
@@ -1403,7 +1406,8 @@ class PrettyBugz(Bugz):
     }
 
     def post(self, title = None, description = None, assigned_to = None,
-             cc = None, url = None,  emerge_info = None, description_from = None):
+             cc = None, url = None, keywords = None, emerge_info = None,
+             description_from = None):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -1466,6 +1470,7 @@ class PrettyBugz(Bugz):
         print 'URL         : ' + url
         print 'Assigned to : ' + assigned_to
         print 'CC          : ' + cc
+        print 'Keywords    : ' + keywords
         print 'Description : '
         print description
         print '-' * (self.columns - 1)
@@ -1486,7 +1491,7 @@ class PrettyBugz(Bugz):
             return
 
 
-        result = Bugz.post(self, title, description, url, assigned_to, cc)
+        result = Bugz.post(self, title, description, url, assigned_to, cc, keywords)
         if result != None:
             self.log('Bug %d submitted' % result)
         else:
@@ -1508,6 +1513,7 @@ class PrettyBugz(Bugz):
         'cc': make_option('--cc', help = 'Add a list of emails to CC list'),
         'url': make_option('-U', '--url', 
                            help = 'URL associated with the bug'),
+        'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
     }
 
 
