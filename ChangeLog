@@ -1,10 +1,11 @@
-28 Dec 2007; William Hubbs <w.d.hubbs@gmail.com>
-	* Added support for the --keywords option, thanks to Mike Vapier
+28 Dec 2007; William Hubbs <w.d.hubbs@gmail.com> pybugz 0.7.2
+
+	* Added support for the --keywords option, thanks to Mike Frysinger.
 
 28 Sep 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.12
 
 	* Changed ExpatError to dump the line of the error.
-	
+
 19 Sep 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.12
 
 	* Added search by product via --product, thanks to Donnie
@@ -19,9 +20,9 @@
 
 	* Added support for dependson and blocked bugs in modify and get.
 	* Fixed stripping depends/blocked bugs in modify.
-	
+
 23 Aug 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.9
-       
+
 	* Fixed traceback when encoding is not detected.
 
 20 Aug 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.8
@@ -42,7 +43,7 @@
 
 	* Fixed attachment download (because of my option parsing
 	cleanup.)
-	
+
 16 Aug 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.6
 
 	* Fixed attachment view failure when filename exists.
@@ -53,7 +54,7 @@
 	* Fixed ugly backtrace when pressing Ctrl+C
 
 14 Aug 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.5
-	
+
 	* Fixed URL construction when passed a base without trailing
 	slash.
 	* Renamed --reported-by to --reporter as it is more intuitive
@@ -62,7 +63,7 @@
 	* Added status whiteboard and keywords to modify and search
 	* Made search console message more informative
 	* Added check for null searches as to save the server from DoS.
-	
+
 10 Aug 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.6.4
 
 	* Added doc strings.
@@ -93,9 +94,9 @@
 
 	* Added --add-cc and --remove-cc to 'bugz modify'
 	* Added --cc to 'bugz search'
-	
+
 26 Jul 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.5.5
-	
+
 	* Changed stty searching to look in os.environ['PATH'] rather than
 	  assuming it lives in /usr/bin/stty. (It is in /bin/stty on
 	  ubuntu).
@@ -126,12 +127,12 @@
 	
 	* Removed debugging that was accidentally left behind.
 	* Cleaned up bad sub command handling.
-	
+
 17 Jul 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.5.1
 
 	* Added an encoding overridable XMLTreeBuilder to get around the 
 	  fact that encoding is broken on the show_bug XML template.
-	
+
 17 Jul 2006; Alastair Tse <alastair@liquidx.net> pybugz 0.5
 
 	* Initial release.
