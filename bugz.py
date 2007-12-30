@@ -1464,6 +1464,13 @@ class PrettyBugz(Bugz):
         else:
             self.log('Enter a CC list (optional): %s' % cc)
 
+        # check for Keywords list
+        if keywords is None:
+            kwd_msg = 'Enter a Keywords list (comma separated) (optional):'
+            keywords = self.get_input(kwd_msg)
+        else:
+            self.log('Enter a Keywords list (optional): %s' % keywords)
+
         # print submission confirmation
         print '-' * (self.columns - 1)
         print 'Title       : ' + title
