@@ -1,7 +1,7 @@
 30 Dec 2007; William Hubbs <w.d.hubbs@gmail.com> pybugz 0.7.3
 
-* Fixed a bug that caused pybugz to crash if posting without specifying
-keywords, thanks to Santiago Mola.
+	* Fixed a bug that caused pybugz to crash if posting without specifying
+	keywords, thanks to Santiago Mola.
 
 28 Dec 2007; William Hubbs <w.d.hubbs@gmail.com> pybugz 0.7.2
 
