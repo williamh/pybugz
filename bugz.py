@@ -599,28 +599,31 @@ class Bugz:
         self.base = base
         scheme, self.host, self.path, query, frag  = urlsplit(self.base)
         self.authenticated = False
+        self.forget = forget
 
-        try:
-            cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
-            self.cookiejar = LWPCookieJar(cookie_file)
-            if forget:
-                try:
-                    self.cookiejar.load()
-                    self.cookiejar.clear()
-                    self.cookiejar.save()
-                    os.chmod(self.cookiejar.filename, 0700)
-                except IOError:
-                    pass
-        except KeyError:
-            self.warn('Unable to save session cookies in %s' % cookie_file)
-            self.cookiejar = CookieJar(cookie_file)
+        if not self.forget:
+            try:
+                cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
+                self.cookiejar = LWPCookieJar(cookie_file)
+                if forget:
+                    try:
+                        self.cookiejar.load()
+                        self.cookiejar.clear()
+                        self.cookiejar.save()
+                        os.chmod(self.cookiejar.filename, 0700)
+                    except IOError:
+                        pass
+            except KeyError:
+                self.warn('Unable to save session cookies in %s' % cookie_file)
+                self.cookiejar = CookieJar(cookie_file)
+        else:
+            self.cookiejar = CookieJar()
 
         self.opener = build_opener(HTTPCookieProcessor(self.cookiejar))
         self.user = user
         self.password = password
         self.httpuser = httpuser
         self.httppassword = httppassword
-        self.forget = forget
         self.always_auth = always_auth
 
         if always_auth:
@@ -661,10 +664,11 @@ class Bugz:
             return
 
         # try seeing if we really need to request login
-        try:
-            self.cookiejar.load()
-        except IOError:
-            pass
+        if not self.forget:
+            try:
+                self.cookiejar.load()
+            except IOError:
+                pass
 
         req_url = urljoin(self.base, config.urls['auth'])
         req_url += '?GoAheadAndLogIn=1'
