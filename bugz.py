@@ -1066,7 +1066,7 @@ class Bugz:
         except:
             return {}
 
-    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = ''):
+    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = ''):
         """Post a bug
 
         @param title: title of the bug.
@@ -1097,6 +1097,10 @@ class Bugz:
         qparams['cc'] = cc
         qparams['bug_file_loc'] = url
         qparams['keywords'] = keywords
+
+        #XXX: default version is 'unspecified'
+        if version != '':
+            qparams['version'] = version
 
         req_params = urlencode(qparams, True)
         req_url = urljoin(self.base, config.urls['post'])
@@ -1409,7 +1413,7 @@ class PrettyBugz(Bugz):
 
     def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
              cc = None, url = None, keywords = None, emerge_info = None,
-             description_from = None):
+             description_from = None, version = None):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -1437,6 +1441,13 @@ class PrettyBugz(Bugz):
                 component = self.get_input('Enter component: ')
         else:
             print 'Enter component: ', component
+
+        # check for version
+        # FIXME: This default behaviour is not too nice.
+        if not version:
+            version = self.get_input('Enter version (default: unspecified): ')
+        else:
+            print 'Enter version: ', version
 
         # check for title
         if not title:
@@ -1491,6 +1502,7 @@ class PrettyBugz(Bugz):
         print '-' * (self.columns - 1)
         print 'Product     : ' + product
         print 'Component   : ' + component
+        print 'Version     : ' + version
         print 'Title       : ' + title
         print 'URL         : ' + url
         print 'Assigned to : ' + assigned_to
@@ -1516,7 +1528,7 @@ class PrettyBugz(Bugz):
             return
 
 
-        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords)
+        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version)
         if result != None:
             self.log('Bug %d submitted' % result)
         else:
@@ -1526,6 +1538,7 @@ class PrettyBugz(Bugz):
     post.options = {
         'product': make_option('--product', help = 'Product'),
         'component': make_option('--component', help = 'Component'),
+        'version': make_option('--version', help = 'Version of the component'),
         'title': make_option('-t', '--title', help = 'Title of bug'),
         'description': make_option('-d', '--description',
                                    help = 'Description of the bug'),
