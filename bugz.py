@@ -1174,7 +1174,7 @@ class Bugz:
 class PrettyBugz(Bugz):
     options = {
         'base': make_option('-b', '--base', type='string',
-                            default = 'http://bugs.gentoo.org/',
+                            default = 'https://bugs.gentoo.org/',
                             help = 'Base URL of Bugzilla'),
         'user': make_option('-u', '--user', type='string',
                             help = 'Username for commands requiring authentication'),
