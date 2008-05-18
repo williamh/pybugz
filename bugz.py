@@ -66,7 +66,7 @@ class BugzConfig:
         },
 
         'post': {
-        'product': 'Gentoo Linux',
+        'product': '',
         'version': 'unspecified',
         'rep_platform': 'All',
         'op_sys': 'Linux',
@@ -77,7 +77,7 @@ class BugzConfig:
         'keywords': '',
         'dependson':'',
         'blocked':'',
-        'component': 'Ebuilds',
+        'component': '',
         # needs to be filled in
         'bug_file_loc': '',
         'short_desc': '',
@@ -1066,7 +1066,7 @@ class Bugz:
         except:
             return {}
 
-    def post(self, title, description, url = '', assigned_to = '', cc = '', keywords = ''):
+    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = ''):
         """Post a bug
 
         @param title: title of the bug.
@@ -1089,6 +1089,8 @@ class Bugz:
             self.auth()
 
         qparams = config.params['post'].copy()
+        qparams['product'] = product
+        qparams['component'] = component
         qparams['short_desc'] = title
         qparams['comment'] = description
         qparams['assigned_to']  = assigned_to
@@ -1405,7 +1407,7 @@ class PrettyBugz(Bugz):
                                 help = 'Do not show comments'),
     }
 
-    def post(self, title = None, description = None, assigned_to = None,
+    def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
              cc = None, url = None, keywords = None, emerge_info = None,
              description_from = None):
         """Post a new bug"""
@@ -1422,7 +1424,21 @@ class PrettyBugz(Bugz):
         #       and "if <field> is None" for optional ones.
         #
 
-	# check for title
+        # check for product
+        if not product:
+            while not product or len(product) < 1:
+                product = self.get_input('Enter product: ')
+        else:
+            print 'Enter product: ', product
+
+        # check for component
+        if not component:
+            while not component or len(component) < 1:
+                component = self.get_input('Enter component: ')
+        else:
+            print 'Enter component: ', component
+
+        # check for title
         if not title:
             while not title or len(title) < 1:
                 title = self.get_input('Enter title: ')
@@ -1473,6 +1489,8 @@ class PrettyBugz(Bugz):
 
         # print submission confirmation
         print '-' * (self.columns - 1)
+        print 'Product     : ' + product
+        print 'Component   : ' + component
         print 'Title       : ' + title
         print 'URL         : ' + url
         print 'Assigned to : ' + assigned_to
@@ -1498,7 +1516,7 @@ class PrettyBugz(Bugz):
             return
 
 
-        result = Bugz.post(self, title, description, url, assigned_to, cc, keywords)
+        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords)
         if result != None:
             self.log('Bug %d submitted' % result)
         else:
@@ -1506,6 +1524,8 @@ class PrettyBugz(Bugz):
 
     post.args = "[options]"
     post.options = {
+        'product': make_option('--product', help = 'Product'),
+        'component': make_option('--component', help = 'Component'),
         'title': make_option('-t', '--title', help = 'Title of bug'),
         'description': make_option('-d', '--description',
                                    help = 'Description of the bug'),
