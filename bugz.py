@@ -1453,7 +1453,7 @@ class PrettyBugz(Bugz):
 
         # check for version
         # FIXME: This default behaviour is not too nice.
-        if not version:
+        if version is None:
             version = self.get_input('Enter version (default: unspecified): ')
         else:
             self.log('Enter version: %s' % version)
