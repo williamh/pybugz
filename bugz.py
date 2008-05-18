@@ -1418,8 +1418,8 @@ class PrettyBugz(Bugz):
     }
 
     def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
-             cc = None, url = None, keywords = None, emerge_info = None,
-             description_from = None, version = None):
+             cc = None, url = None, keywords = None, emerge_info = False,
+             description_from = None, version = None, append_command = None):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -1439,28 +1439,28 @@ class PrettyBugz(Bugz):
             while not product or len(product) < 1:
                 product = self.get_input('Enter product: ')
         else:
-            print 'Enter product: ', product
+            self.log('Enter product: %s' % product)
 
         # check for component
         if not component:
             while not component or len(component) < 1:
                 component = self.get_input('Enter component: ')
         else:
-            print 'Enter component: ', component
+            self.log('Enter component: %s' % component)
 
         # check for version
         # FIXME: This default behaviour is not too nice.
         if not version:
             version = self.get_input('Enter version (default: unspecified): ')
         else:
-            print 'Enter version: ', version
+            self.log('Enter version: %s' % version)
 
         # check for title
         if not title:
             while not title or len(title) < 1:
                 title = self.get_input('Enter title: ')
         else:
-            print 'Enter title:', title
+            self.log('Enter title: %s' % title)
 
         # load description from file if possible
         if description_from:
@@ -1474,8 +1474,7 @@ class PrettyBugz(Bugz):
         if not description:
             description = block_edit('Enter bug description: ')
         else:
-            print 'Enter bug description:'
-            print description
+            self.log('Enter bug description: %s)' % description)
 
         # check for optional URL
         if url is None:
@@ -1514,22 +1513,26 @@ class PrettyBugz(Bugz):
         print 'Assigned to : ' + assigned_to
         print 'CC          : ' + cc
         print 'Keywords    : ' + keywords
-        print 'Description : '
-        print description
+        print 'Description : ' + description
         print '-' * (self.columns - 1)
 
-        if emerge_info == None:
-            ask_emerge = raw_input('Include output of emerge --info (Y/n)?')
-            if ask_emerge[0] in ('y', 'Y'):
-                emerge_info = True
+        #FIXME: Remove in 0.8
+        if emerge_info is True:
+            self.warn('--emerge-info is deprecated. Please, use --append-command.')
+            append_command = 'emerge --info'
 
-        if emerge_info:
+        if append_command is None:
+            append_command = self.get_input('Append the output of the following command (leave blank for none): ')
+        else:
+            self.log('Append command (optional): %s' % append_command)
+
+        if append_command is not None and append_command != '':
             import commands
-            emerge_info_output = commands.getoutput('%s --info' % EMERGE)
-            description = description + '\n' + emerge_info_output
+            append_command_output = commands.getoutput(append_command)
+            description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
 
         confirm = raw_input('Confirm bug submission (y/N)?')
-        if confirm[0] not in ('y', 'Y'):
+        if len(confirm) < 1 or confirm[0] not in ('y', 'Y'):
             self.log('Submission aborted')
             return
 
@@ -1552,7 +1555,9 @@ class PrettyBugz(Bugz):
                                         help = 'Description from contents of'
                                         ' file'),
         'emerge_info': make_option('-e', '--emerge-info', action="store_true",
-                                   help = 'Include emerge --info'),
+                                   help = 'Include emerge --info (DEPRECATED, use --append-command)'),
+        'append_command': make_option('--append-command',
+                                      help = 'Append the output of a command to the description.'),
         'assigned_to': make_option('-a', '--assigned-to',
                                    help = 'Assign bug to someone other than '
                                    'the default assignee'),
