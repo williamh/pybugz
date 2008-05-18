@@ -1538,7 +1538,7 @@ class PrettyBugz(Bugz):
     post.options = {
         'product': make_option('--product', help = 'Product'),
         'component': make_option('--component', help = 'Component'),
-        'version': make_option('--version', help = 'Version of the component'),
+        'version': make_option('--version', default = 'version', help = 'Version of the component'),
         'title': make_option('-t', '--title', help = 'Title of bug'),
         'description': make_option('-d', '--description',
                                    help = 'Description of the bug'),
