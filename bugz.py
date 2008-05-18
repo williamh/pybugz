@@ -22,12 +22,12 @@ Classes
 
 __version__ = '0.7.3'
 __author__ = 'Alastair Tse <http://www.liquidx.net/>'
-__contributors__ = []
+__contributors__ = ['Santiago M. Mola <cooldwind@gmail.com']
 __revision__ = '$Id: $'
 __license__ = """Copyright (c) 2006, Alastair Tse, All rights reserved.
 This following source code is licensed under the GPL v2 License."""
 
-BUGZ_USER_AGENT = 'PyBugz/%s +http://www.liquidx.net/' % __version__
+BUGZ_USER_AGENT = 'PyBugz/%s +http://code.google.com/p/pybugz/' % __version__
 BUGZ_COMMENT_TEMPLATE = \
 """
 BUGZ: ---------------------------------------------------
