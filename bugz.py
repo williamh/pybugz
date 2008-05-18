@@ -36,7 +36,6 @@ BUGZ: Any line beginning with 'BUGZ:' will be ignored.
 BUGZ: ---------------------------------------------------
 """
 
-EMERGE = "/usr/bin/emerge"
 COOKIE_FILE = '.bugz_cookie'
 CONFIG_FILE = '.bugz'
 DEFAULT_NUM_COLS = 80
@@ -1523,7 +1522,7 @@ class PrettyBugz(Bugz):
         #FIXME: Remove in 0.8
         if emerge_info is True:
             self.warn('--emerge-info is deprecated. Please, use --append-command.')
-            append_command = 'emerge --info'
+            append_command = 'emerge --ignore-default-opts --info'
 
         if append_command is None:
             append_command = self.get_input('Append the output of the following command (leave blank for none): ')
