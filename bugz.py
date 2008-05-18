@@ -1069,6 +1069,10 @@ class Bugz:
     def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = ''):
         """Post a bug
 
+        @param product: product where the bug should be placed
+        @type product: string
+        @param component: component where the bug should be placed
+        @type component: string
         @param title: title of the bug.
         @type  title: string
         @param description: description of the bug
@@ -1080,6 +1084,8 @@ class Bugz:
         @keyword cc: option list of CC'd emails
         @type: string
         @keyword keywords: option list of bugzilla keywords
+        @type: string
+        @keyword version: version of the component
         @type: string
 
         @rtype: int
