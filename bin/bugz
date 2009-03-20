@@ -106,6 +106,12 @@ def block_edit(comment):
     else:
         return ''
 
+def ellipsis(text, length):
+    if len(text) > length:
+        return text[:length-4] + "..."
+    else:
+        return text
+
 #
 # LaxOptionParser will silently ignore options that it does not
 # recognise, as opposed to OptionParser which will throw an

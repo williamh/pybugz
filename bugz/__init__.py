@@ -22,12 +22,9 @@ Classes
 
 import base64
 import csv
-import getpass
 import mimetypes
 import os
 import re
-import readline
-import time
 
 from cStringIO import StringIO
 from urlparse import urlsplit, urljoin
@@ -269,15 +266,6 @@ except NameError:
     config = BugzConfig()
 
 #
-# Return a string truncated to the given length if it is longer.
-#
-def ellipsis(text, length):
-    if len(text) > length:
-        return text[:length-4] + "..."
-    else:
-        return text
-
-#
 # Override the behaviour of elementtree and allow us to
 # force the encoding to ISO-8859-1
 #
@@ -500,6 +488,7 @@ class Bugz:
 
         # prompt for username and password if we were not supplied with it
         if not self.user or not self.password:
+            import getpass
             self.log('No username or password given.')
             self.user = self.get_input('Username: ')
             self.password = getpass.getpass()
@@ -723,6 +712,7 @@ class Bugz:
         if not buginfo:
             return False
 
+        import time
         modified = []
         qparams = config.params['modify'].copy()
         qparams['id'] = bugid
