@@ -553,7 +553,6 @@ class PrettyBugz(Bugz):
             self.log('Append command (optional): %s' % append_command)
 
         if append_command is not None and append_command != '':
-            import commands
             append_command_output = commands.getoutput(append_command)
             description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
 
