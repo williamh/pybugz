@@ -338,6 +338,26 @@ class PrettyBugz(Bugz):
                                   help = 'Status whiteboard'),
     }
 
+    def namedcmd(self, command):
+        """Run a command stored in Bugzilla by name."""
+        log_msg = 'Running namedcmd \'%s\''%command
+        result = Bugz.namedcmd(self, command)
+        if result == None:
+            raise RuntimeError('Failed to run command\nWrong namedcmd perhaps?')
+
+        if len(result) == 0:
+            self.log('No result from command')
+            return
+
+        for row in result:
+            desc = row['desc'][:self.columns - 30]
+            if row.has_key('assignee'): # Novell does not have 'assignee'       field
+                assignee = row['assignee'].split('@')[0]
+                print '%7s %-20s %s' % (row['bugid'], assignee, desc)
+            else:
+                print '%7s %s' % (row['bugid'], desc)
+
+    namedcmd.args = "<command name>"
 
     def get(self, bugid, comments = True, attachments = True):
         """ Fetch bug details given the bug id """
@@ -763,6 +783,7 @@ class PrettyBugz(Bugz):
             print '  post        Post a new bug into bugzilla'
             print '  modify      Modify a bug (eg. post a comment)'
             print '  attach      Attach file to a bug'
+            print '  namedcmd    Run a stored search,'
             print
             print 'Examples:'
             print '  bugz get 12345'
@@ -770,6 +791,7 @@ class PrettyBugz(Bugz):
             print '  bugz attachment 5000 --view'
             print '  bugz attach 140574 python-2.4.3.ebuild'
             print '  bugz modify 140574 -c "Me too"'
+            print '  bugz namedcmd "Amd64 stable"'
             print
             print 'For more information on subcommands, run:'
             print '  bugz <subcommand> --help'

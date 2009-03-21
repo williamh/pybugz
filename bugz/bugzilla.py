@@ -11,7 +11,7 @@ import readline
 from cookielib import LWPCookieJar, CookieJar
 from cStringIO import StringIO
 from urlparse import urlsplit, urljoin
-from urllib import urlencode
+from urllib import urlencode, quote
 from urllib2 import build_opener, HTTPCookieProcessor, Request
 
 from config import config
@@ -275,6 +275,29 @@ class Bugz:
         else:
             raise RuntimeError("Failed to login")
 
+    def extractResults(self, resp):
+        # parse the results into dicts.
+        results = []
+        columns = []
+        rows = []
+
+        for r in csv.reader(resp): rows.append(r)
+        for field in rows[0]:
+            if config.choices['column_alias'].has_key(field):
+                columns.append(config.choices['column_alias'][field])
+            else:
+                self.log('Unknown field: ' + field)
+                columns.append(field)
+        for row in rows[1:]:
+            if row[0].find("Missing Search") != -1:
+                self.log('Bugzilla error (Missing search found)')
+                return None
+            fields = {}
+            for i in range(min(len(row), len(columns))):
+                fields[columns[i]] = row[i]
+            results.append(fields)
+        return results
+
     def search(self, query, comments = False, order = 'number',
                assigned_to = None, reporter = None, cc = None,
                commenter = None, whiteboard = None, keywords = None,
@@ -365,26 +388,35 @@ class Bugz:
             base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
             req.add_header("Authorization", "Basic %s" % base64string)
         resp = self.opener.open(req)
+        return self.extractResults(resp)
 
-        # parse the results into dicts.
-        results = []
-        columns = []
-        rows = []
-        for r in csv.reader(resp): rows.append(r)
-        for field in rows[0]:
-            if config.choices['column_alias'].has_key(field):
-                columns.append(config.choices['column_alias'][field])
-            else:
-                self.log('Unknown field: ' + field)
-                columns.append(field)
-        for row in rows[1:]:
-            fields = {}
-            for i in range(min(len(row), len(columns))):
-                fields[columns[i]] = row[i]
-            results.append(fields)
+    def namedcmd(self, cmd):
+        """Run command stored in Bugzilla by name.
+ 
+        @return: Result from the stored command.
+        @rtype: list of dicts
+        """
 
-        return results
+        if not self.authenticated:
+            self.auth()
 
+        qparams = config.params['namedcmd'].copy()
+        # Is there a better way of getting a command with a space in its name
+        # to be encoded as foo%20bar instead of foo+bar or foo%2520bar?
+        qparams['namedcmd'] = quote(cmd)
+        req_params = urlencode(qparams, True)
+        req_params = req_params.replace('%25','%')
+
+        req_url = urljoin(self.base, config.urls['list'])
+        req_url += '?' + req_params
+        req = Request(req_url, None, config.headers)
+        if self.user and self.hpassword:
+            base64string = base64.encodestring('%s:%s' % (self.user, self.hpassword))[:-1]
+            req.add_header("Authorization", "Basic %s" % base64string)
+        resp = self.opener.open(req)
+
+        return self.extractResults(resp)
+ 
     def get(self, bugid):
         """Get an ElementTree representation of a bug.
 

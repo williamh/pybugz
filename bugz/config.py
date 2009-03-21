@@ -137,8 +137,13 @@ class BugzConfig:
         'assigned_to': '',# only valid for knob=reassign
         'form_name': 'process_bug',
         'comment':''
-        }
+        },
 
+        'namedcmd': {
+        'cmdtype' : 'runnamed',
+        'namedcmd' : '',
+        'ctype':'csv'
+        }
     }
 
     choices = {
