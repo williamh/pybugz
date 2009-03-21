@@ -634,7 +634,7 @@ class Bugz:
         except:
             return {}
 
-    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = ''):
+    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = '', dependson = '', blocked = ''):
         """Post a bug
 
         @param product: product where the bug should be placed
@@ -655,6 +655,10 @@ class Bugz:
         @type: string
         @keyword version: version of the component
         @type: string
+        @keyword dependson: bugs this one depends on
+        @type: string
+        @keyword blocked: bugs this one blocks
+        @type: string
 
         @rtype: int
         @return: the bug number, or 0 if submission failed.
@@ -670,6 +674,8 @@ class Bugz:
         qparams['assigned_to']  = assigned_to
         qparams['cc'] = cc
         qparams['bug_file_loc'] = url
+        qparams['dependson'] = dependson
+        qparams['blocked'] = blocked
         qparams['keywords'] = keywords
 
         #XXX: default version is 'unspecified'

@@ -445,7 +445,8 @@ class PrettyBugz(Bugz):
 
     def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
              cc = None, url = None, keywords = None, emerge_info = False,
-             description_from = None, version = None, append_command = None):
+             description_from = None, version = None, append_command = None,
+             dependson = None, blocked = None):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -522,6 +523,20 @@ class PrettyBugz(Bugz):
         else:
             self.log('Enter a CC list (optional): %s' % cc)
 
+        # check for bug dependencies
+        if not dependson:
+            dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional):'
+            dependson = self.get_input(dependson_msg)
+        else:
+            self.log('Enter a list of bug dependencies (optional): %s' % dependson)
+
+        # check for blocker bugs
+        if not blocked:
+            blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional):'
+            blocked = self.get_input(blocked_msg)
+        else:
+            self.log('Enter a list of blocker bugs (optional): %s' % blocked)
+
         # check for Keywords list
         if keywords is None:
             kwd_msg = 'Enter a Keywords list (comma separated) (optional):'
@@ -538,6 +553,8 @@ class PrettyBugz(Bugz):
         print 'URL         : ' + url
         print 'Assigned to : ' + assigned_to
         print 'CC          : ' + cc
+        print 'Depends on  : ' + dependson
+        print 'Blocks      : ' + blocked
         print 'Keywords    : ' + keywords
         print 'Description : ' + description
         print '-' * (self.columns - 1)
@@ -562,7 +579,7 @@ class PrettyBugz(Bugz):
             return
 
 
-        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version)
+        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version, dependson, blocked)
         if result != None:
             self.log('Bug %d submitted' % result)
         else:
@@ -589,6 +606,8 @@ class PrettyBugz(Bugz):
         'cc': make_option('--cc', help = 'Add a list of emails to CC list'),
         'url': make_option('-U', '--url', 
                            help = 'URL associated with the bug'),
+        'dependson': make_option('--depends-on', help = 'Add a list of bug dependencies'),
+        'blocked': make_option('--blocked', help = 'Add a list of blocker bugs'),
         'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
     }
 
