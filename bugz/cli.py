@@ -298,13 +298,7 @@ class PrettyBugz(Bugz):
             self.log('No bugs found.')
             return
 
-        for row in result:
-            desc = row['desc'][:self.columns - 30]
-            if row.has_key('assignee'): # Novell does not have 'assignee' field
-                assignee = row['assignee'].split('@')[0]
-                print '%7s %-20s %s' % (row['bugid'], assignee, desc)
-            else:
-                print '%7s %s' % (row['bugid'], desc)
+        self.listbugs(result)
 
     search.args = "<search term> [options..]"
     search.options = {
@@ -348,13 +342,7 @@ class PrettyBugz(Bugz):
             self.log('No result from command')
             return
 
-        for row in result:
-            desc = row['desc'][:self.columns - 30]
-            if row.has_key('assignee'): # Novell does not have 'assignee'       field
-                assignee = row['assignee'].split('@')[0]
-                print '%7s %-20s %s' % (row['bugid'], assignee, desc)
-            else:
-                print '%7s %s' % (row['bugid'], desc)
+        self.listbugs(result)
 
     namedcmd.args = "<command name>"
 
@@ -754,6 +742,15 @@ class PrettyBugz(Bugz):
         'description': make_option('-d', '--description',
                                     help = 'A description of the attachment.')
     }
+
+    def listbugs(self, buglist):
+        for row in buglist:
+            desc = row['desc'][:self.columns - 30]
+            if row.has_key('assignee'): # Novell does not have 'assignee' field
+                assignee = row['assignee'].split('@')[0]
+                print '%7s %-20s %s' % (row['bugid'], assignee, desc)
+            else:
+                print '%7s %s' % (row['bugid'], desc)
 
     @classmethod
     def usage(self, cmd = None):
