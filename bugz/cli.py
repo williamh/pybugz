@@ -553,14 +553,14 @@ class PrettyBugz(Bugz):
             self.log('Enter a Keywords list (optional): %s' % keywords)
 
         # check for bug dependencies
-        if not dependson:
+        if dependson is None:
             dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional):'
             dependson = self.get_input(dependson_msg)
         else:
             self.log('Enter a list of bug dependencies (optional): %s' % dependson)
 
         # check for blocker bugs
-        if not blocked:
+        if blocked is None:
             blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional):'
             blocked = self.get_input(blocked_msg)
         else:
