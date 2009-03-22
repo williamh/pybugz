@@ -6,6 +6,7 @@ import os
 import re
 import readline
 import tempfile
+import textwrap
 
 from optparse import BadOptionError, OptionParser,  make_option
 from urlparse import urljoin
@@ -432,7 +433,6 @@ class PrettyBugz(Bugz):
                 print '[Attachment] [%s] [%s]' % (aid, desc.encode(self.enc))
 
         if comments:
-            import textwrap
             i = 0
             wrapper = textwrap.TextWrapper(width = self.columns)
             for comment in bug_comments:
@@ -739,7 +739,6 @@ class PrettyBugz(Bugz):
         if not self.authenticated:
             self.auth()
 
-        import os
         if not os.path.exists(filename):
             raise BugzError('File not found: %s' % filename)
         if not description:
