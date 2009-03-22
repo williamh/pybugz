@@ -454,7 +454,8 @@ class PrettyBugz(Bugz):
     def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
              cc = None, url = None, keywords = None, emerge_info = False,
              description_from = None, version = None, append_command = None,
-             dependson = None, blocked = None, no_confirm = False):
+             dependson = None, blocked = None, no_confirm = False,
+	     no_append_command = False):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -536,14 +537,15 @@ class PrettyBugz(Bugz):
             self.warn('--emerge-info is deprecated. Please, use --append-command.')
             append_command = 'emerge --ignore-default-opts --info'
 
-        if append_command is None:
-            append_command = self.get_input('Append the output of the following command (leave blank for none): ')
-        else:
-            self.log('Append command (optional): %s' % append_command)
+        if not no_append_command:
+            if append_command is None:
+                append_command = self.get_input('Append the output of the following command (leave blank for none): ')
+            else:
+                self.log('Append command (optional): %s' % append_command)
 
-        if append_command is not None and append_command != '':
-            append_command_output = commands.getoutput(append_command)
-            description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
+            if append_command is not None and append_command != '':
+                append_command_output = commands.getoutput(append_command)
+                description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
 
         # check for Keywords list
         if keywords is None:
@@ -619,6 +621,9 @@ class PrettyBugz(Bugz):
         'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
         'no_confirm': make_option('--no-confirm', action="store_true",
                                    help = 'Do not confirm bug submission'),
+        'no_append_command': make_option('--no-append-command',
+	                                 action="store_true",
+                                         help = 'Do not append command output'),
     }
 
 
