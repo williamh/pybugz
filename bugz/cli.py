@@ -476,6 +476,13 @@ class PrettyBugz(Bugz):
         else:
             self.log('Enter product: %s' % product)
 
+        # check for version
+        # FIXME: This default behaviour is not too nice.
+        if version is None:
+            version = self.get_input('Enter version (default: unspecified): ')
+        else:
+            self.log('Enter version: %s' % version)
+
         # check for component
         if not component:
             while not component or len(component) < 1:
@@ -483,12 +490,25 @@ class PrettyBugz(Bugz):
         else:
             self.log('Enter component: %s' % component)
 
-        # check for version
-        # FIXME: This default behaviour is not too nice.
-        if version is None:
-            version = self.get_input('Enter version (default: unspecified): ')
+        # check for default assignee
+        if assigned_to is None:
+            assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional):'
+            assigned_to = self.get_input(assigned_msg)
         else:
-            self.log('Enter version: %s' % version)
+            self.log('Enter assignee (optional): %s' % assigned_to)
+
+        # check for CC list
+        if cc is None:
+            cc_msg = 'Enter a CC list (comma separated) (optional):'
+            cc = self.get_input(cc_msg)
+        else:
+            self.log('Enter a CC list (optional): %s' % cc)
+
+        # check for optional URL
+        if url is None:
+            url = self.get_input('Enter URL (optional): ')
+        else:
+            self.log('Enter URL (optional): %s' % url)
 
         # check for title
         if not title:
@@ -525,25 +545,12 @@ class PrettyBugz(Bugz):
             append_command_output = commands.getoutput(append_command)
             description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
 
-        # check for optional URL
-        if url is None:
-            url = self.get_input('Enter URL (optional): ')
+        # check for Keywords list
+        if keywords is None:
+            kwd_msg = 'Enter a Keywords list (comma separated) (optional):'
+            keywords = self.get_input(kwd_msg)
         else:
-            self.log('Enter URL (optional): %s' % url)
-
-        # check for default assignee
-        if assigned_to is None:
-            assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional):'
-            assigned_to = self.get_input(assigned_msg)
-        else:
-            self.log('Enter assignee (optional): %s' % assigned_to)
-
-        # check for CC list
-        if cc is None:
-            cc_msg = 'Enter a CC list (comma separated) (optional):'
-            cc = self.get_input(cc_msg)
-        else:
-            self.log('Enter a CC list (optional): %s' % cc)
+            self.log('Enter a Keywords list (optional): %s' % keywords)
 
         # check for bug dependencies
         if not dependson:
@@ -559,26 +566,19 @@ class PrettyBugz(Bugz):
         else:
             self.log('Enter a list of blocker bugs (optional): %s' % blocked)
 
-        # check for Keywords list
-        if keywords is None:
-            kwd_msg = 'Enter a Keywords list (comma separated) (optional):'
-            keywords = self.get_input(kwd_msg)
-        else:
-            self.log('Enter a Keywords list (optional): %s' % keywords)
-
         # print submission confirmation
         print '-' * (self.columns - 1)
         print 'Product     : ' + product
-        print 'Component   : ' + component
         print 'Version     : ' + version
-        print 'Title       : ' + title
-        print 'URL         : ' + url
+        print 'Component   : ' + component
         print 'Assigned to : ' + assigned_to
         print 'CC          : ' + cc
+        print 'URL         : ' + url
+        print 'Title       : ' + title
+        print 'Description : ' + description
+        print 'Keywords    : ' + keywords
         print 'Depends on  : ' + dependson
         print 'Blocks      : ' + blocked
-        print 'Keywords    : ' + keywords
-        print 'Description : ' + description
         print '-' * (self.columns - 1)
 
         if not no_confirm:
