@@ -454,7 +454,7 @@ class PrettyBugz(Bugz):
     def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
              cc = None, url = None, keywords = None, emerge_info = False,
              description_from = None, version = None, append_command = None,
-             dependson = None, blocked = None):
+             dependson = None, blocked = None, no_confirm = False):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -510,6 +510,20 @@ class PrettyBugz(Bugz):
             description = block_edit('Enter bug description: ')
         else:
             self.log('Enter bug description: %s)' % description)
+
+        #FIXME: Remove in 0.8
+        if emerge_info is True:
+            self.warn('--emerge-info is deprecated. Please, use --append-command.')
+            append_command = 'emerge --ignore-default-opts --info'
+
+        if append_command is None:
+            append_command = self.get_input('Append the output of the following command (leave blank for none): ')
+        else:
+            self.log('Append command (optional): %s' % append_command)
+
+        if append_command is not None and append_command != '':
+            append_command_output = commands.getoutput(append_command)
+            description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
 
         # check for optional URL
         if url is None:
@@ -567,25 +581,11 @@ class PrettyBugz(Bugz):
         print 'Description : ' + description
         print '-' * (self.columns - 1)
 
-        #FIXME: Remove in 0.8
-        if emerge_info is True:
-            self.warn('--emerge-info is deprecated. Please, use --append-command.')
-            append_command = 'emerge --ignore-default-opts --info'
-
-        if append_command is None:
-            append_command = self.get_input('Append the output of the following command (leave blank for none): ')
-        else:
-            self.log('Append command (optional): %s' % append_command)
-
-        if append_command is not None and append_command != '':
-            append_command_output = commands.getoutput(append_command)
-            description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
-
-        confirm = raw_input('Confirm bug submission (y/N)?')
-        if len(confirm) < 1 or confirm[0] not in ('y', 'Y'):
-            self.log('Submission aborted')
-            return
-
+        if not no_confirm:
+            confirm = raw_input('Confirm bug submission (y/N)?')
+            if len(confirm) < 1 or confirm[0] not in ('y', 'Y'):
+                self.log('Submission aborted')
+                return
 
         result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version, dependson, blocked)
         if result != None:
@@ -617,6 +617,8 @@ class PrettyBugz(Bugz):
         'dependson': make_option('--depends-on', help = 'Add a list of bug dependencies'),
         'blocked': make_option('--blocked', help = 'Add a list of blocker bugs'),
         'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
+        'no_confirm': make_option('--no-confirm', action="store_true",
+                                   help = 'Do not confirm bug submission'),
     }
 
 
