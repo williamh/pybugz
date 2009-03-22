@@ -22,7 +22,11 @@ def main():
                                         add_help_option = False)
 
         gopts, gargs = global_parser.parse_args()
-        cmd = gargs[0]
+        if gargs:
+            cmd = gargs[0]
+        else:
+            PrettyBugz.usage()
+            sys.exit(0)
 
         # gather options
         cmd_options = {}
@@ -33,8 +37,9 @@ def main():
             cmd_options = getattr(cmd_func, "options", {})
             cmd_args = getattr(cmd_func, "args", "[options]")
         else:
-            print '!! Error: Unable to recognise command: %s' % cmd
-            print
+            if not cmd == "--help" and not cmd == "-h":
+                print '!! Error: Unable to recognise command: %s' % cmd
+                print
             PrettyBugz.usage()
             sys.exit(-1)
 
