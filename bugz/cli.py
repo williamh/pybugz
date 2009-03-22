@@ -228,7 +228,6 @@ class PrettyBugz(Bugz):
                                    help = 'Authenticated for every command.'),
         'quiet': make_option('-q', '--quiet', action='store_true',
                              default = False, help = 'Quiet mode'),
-        'help': make_option('-h', '--help', action='help'),
     }
 
     def __init__(self, base, user = None, password =None, forget = False,
