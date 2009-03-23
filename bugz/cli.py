@@ -434,6 +434,9 @@ class PrettyBugz(Bugz):
                 print '\n[Comment #%d] %s : %s'  % (i, who, when)
                 print '-' * (self.columns - 1)
 
+                if what is None:
+		    what = ''
+
                 # print wrapped version
                 for line in what.split('\n'):
                     if len(line) < self.columns:
