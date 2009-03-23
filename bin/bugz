@@ -86,6 +86,7 @@ def main():
     except KeyboardInterrupt:
         print
         print 'Stopped.'
+        sys.exit(-1)
     except:
         raise
 
