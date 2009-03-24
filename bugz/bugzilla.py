@@ -3,10 +3,10 @@
 import base64
 import csv
 import getpass
+import locale
 import mimetypes
 import os
 import re
-import readline
 
 from cookielib import LWPCookieJar, CookieJar
 from cStringIO import StringIO

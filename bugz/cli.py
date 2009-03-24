@@ -4,13 +4,17 @@ import commands
 import locale
 import os
 import re
-import readline
 import sys
 import tempfile
 import textwrap
 
 from optparse import BadOptionError, OptionParser,  make_option
 from urlparse import urljoin
+
+try:
+    import readline
+except ImportError:
+	    readline = None
 
 from bugzilla import Bugz
 from config import config
