@@ -342,6 +342,9 @@ class Bugz:
         @rtype: list of dicts
         """
 
+        if not self.authenticated:
+            self.auth()
+
         qparams = config.params['list'].copy()
         if comments:
             qparams['long_desc'] = query
@@ -425,6 +428,9 @@ class Bugz:
 
         @rtype: ElementTree
         """
+        if not self.authenticated:
+            self.auth()
+
         qparams = config.params['show'].copy()
         qparams['id'] = bugid
 
@@ -645,6 +651,9 @@ class Bugz:
         @return: dict with three keys, 'filename', 'size', 'fd'
         @rtype: dict
         """
+        if not self.authenticated:
+            self.auth()
+
         qparams = config.params['attach'].copy()
         qparams['id'] = attachid
 
