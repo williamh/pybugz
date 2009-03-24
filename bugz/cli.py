@@ -67,7 +67,7 @@ def get_cols():
     else:
         return DEFAULT_NUM_COLS
 
-def launch_editor(initial_text, comment_prefix = 'BUGZ:'):
+def launch_editor(initial_text, comment_from = '',comment_prefix = 'BUGZ:'):
     """Launch an editor with some default text.
 
     Lifted from Mercurial 0.9.
@@ -75,6 +75,7 @@ def launch_editor(initial_text, comment_prefix = 'BUGZ:'):
     """
     (fd, name) = tempfile.mkstemp("bugz")
     f = os.fdopen(fd, "w")
+    f.write(comment_from)
     f.write(initial_text)
     f.close()
 
@@ -92,7 +93,7 @@ def launch_editor(initial_text, comment_prefix = 'BUGZ:'):
 
     return ''
 
-def block_edit(comment):
+def block_edit(comment, comment_from = ''):
     editor = (os.environ.get('BUGZ_EDITOR') or
               os.environ.get('EDITOR'))
 
@@ -102,7 +103,7 @@ def block_edit(comment):
         return new_text
 
     initial_text = '\n'.join(['BUGZ: %s'%line for line in comment.split('\n')])
-    new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text)
+    new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text, comment_from)
 
     if new_text.strip():
         return new_text
@@ -643,6 +644,11 @@ class PrettyBugz(Bugz):
                     raise BugzError('Failed to get read from file: %s: %s' % \
                                     (comment_from, e))
 
+                if 'comment_editor' in kwds:
+                    if kwds['comment_editor']:
+                        kwds['comment'] = block_edit('Enter comment:', kwds['comment'])
+                        del kwds['comment_editor']
+
             del kwds['comment_from']
 
         if 'comment_editor' in kwds:
@@ -663,7 +669,7 @@ class PrettyBugz(Bugz):
     modify.options = {
         'title': make_option('-t', '--title', help = 'Set title of bug'),
         'comment_from': make_option('-F', '--comment-from',
-                                    help = 'Add comment from file'),
+                                    help = 'Add comment from file.  If -C is also specified, the editor will be opened with this file as its contents.'),
         'comment_editor': make_option('-C', '--comment-editor',
                                       action='store_true', default = False,
                                       help = 'Add comment via default editor'),
