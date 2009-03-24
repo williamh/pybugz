@@ -5,6 +5,7 @@ import locale
 import os
 import re
 import readline
+import sys
 import tempfile
 import textwrap
 
@@ -41,31 +42,30 @@ def raw_input_block():
         except EOFError:
             return target
 
-def which(cmd):
-    """ just like /usr/bin/which, but in 5 lines of python.
+#
+# This function was lifted from Bazaar 1.9.
+#
+def terminal_width():
+    """Return estimated terminal width."""
+    if sys.platform == 'win32':
+        return win32utils.get_console_size()[0]
+    width = DEFAULT_NUM_COLS
+    try:
+        import struct, fcntl, termios
+        s = struct.pack('HHHH', 0, 0, 0, 0)
+        x = fcntl.ioctl(1, termios.TIOCGWINSZ, s)
+        width = struct.unpack('HHHH', x)[1]
+    except IOError:
+        pass
+    if width <= 0:
+        try:
+            width = int(os.environ['COLUMNS'])
+        except:
+            pass
+    if width <= 0:
+        width = DEFAULT_NUM_COLS
 
-    @return: full path of the executable
-    @rtype: string or None
-    """
-    paths = os.environ['PATH'].split(':')
-    for path in paths:
-        if os.access(os.path.join(path, cmd), os.X_OK):
-            return os.path.join(path, cmd)
-    return None
-
-def get_cols():
-    """ get the number of columns in the terminal.
-
-    @return: width of the current terminal
-    @rtype: int
-    """
-    stty = which('stty')
-    if stty:
-        row_cols = commands.getoutput("%s size" % stty)
-        rows, cols = map(int, row_cols.split())
-        return cols
-    else:
-        return DEFAULT_NUM_COLS
+    return width
 
 def launch_editor(initial_text, comment_from = '',comment_prefix = 'BUGZ:'):
     """Launch an editor with some default text.
@@ -236,7 +236,7 @@ class PrettyBugz(Bugz):
                  quiet = False, httpuser = None, httppassword = None ):
 
         self.quiet = quiet
-        self.columns = columns or get_cols()
+        self.columns = columns or terminal_width()
 
         Bugz.__init__(self, base, user, password, forget, always_auth, httpuser, httppassword)
 
