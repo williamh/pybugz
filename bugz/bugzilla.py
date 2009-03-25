@@ -88,7 +88,7 @@ def get_content_type(filename):
 
 #
 # Override the behaviour of elementtree and allow us to
-# force the encoding to ISO-8859-1
+# force the encoding to utf-8
 #
 
 class ForcedEncodingXMLTreeBuilder(ElementTree.XMLTreeBuilder):
@@ -445,7 +445,7 @@ class Bugz:
 
         fd = StringIO(resp.read())
         # workaround for ill-defined XML templates in bugzilla 2.20.2
-        parser = ForcedEncodingXMLTreeBuilder(encoding = 'ISO-8859-1')
+        parser = ForcedEncodingXMLTreeBuilder(encoding = 'utf-8')
         etree = ElementTree.parse(fd, parser)
         bug = etree.find('.//bug')
         if bug and bug.attrib.has_key('error'):
