@@ -249,10 +249,14 @@ class Bugz:
             self.authenticated = True
             return
 
-        # prompt for username and password if we were not supplied with it
-        if not self.user or not self.password:
-            self.log('No username or password given.')
+        # prompt for username if we were not supplied with it
+        if not self.user:
+            self.log('No username given.')
             self.user = self.get_input('Username: ')
+
+        # prompt for password if we were not supplied with it
+        if not self.password:
+            self.log('No password given.')
             self.password = getpass.getpass()
 
         # perform login
