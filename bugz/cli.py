@@ -353,11 +353,6 @@ class PrettyBugz(Bugz):
 
     def get(self, bugid, comments = True, attachments = True):
         """ Fetch bug details given the bug id """
-        try:
-            int(bugid)
-        except ValueError:
-            raise BugzError("bugid must be a number.")
-
         self.log('Getting bug %s ..' % bugid)
 
         result = Bugz.get(self, bugid)
