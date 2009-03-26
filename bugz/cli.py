@@ -698,7 +698,7 @@ class PrettyBugz(Bugz):
         'add_dependson': make_option('--add-dependson', action = 'append',
                               help = 'Add a bug to the depends list'),
         'remove_dependson': make_option('--remove-dependson', action = 'append',
-                                 help = 'Remove a bug from the blocked list'),
+                                 help = 'Remove a bug from the depends list'),
         'add_blocked': make_option('--add-blocked', action = 'append',
                               help = 'Add a bug to the blocked list'),
         'remove_blocked': make_option('--remove-blocked', action = 'append',
@@ -734,7 +734,7 @@ class PrettyBugz(Bugz):
     attachment.options = {
         'view': make_option('-v', '--view', action="store_true",
                             default = False,
-                            help = "Print attachment rather that save")
+                            help = "Print attachment rather than save")
     }
 
     def attach(self, bugid, filename, content_type = 'text/plain', description = None):
