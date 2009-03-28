@@ -1,2 +1,3 @@
 include ChangeLog
 include LICENSE
+include contrib/*
