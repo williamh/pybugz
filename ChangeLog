@@ -1,0 +1,511 @@
+commit 96066c306c2f3e9444518dd15c475340e6051cd7
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    added ChangeLog.old to distribution
+
+commit df3dcbe202c1ea739c030216562c1e5ed8efa748
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    renamed old ChangeLog to ChangeLog.old
+
+commit d0508fb37731d8286a31a6fad8ff80bf15511108
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    make sure anything in contrib is included in distribution
+
+commit f48cf7af1f12d1aae7dc2efb09722d70fd60169e
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Made the help for the search command more clear
+    
+    This is for gentoo bug 263997.  I made it a little more clear in the
+    --help function for the search command that --status=all is a valid
+    choice.
+
+commit 06a9d4ceeb5cf55d6d5a089d5d8640aa3ac3e38c
+Author: Ingmar Vanhassel <ingmar@exherbo.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Initial zsh-completion
+
+commit b763f4e5a5c393cebf9f9c83664ff0ab6b99a0ec
+Author: Ingmar Vanhassel <ingmar@exherbo.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Add some common editor temporary files to .gitignore
+
+commit f4511a96071e1f6cfb7c56521fabafb9d4fbae78
+Author: Ingmar Vanhassel <ingmar@exherbo.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Fix two typos
+
+commit 36033557fe08fada8931cc33554fd7dc4c5cde0e
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    allow a bug id to be a string
+    
+    This allows the use of aliases.
+    Thanks to Donnie Berkholz for the patch.
+
+commit 8bd293f3126858a2d092e7a3f6b8a48b7381bb83
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    check for username and password separately
+    
+    This changes the bugzilla interface to check and prompt for the username
+    and password separately so that the tools using it can provide one or
+    the other.  This fixes google code issue 12.
+
+commit b393f7eb391e2917c390103a502ed6ccaf15d2fa
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    change default encoding to utf-8
+    
+    This is an attempt to fix google code issue 3.
+
+commit 4d52d2419aa040b32a70af602d10ad9b41f3d07e
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    locale and readline fixes
+    
+    All of the modules need to import locale for locale support.  Also,
+    thanks again to brian.mitz@gmail.com for the patch for importing
+    readline correctly since some platforms do not have it.
+
+commit cbe23f0dda761c22eadef9870fa2d0224dfb8d73
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    fixed trace back when no terminal is available
+    
+    This closes google code issue #18.
+    Thanks to brian.nitz@gmail.com for suggesting looking at bazaar's
+    terminal_width function.
+
+commit 5efd94ab9483057f735759ca1bb69d34b26124f7
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    attachment, get and search now authenticate
+    
+    This fixes google code issue #16.
+
+commit 61b5530891202db6580d0395c0e25c2cfc00da55
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Allow --comment-from and --comment-editor to be used together
+    
+    If this is done, the editor will be opened with the file mentioned by the
+    --comment-from option as its initial contents.
+    This fixes google code issue #15.
+    Thanks to me@tiagocunha.org  for the patch.
+
+commit b1f070005fe37c61bb6bc3800ec88bb790f98a01
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Fixed a traceback if a comment was empty
+    
+    This fixes google code issue 22.
+
+commit 40c4e31e4d3579aa7ba3e597db3bb31ca36534ac
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    fixed exit code after keyboard interrupt
+    
+    pybugz now exits with an unsuccessful exit after a keyboard interrupt.
+    This fixes google code issue 9.
+
+commit b5944e86265817bff25b6096a350728146d72486
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    added --no-append-command option to the post command
+    
+    This was added so that pybugz will skip asking about appending the
+    output of a command to the description.  This fixes gentoo bug 219798.
+
+commit 01559d8a86603398b9def3659ea747e13daeb83f
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    corrected handling of dependson and blocked
+    
+    These fields were not being handled correctly in the post command.  The
+    conditions should have both been using "is none" instead of "not".
+
+commit 313491b51b62e4b02c6834d21aafb4f91d15495e
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Re-arranged the prompts for the post command
+    
+    I arranged the promtts for the post command so that they appear in the
+    same order a user sees them in Bugzilla.
+
+commit bf050b710c09db7c2bc6e8cc053b6a75f5ed28d9
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    added a --no-confirm option to the post command
+    
+    This makes it possible to use pybugz from scripts.
+    This is a fix for gentoo bug 219797.
+
+commit eed937a0ff0fef996f7706615b4041f934ce9778
+Author: Christian Ruppert (idl0r) <idl0r@gentoo.org>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Added workaround for --help/-h without subcommand. Fixed cmd definition to prevent "index out of range" errors.
+
+commit aafd15eaff18cdda819b72c5d496357919f315d1
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Revert "Added --help options to avoid unrecognized option errors."
+    
+    This reverts commit 56b752d49d91ffefce53d79fd32522559d2e955f.
+    
+    After working with Christian, we discovered that this breaks the help
+    for the subcommands.
+
+commit 56b752d49d91ffefce53d79fd32522559d2e955f
+Author: Christian Ruppert (idl0r) <idl0r@gentoo.org>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Added --help options to avoid unrecognized option errors.
+    
+    Signed-off-by: William Hubbs <w.d.hubbs@gmail.com>
+
+commit 2b784872e99c4ee9501647d44c01c399fef1d244
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    factored some common code
+    
+    There was common code in the namedcmd and search functions, so I put it
+    in a function on its own.
+
+commit 3ace45274460421e4a409283547b982d59d872dd
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    re-arranged imports
+    
+    I moved an import to the top of cli.py and removed a duplicate import.
+
+commit 4dc26b9b1a22a53dea7d4b8449e97fe1054c5d7d
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Revert "Fixed the help option"
+    
+    This reverts commit 662c6416a76539ba38a6c4aee77a4c24880e07b9.
+    
+    It is possible that I applied this incorrectly, but I found that there
+    was not an issue with the help command without this patch.
+
+commit 6db04965aa81e5cdcb585b465550c94685ca925e
+Author: Nick Fortino (nfortino) <nfortino@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Match the severity and priority of the web interface
+
+commit 7cfa4fab9dbc33379e46a88ac77edf7dbe8e7d74
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    added support for running stored searches
+    
+    This adds the ability to run stored searches such as:
+    bugz namedcmd "Amd64 stable"
+    Thanks to togge.gentoo@gmail.com for the patch.
+
+commit 662c6416a76539ba38a6c4aee77a4c24880e07b9
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Fixed the help option
+    
+    The help option was missing, thanks to idl0r for the patch.
+
+commit 3f35af2731b6730fe45bdd95a99372fb0aa8d7e5
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    added support for setting depends and blockers when posting
+    
+    This fixes gentoo bug 186293.
+
+commit 1286f053e11fb8798d152f830910309b9c8dcef9
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    ignore the dist directory
+    
+    The dist directory should not end up being committed to the repository,
+    so I added it to .gitignore.
+
+commit 34bdd087f6d17c0b7b9c2a70d4e30551ff554431
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    removed extra import
+    
+    I removed an extra import.
+
+commit 0c6c45afa2614a90f852fb37d4abd7f0e40736af
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    distutils configuration update
+    
+    I removed PKG-INFO since this is automatically generated.  Also,
+    .gitignore was updated so that MANIFEST will be ignored and the metadata
+    in the setup.py script was updated.
+
+commit a5421628320340a3bfbb77ae474728fa197f6e79
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    separated the bugzilla and command line interfaces
+    
+    The code has been re-factored so that the command line interface,
+    bugzilla interface and configuration are all in the bugz package.  The
+    bugz script just imports the portions of the package it needs to allow
+    it to be run from the command line.
+
+commit d83bed85b06a48b3c547f6a77bcc458e0f072113
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Added a .gitignore file
+    
+    This is so that git will ignore *.pyc and *.pyo files.
+
+commit fe4f585a179c7f47ff3a73b79af9c261bf9356e5
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    fixed import
+    
+    The bugz script needs to import urljoin.
+
+commit af6aa6d74ddfc375278360a1280d16ae074cad1f
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Revert "separated command line functions again"
+    I am working on the dev branch, so I reverted this from master.
+    This reverts commit 233156aa85a3ab44d1ce7edd3c9312aed135813b.
+
+commit 4a5257c9751416a6b996b0b7a80fd3b03372f049
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Revert "moved ellipsis function and imports"
+    
+    This reverts commit 6b7d070f7652aee96aec4c69baf82387db4ad94d.
+    Reverted this since I am working on the dev  branch.
+
+commit 6b7d070f7652aee96aec4c69baf82387db4ad94d
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    moved ellipsis function and imports
+    
+    I moved the ellipsis function to the bugz package since that is the only
+    place it is used.  I moved most of the imports in the bugz package to
+    the top of the file.
+
+commit 233156aa85a3ab44d1ce7edd3c9312aed135813b
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    separated command line functions again
+    
+    This is my second attempt to separate the command line functions from
+    the bugzilla interface itself.
+
+commit e4b8ea0c37a1b731744c1ce1d7a640688cc727e8
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Revert "separate the interfaces"
+    
+    This reverts commit 7ecc9f218c5f34444567eb89cfa9e9234a9c8a6d.
+
+commit 7ecc9f218c5f34444567eb89cfa9e9234a9c8a6d
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    separate the interfaces
+    
+    Now bin/bugz contains the code for the command line interface, and
+    the bugz directory contains code for the bugzilla interface.
+
+commit 7a08805e52eb5fdbbf7a731f901c6704f335e970
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    add MANIFEST.in
+    
+    This file is also on the master branch, so I have added a version of it
+    here without the bugz/bugzdefs directory.
+
+commit 65f202bb84f7b046d0216aa4b13734f79756da05
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    make file/directory layout consistent
+    
+    This makes the file/directory layout consistent between this branch ant
+    master.
+
+commit 4a9e4a7a2b62469b9b48d74a362e305882514e56
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Updated version number.
+
+commit 285870d86738c868d53b2ae2ef57e4bea91343c7
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Make --version skipable throgh an empty string.
+
+commit 48b7e42893d6d9baba867ee4119da51dfffe3373
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Removed default 'version' value on command line.
+
+commit 69d8a9e612305066910d40e4aa33881e24719c92
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    * Remove EMERGE
+    * Add --ignore-default-opts to emerge_info, fixes issue 5,
+    thanks to Tiago Cunha.
+
+commit 5746fe898a3a0a5b08e82214d63dc8f5fe4731ed
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Fix --forget, issue 6. Patch from John L. Clark.
+
+commit 3f717a8ecfdf1260fd031e4a4d0164a5aafd8997
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    * Deprecate --emerge-info
+    * Introducing --append-command
+    * Use 'log' for all default output on post action.
+
+commit d687ea415b7bbe127483f7e0a5c8846b48957fc2
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Update post's docstring.
+
+commit 1f65a3a4a2540b6562ad7a50b84fc8cfa4c134b2
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    version default to 'unspecified' on command-line, too.
+
+commit 156e7cf203fc733079d9c482ee13d92045995435
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Use https://bugs.gentoo.org/ by default.
+
+commit a2a3f8ee30ca6d8f2c396c6055f52f6e67e88b24
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Add support for version field and make product and component
+    support on test work.
+
+commit 831d8d69459ee450eec9d37ebd356a1b17064ce5
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Initial support for product and component.
+
+commit 16819419b495c85170838322bdf7f3cca6b103a6
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Update homepage and add my contact info.
+
+commit 0530cd2b462ceb31615ae5deebb138f8be496b90
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Add LICENSE to 0.7.x branch.
+
+commit a8805266f49b4bc761ebad1f0defbd8d0cd274e9
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Fix tabs in ChangeLog and bring PKG-INFO back.
+
+commit 23775838988ee479382f38cef9a267d9d02ce89b
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Set version to 0.7.3 and updated changelog.
+
+commit 7fcd038bc688f2d5adc2bcce70570dafdb76b78b
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    Creating a maintainance branch for 0.7.x
+
+commit 5ee6dc279eea4b9cc57e44b4475cd105102ce499
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    * Fix a a bug when posting without keywords.
+
+commit 2e41e321fe285d1546084e165bb7e9ff8c537281
+Author: Santiago M. Mola <coldwind@coldwind.org>
+Commit: Santiago M. Mola <coldwind@coldwind.org>
+
+    ChangeLog fixes and set version to 0.7.2.
+
+commit f6a6588b1f43864dc99b092ea5ccb959a96346b9
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Added support for the --keywords option, thanks to Mike Vapier.
+
+commit 29bef2dc00784c69b17f6cb478ba299082586ae7
+Author: William Hubbs <w.d.hubbs@gmail.com>
+Commit: William Hubbs <w.d.hubbs@gmail.com>
+
+    Removed the ebuild since this is in the gentoo portage tree.
+
+commit be8e477afc7b5942273b9eeef2bd5755f5a11d28
+Author: Alastair Tse <alastair@liquidx.net>
+Commit: Alastair Tse <alastair@liquidx.net>
+
+    Syncing from Gentoo's SVN repository (from coldwind@gentoo.org)
+
+commit 31c3a4c37f783cfdb916a6adfd35bff4464047ea
+Author: Alastair Tse <alastair@liquidx.net>
+Commit: Alastair Tse <alastair@liquidx.net>
+
+    Adding snapshot of code form http://svn.liquidx.net/svn/python/pybugz/
