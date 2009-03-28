@@ -1,4 +1,3 @@
-include ChangeLog
-include ChangeLog.old
+include ChangeLog*
 include LICENSE
 include contrib/*
