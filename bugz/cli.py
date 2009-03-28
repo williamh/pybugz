@@ -318,7 +318,7 @@ class PrettyBugz(Bugz):
         'commenter': make_option('--commenter',help = 'email that commented the bug'),
         'status': make_option('-s', '--status', action='append',
                               help = 'Bug status (for multiple choices,'
-                              'use --status=NEW --status=ASSIGNED)'),
+                              'use --status=NEW --status=ASSIGNED) or --status=all for all statuses'),
         'severity': make_option('--severity', action='append',
                                 choices = config.choices['severity'],
                                 help = 'Restrict by severity.'),
