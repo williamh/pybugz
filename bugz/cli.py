@@ -619,7 +619,7 @@ class PrettyBugz(Bugz):
         'cc': make_option('--cc', help = 'Add a list of emails to CC list'),
         'url': make_option('-U', '--url', 
                            help = 'URL associated with the bug'),
-        'dependson': make_option('--depends-on', help = 'Add a list of bug dependencies'),
+        'dependson': make_option('--depends-on', dest='dependson', help = 'Add a list of bug dependencies'),
         'blocked': make_option('--blocked', help = 'Add a list of blocker bugs'),
         'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
         'no_confirm': make_option('--no-confirm', action="store_true",
