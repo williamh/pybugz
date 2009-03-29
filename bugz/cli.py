@@ -533,7 +533,7 @@ class PrettyBugz(Bugz):
         if not description:
             description = block_edit('Enter bug description: ')
         else:
-            self.log('Enter bug description: %s)' % description)
+            self.log('Enter bug description: %s' % description)
 
         #FIXME: Remove in 0.8
         if emerge_info is True:
