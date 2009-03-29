@@ -9,6 +9,6 @@ setup(
     url = 'http://www.liquidx.net/pybuggz',
     license = "GPL-2",
     platforms = ['any'],
-    packages = ['bugz'],
+    packages = ['bugz', 'laxoptionparser'],
     scripts = ['bin/bugz']
 )

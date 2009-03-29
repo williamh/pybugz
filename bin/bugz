@@ -3,10 +3,11 @@
 import locale
 import sys
 
+from laxoptionparser import LaxOptionParser
 from optparse import OptionParser
 
 from bugz import cli
-from bugz.cli import BugzError, LaxOptionParser, PrettyBugz
+from bugz.cli import BugzError, PrettyBugz
 
 def main():
     if len(sys.argv) < 2:
