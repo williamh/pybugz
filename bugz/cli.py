@@ -551,7 +551,7 @@ class PrettyBugz(Bugz):
                                    help = 'Do not confirm bug submission'),
         'no_append_command': make_option('--no-append-command',
 	                                 action="store_true",
-                                         help = 'Do not append command output'),
+                                         help = 'do not ask about appending command output'),
     }
 
 
