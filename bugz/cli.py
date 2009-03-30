@@ -383,7 +383,7 @@ class PrettyBugz(Bugz):
              cc = None, url = None, keywords = None, emerge_info = False,
              description_from = None, version = None, append_command = None,
              dependson = None, blocked = None, no_confirm = False,
-	     no_append_command = False):
+	     no_append_command = False, default_confirm = 'y'):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -512,8 +512,13 @@ class PrettyBugz(Bugz):
         print '-' * (self.columns - 1)
 
         if not no_confirm:
-            confirm = raw_input('Confirm bug submission (y/N)?')
-            if len(confirm) < 1 or confirm[0] not in ('y', 'Y'):
+            if default_confirm in ['Y','y']:
+                confirm = raw_input('Confirm bug submission (Y/n)?')
+            else:
+                confirm = raw_input('Confirm bug submission (y/N)?')
+	    if len(confirm) < 1:
+                confirm = default_confirm
+            if confirm[0] not in ('y', 'Y'):
                 self.log('Submission aborted')
                 return
 
@@ -552,6 +557,10 @@ class PrettyBugz(Bugz):
         'no_append_command': make_option('--no-append-command',
 	                                 action="store_true",
                                          help = 'do not ask about appending command output'),
+        'default_confirm': make_option('--default-confirm',
+	                                 choices = ['y','Y','n','N'],
+                                         default = 'y',
+                                         help = 'default answer to confirmation question (y/n)'),
     }
 
 
