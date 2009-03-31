@@ -18,8 +18,10 @@ def main():
         # do one global option search first to find those options
         # that are global across all sub commands.
         global_opts = PrettyBugz.options
-        global_parser = LaxOptionParser(option_list = global_opts.values(),
-                                        add_help_option = False)
+        global_parser = LaxOptionParser(add_help_option = False)
+
+        for x in global_opts.values():
+            global_parser.add_option(x)
 
         gopts, gargs = global_parser.parse_args()
         if gargs:
@@ -45,8 +47,11 @@ def main():
 
         # parse options
         parser = OptionParser(usage = '%%prog %s %s' % (cmd, cmd_args),
-                              description = cmd_func.__doc__,
-                              option_list = cmd_options.values())
+                              description = cmd_func.__doc__)
+
+        for x in cmd_options.values():
+            parser.add_option(x)
+
         opts, args = parser.parse_args(gargs[1:])
 
         # separate bugz options and cmd options
