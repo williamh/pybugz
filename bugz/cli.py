@@ -383,7 +383,8 @@ class PrettyBugz(Bugz):
              cc = None, url = None, keywords = None, emerge_info = False,
              description_from = None, version = None, append_command = None,
              dependson = None, blocked = None, no_confirm = False,
-	     no_append_command = False, default_confirm = 'y'):
+	     no_append_command = False, default_confirm = 'y',
+             priority = None, severity = None):
         """Post a new bug"""
         # As we are submitting something, we should really
         # grab entry from console rather than from the command line:
@@ -418,6 +419,20 @@ class PrettyBugz(Bugz):
                 component = self.get_input('Enter component: ')
         else:
             self.log('Enter component: %s' % component)
+
+        # check for default priority
+        if priority is None:
+            priority_msg ='Enter priority (eg. P2) (optional):'
+            priority = self.get_input(priority_msg)
+        else:
+            self.log('Enter priority (optional): %s' % priority)
+
+        # check for default severity
+        if severity is None:
+            severity_msg ='Enter severity (eg. normal) (optional):'
+            severity = self.get_input(severity_msg)
+        else:
+            self.log('Enter severity (optional): %s' % severity)
 
         # check for default assignee
         if assigned_to is None:
@@ -501,6 +516,8 @@ class PrettyBugz(Bugz):
         print 'Product     : ' + product
         print 'Version     : ' + version
         print 'Component   : ' + component
+        print 'priority   : ' + priority
+        print 'severity   : ' + severity
         print 'Assigned to : ' + assigned_to
         print 'CC          : ' + cc
         print 'URL         : ' + url
@@ -522,7 +539,7 @@ class PrettyBugz(Bugz):
                 self.log('Submission aborted')
                 return
 
-        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version, dependson, blocked)
+        result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version, dependson, blocked, priority, severity)
         if result != None:
             self.log('Bug %d submitted' % result)
         else:
@@ -561,6 +578,10 @@ class PrettyBugz(Bugz):
 	                                 choices = ['y','Y','n','N'],
                                          default = 'y',
                                          help = 'default answer to confirmation question (y/n)'),
+        'priority': make_option('--priority', 
+                                choices=config.choices['priority'].values()),
+        'severity': make_option('-S', '--severity',
+                                choices=config.choices['severity']),
     }
 
 

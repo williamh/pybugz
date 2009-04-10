@@ -679,7 +679,7 @@ class Bugz:
         except:
             return {}
 
-    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = '', dependson = '', blocked = ''):
+    def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = '', dependson = '', blocked = '', priority = '', severity = ''):
         """Post a bug
 
         @param product: product where the bug should be placed
@@ -704,6 +704,10 @@ class Bugz:
         @type: string
         @keyword blocked: bugs this one blocks
         @type: string
+        @keyword priority: priority of this bug
+        @type: string
+        @keyword severity: severity of this bug
+        @type: string
 
         @rtype: int
         @return: the bug number, or 0 if submission failed.
@@ -726,6 +730,14 @@ class Bugz:
         #XXX: default version is 'unspecified'
         if version != '':
             qparams['version'] = version
+
+        #XXX: default priority is 'P2'
+        if priority != '':
+            qparams['priority'] = priority
+
+        #XXX: default severity is 'normal'
+        if severity != '':
+            qparams['bug_severity'] = severity
 
         req_params = urlencode(qparams, True)
         req_url = urljoin(self.base, config.urls['post'])
