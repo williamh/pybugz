@@ -213,6 +213,7 @@ class BugzConfig:
         'minor',
         'trivial',
         'enhancement',
+        'QA',
         ],
 
         'priority': {
