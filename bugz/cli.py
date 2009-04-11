@@ -15,7 +15,7 @@ from urlparse import urljoin
 try:
     import readline
 except ImportError:
-	    readline = None
+    readline = None
 
 from bugzilla import Bugz
 from config import config
@@ -360,7 +360,7 @@ class PrettyBugz(Bugz):
                 print '-' * (self.columns - 1)
 
                 if what is None:
-		    what = ''
+                    what = ''
 
                 # print wrapped version
                 for line in what.split('\n'):
@@ -383,7 +383,7 @@ class PrettyBugz(Bugz):
              cc = None, url = None, keywords = None, emerge_info = False,
              description_from = None, version = None, append_command = None,
              dependson = None, blocked = None, no_confirm = False,
-	     no_append_command = False, default_confirm = 'y',
+             no_append_command = False, default_confirm = 'y',
              priority = None, severity = None):
         """Post a new bug"""
         # As we are submitting something, we should really
@@ -533,7 +533,7 @@ class PrettyBugz(Bugz):
                 confirm = raw_input('Confirm bug submission (Y/n)?')
             else:
                 confirm = raw_input('Confirm bug submission (y/N)?')
-	    if len(confirm) < 1:
+            if len(confirm) < 1:
                 confirm = default_confirm
             if confirm[0] not in ('y', 'Y'):
                 self.log('Submission aborted')
@@ -572,12 +572,12 @@ class PrettyBugz(Bugz):
         'no_confirm': make_option('--no-confirm', action="store_true",
                                    help = 'Do not confirm bug submission'),
         'no_append_command': make_option('--no-append-command',
-	                                 action="store_true",
+                                         action="store_true",
                                          help = 'do not ask about appending command output'),
         'default_confirm': make_option('--default-confirm',
-	                                 choices = ['y','Y','n','N'],
-                                         default = 'y',
-                                         help = 'default answer to confirmation question (y/n)'),
+                                       choices = ['y','Y','n','N'],
+                                       default = 'y',
+                                       help = 'default answer to confirmation question (y/n)'),
         'priority': make_option('--priority', 
                                 choices=config.choices['priority'].values()),
         'severity': make_option('-S', '--severity',
