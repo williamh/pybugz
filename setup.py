@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name = 'pybugz',
-    version = '0.7.4_rc1',
+    version = '0.7.4_rc2',
     description = 'python interface to bugzilla',
     author = 'Alastair Tse',
     author_email = 'alastair@liquidx.net',
