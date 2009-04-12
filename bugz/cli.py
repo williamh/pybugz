@@ -200,6 +200,8 @@ class PrettyBugz(Bugz):
         """Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
         """
         search_term = ' '.join(args).strip()
+        show_url = kwds['show_url']
+        del kwds['show_url']
         search_opts = sorted([(opt, val) for opt, val in kwds.items()
                               if val != None and opt != 'order'])
 
@@ -218,7 +220,6 @@ class PrettyBugz(Bugz):
         else:
             self.log(log_msg)
 
-
         result = Bugz.search(self, search_term, **kwds)
 
         if result == None:
@@ -228,7 +229,7 @@ class PrettyBugz(Bugz):
             self.log('No bugs found.')
             return
 
-        self.listbugs(result)
+        self.listbugs(result, show_url)
 
     search.args = "<search term> [options..]"
     search.options = {
@@ -259,9 +260,11 @@ class PrettyBugz(Bugz):
         'keywords': make_option('-k', '--keywords', help = 'Bug keywords'),
         'whiteboard': make_option('-w', '--whiteboard',
                                   help = 'Status whiteboard'),
+        'show_url': make_option('--show-url', help='Show bug id as a url.',
+                                action = 'store_true', default = False),
     }
 
-    def namedcmd(self, command):
+    def namedcmd(self, command, show_url = False):
         """Run a command stored in Bugzilla by name."""
         log_msg = 'Running namedcmd \'%s\''%command
         result = Bugz.namedcmd(self, command)
@@ -272,9 +275,13 @@ class PrettyBugz(Bugz):
             self.log('No result from command')
             return
 
-        self.listbugs(result)
+        self.listbugs(result, show_url)
 
     namedcmd.args = "<command name>"
+    namedcmd.options = {
+        'show_url': make_option('--show-url', help='Show bug id as a url.',
+                                action = 'store_true', default = False),
+    }
 
     def get(self, bugid, comments = True, attachments = True):
         """ Fetch bug details given the bug id """
@@ -714,14 +721,18 @@ class PrettyBugz(Bugz):
                                     help = 'A description of the attachment.')
     }
 
-    def listbugs(self, buglist):
+    def listbugs(self, buglist, show_url = False):
         for row in buglist:
-            desc = row['desc'][:self.columns - 30]
+            desc = row['desc']
+            bugid = row['bugid']
+            if show_url:
+                bugid = '%s%s?id=%s'%(self.base, config.urls['show'], bugid)
             if row.has_key('assignee'): # Novell does not have 'assignee' field
                 assignee = row['assignee'].split('@')[0]
-                print '%7s %-20s %s' % (row['bugid'], assignee, desc)
+                line = '%s %-20s %s' % (bugid, assignee, desc)
             else:
-                print '%7s %s' % (row['bugid'], desc)
+                line = '%s %s' % (bugid, desc)
+            print line.encode(self.enc)[:self.columns]
 
     @classmethod
     def usage(self, cmd = None):
