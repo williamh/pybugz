@@ -523,8 +523,8 @@ class PrettyBugz(Bugz):
         print 'Product     : ' + product
         print 'Version     : ' + version
         print 'Component   : ' + component
-        print 'priority   : ' + priority
-        print 'severity   : ' + severity
+        print 'priority    : ' + priority
+        print 'severity    : ' + severity
         print 'Assigned to : ' + assigned_to
         print 'CC          : ' + cc
         print 'URL         : ' + url
@@ -537,9 +537,9 @@ class PrettyBugz(Bugz):
 
         if not no_confirm:
             if default_confirm in ['Y','y']:
-                confirm = raw_input('Confirm bug submission (Y/n)?')
+                confirm = raw_input('Confirm bug submission (Y/n)? ')
             else:
-                confirm = raw_input('Confirm bug submission (y/N)?')
+                confirm = raw_input('Confirm bug submission (y/N)? ')
             if len(confirm) < 1:
                 confirm = default_confirm
             if confirm[0] not in ('y', 'Y'):
