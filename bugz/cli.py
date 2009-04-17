@@ -732,7 +732,11 @@ class PrettyBugz(Bugz):
                 line = '%s %-20s %s' % (bugid, assignee, desc)
             else:
                 line = '%s %s' % (bugid, desc)
-            print line.encode(self.enc)[:self.columns]
+
+            try:
+                print line.encode(self.enc)[:self.columns]
+            except UnicodeDecodeError:
+		    print line[:self.columns]
 
     @classmethod
     def usage(self, cmd = None):
