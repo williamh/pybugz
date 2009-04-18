@@ -3,7 +3,7 @@
 import csv
 import locale
 
-__version__ = '0.7.4_rc3'
+__version__ = '0.7.4_rc4'
 __author__ = 'Alastair Tse <http://www.liquidx.net/>'
 __contributors__ = ['Santiago M. Mola <cooldwind@gmail.com']
 __revision__ = '$Id: $'
