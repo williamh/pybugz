@@ -429,28 +429,28 @@ class PrettyBugz(Bugz):
 
         # check for default priority
         if priority is None:
-            priority_msg ='Enter priority (eg. P2) (optional):'
+            priority_msg ='Enter priority (eg. P2) (optional): '
             priority = self.get_input(priority_msg)
         else:
             self.log('Enter priority (optional): %s' % priority)
 
         # check for default severity
         if severity is None:
-            severity_msg ='Enter severity (eg. normal) (optional):'
+            severity_msg ='Enter severity (eg. normal) (optional): '
             severity = self.get_input(severity_msg)
         else:
             self.log('Enter severity (optional): %s' % severity)
 
         # check for default assignee
         if assigned_to is None:
-            assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional):'
+            assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
             assigned_to = self.get_input(assigned_msg)
         else:
             self.log('Enter assignee (optional): %s' % assigned_to)
 
         # check for CC list
         if cc is None:
-            cc_msg = 'Enter a CC list (comma separated) (optional):'
+            cc_msg = 'Enter a CC list (comma separated) (optional): '
             cc = self.get_input(cc_msg)
         else:
             self.log('Enter a CC list (optional): %s' % cc)
@@ -499,21 +499,21 @@ class PrettyBugz(Bugz):
 
         # check for Keywords list
         if keywords is None:
-            kwd_msg = 'Enter a Keywords list (comma separated) (optional):'
+            kwd_msg = 'Enter a Keywords list (comma separated) (optional): '
             keywords = self.get_input(kwd_msg)
         else:
             self.log('Enter a Keywords list (optional): %s' % keywords)
 
         # check for bug dependencies
         if dependson is None:
-            dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional):'
+            dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional): '
             dependson = self.get_input(dependson_msg)
         else:
             self.log('Enter a list of bug dependencies (optional): %s' % dependson)
 
         # check for blocker bugs
         if blocked is None:
-            blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional):'
+            blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional): '
             blocked = self.get_input(blocked_msg)
         else:
             self.log('Enter a list of blocker bugs (optional): %s' % blocked)
