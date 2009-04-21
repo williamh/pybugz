@@ -736,7 +736,7 @@ class PrettyBugz(Bugz):
             try:
                 print line.encode(self.enc)[:self.columns]
             except UnicodeDecodeError:
-		    print line[:self.columns]
+        	print line[:self.columns]
 
     @classmethod
     def usage(self, cmd = None):
