@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 MANIFEST
+build
 dist
 .*swp
 .*~
