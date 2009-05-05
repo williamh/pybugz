@@ -85,7 +85,7 @@ def launch_editor(initial_text, comment_from = '',comment_prefix = 'BUGZ:'):
 	f.close()
 
 	editor = (os.environ.get("BUGZ_EDITOR") or
-			  os.environ.get("EDITOR"))
+			os.environ.get("EDITOR"))
 	if editor:
 		result = os.system("%s \"%s\"" % (editor, name))
 		if result != 0:
@@ -100,7 +100,7 @@ def launch_editor(initial_text, comment_from = '',comment_prefix = 'BUGZ:'):
 
 def block_edit(comment, comment_from = ''):
 	editor = (os.environ.get('BUGZ_EDITOR') or
-			  os.environ.get('EDITOR'))
+			os.environ.get('EDITOR'))
 
 	if not editor:
 		print comment + ': (Press Ctrl+D to end)'
@@ -142,27 +142,26 @@ class PrettyBugz(Bugz):
 		'user': make_option('-u', '--user', type='string',
 							help = 'Username for commands requiring authentication'),
 		'password': make_option('-p', '--password', type='string',
-								help = 'Password for commands requiring authentication'),
+							help = 'Password for commands requiring authentication'),
 		'httpuser': make_option('-H', '--httpuser', type='string',
 							help = 'Username for basic http auth'),
 		'httppassword': make_option('-P', '--httppassword', type='string',
-								help = 'Password for basic http auth'),
+							help = 'Password for basic http auth'),
 		'forget': make_option('-f', '--forget', action='store_true',
-							  help = 'Forget login after execution'),
+							help = 'Forget login after execution'),
 		'columns': make_option('--columns', type='int', default = 0,
-							   help = 'Maximum number of columns output should use'),
-		'encoding': make_option('--encoding', 
-								help = 'Output encoding (default: utf-8).'),
+							help = 'Maximum number of columns output should use'),
+		'encoding': make_option('--encoding',
+							help = 'Output encoding (default: utf-8).'),
 		'always_auth': make_option('-A', '--always-auth', action='store_true',
-								   default = False,
-								   help = 'Authenticated for every command.'),
+							default = False, help = 'Authenticated for every command.'),
 		'quiet': make_option('-q', '--quiet', action='store_true',
-							 default = False, help = 'Quiet mode'),
+							default = False, help = 'Quiet mode'),
 	}
 
 	def __init__(self, base, user = None, password =None, forget = False,
-				 columns = 0, encoding = '', always_auth = False,
-				 quiet = False, httpuser = None, httppassword = None ):
+			columns = 0, encoding = '', always_auth = False,
+			quiet = False, httpuser = None, httppassword = None ):
 
 		self.quiet = quiet
 		self.columns = columns or terminal_width()
@@ -203,13 +202,13 @@ class PrettyBugz(Bugz):
 		show_url = kwds['show_url']
 		del kwds['show_url']
 		search_opts = sorted([(opt, val) for opt, val in kwds.items()
-							  if val != None and opt != 'order'])
+			if val != None and opt != 'order'])
 
 		if not (search_term or search_opts):
 			raise BugzError('Please give search terms or options.')
 
 		if search_term:
-			log_msg = 'Searching for \'%s\' ' % search_term 
+			log_msg = 'Searching for \'%s\' ' % search_term
 		else:
 			log_msg = 'Searching for bugs '
 
@@ -234,17 +233,17 @@ class PrettyBugz(Bugz):
 	search.args = "<search term> [options..]"
 	search.options = {
 		'order': make_option('-o', '--order', type='choice',
-							 choices = config.choices['order'].keys(),
-							 default = 'number'),
+								choices = config.choices['order'].keys(),
+								default = 'number'),
 		'assigned_to': make_option('-a', '--assigned-to',
 								help = 'email the bug is assigned to'),
 		'reporter': make_option('-r', '--reporter',
-								   help = 'email the bug was reported by'),
+								help = 'email the bug was reported by'),
 		'cc': make_option('--cc',help = 'Restrict by CC email address'),
 		'commenter': make_option('--commenter',help = 'email that commented the bug'),
 		'status': make_option('-s', '--status', action='append',
-							  help = 'Bug status (for multiple choices,'
-							  'use --status=NEW --status=ASSIGNED) or --status=all for all statuses'),
+								help = 'Bug status (for multiple choices,'
+								'use --status=NEW --status=ASSIGNED) or --status=all for all statuses'),
 		'severity': make_option('--severity', action='append',
 								choices = config.choices['severity'],
 								help = 'Restrict by severity.'),
@@ -254,12 +253,12 @@ class PrettyBugz(Bugz):
 		'comments': make_option('-c', '--comments',  action='store_true',
 								help = 'Search comments instead of title'),
 		'product': make_option('-P', '--product', action='append',
-								 help = 'Restrict by product (1 or more)'),
+								help = 'Restrict by product (1 or more)'),
 		'component': make_option('-C', '--component', action='append',
-								 help = 'Restrict by component (1 or more)'),
+								help = 'Restrict by component (1 or more)'),
 		'keywords': make_option('-k', '--keywords', help = 'Bug keywords'),
 		'whiteboard': make_option('-w', '--whiteboard',
-								  help = 'Status whiteboard'),
+								help = 'Status whiteboard'),
 		'show_url': make_option('--show-url', help='Show bug id as a url.',
 								action = 'store_true', default = False),
 	}
@@ -387,11 +386,11 @@ class PrettyBugz(Bugz):
 	}
 
 	def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
-			 cc = None, url = None, keywords = None, emerge_info = False,
-			 description_from = None, version = None, append_command = None,
-			 dependson = None, blocked = None, no_confirm = False,
-			 no_append_command = False, default_confirm = 'y',
-			 priority = None, severity = None):
+			cc = None, url = None, keywords = None, emerge_info = False,
+			description_from = None, version = None, append_command = None,
+			dependson = None, blocked = None, no_confirm = False,
+			no_append_command = False, default_confirm = 'y',
+			priority = None, severity = None):
 		"""Post a new bug"""
 		# As we are submitting something, we should really
 		# grab entry from console rather than from the command line:
@@ -559,33 +558,33 @@ class PrettyBugz(Bugz):
 		'version': make_option('--version', help = 'Version of the component'),
 		'title': make_option('-t', '--title', help = 'Title of bug'),
 		'description': make_option('-d', '--description',
-								   help = 'Description of the bug'),
+									help = 'Description of the bug'),
 		'description_from': make_option('-F' , '--description-from',
-										help = 'Description from contents of'
-										' file'),
+									help = 'Description from contents of'
+									' file'),
 		'emerge_info': make_option('-e', '--emerge-info', action="store_true",
-								   help = 'Include emerge --info (DEPRECATED, use --append-command)'),
+									help = 'Include emerge --info (DEPRECATED, use --append-command)'),
 		'append_command': make_option('--append-command',
-									  help = 'Append the output of a command to the description.'),
+									help = 'Append the output of a command to the description.'),
 		'assigned_to': make_option('-a', '--assigned-to',
-								   help = 'Assign bug to someone other than '
-								   'the default assignee'),
+									help = 'Assign bug to someone other than '
+									'the default assignee'),
 		'cc': make_option('--cc', help = 'Add a list of emails to CC list'),
-		'url': make_option('-U', '--url', 
-						   help = 'URL associated with the bug'),
+		'url': make_option('-U', '--url',
+									help = 'URL associated with the bug'),
 		'dependson': make_option('--depends-on', dest='dependson', help = 'Add a list of bug dependencies'),
 		'blocked': make_option('--blocked', help = 'Add a list of blocker bugs'),
 		'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
 		'no_confirm': make_option('--no-confirm', action="store_true",
-								   help = 'Do not confirm bug submission'),
+									help = 'Do not confirm bug submission'),
 		'no_append_command': make_option('--no-append-command',
-										 action="store_true",
-										 help = 'do not ask about appending command output'),
+									action="store_true",
+									help = 'do not ask about appending command output'),
 		'default_confirm': make_option('--default-confirm',
-									   choices = ['y','Y','n','N'],
-									   default = 'y',
-									   help = 'default answer to confirmation question (y/n)'),
-		'priority': make_option('--priority', 
+									choices = ['y','Y','n','N'],
+									default = 'y',
+									help = 'default answer to confirmation question (y/n)'),
+		'priority': make_option('--priority',
 								choices=config.choices['priority'].values()),
 		'severity': make_option('-S', '--severity',
 								choices=config.choices['severity']),
@@ -632,42 +631,42 @@ class PrettyBugz(Bugz):
 		'comment_from': make_option('-F', '--comment-from',
 									help = 'Add comment from file.  If -C is also specified, the editor will be opened with this file as its contents.'),
 		'comment_editor': make_option('-C', '--comment-editor',
-									  action='store_true', default = False,
-									  help = 'Add comment via default editor'),
+									action='store_true', default = False,
+									help = 'Add comment via default editor'),
 		'comment': make_option('-c', '--comment', help = 'Add comment to bug'),
 		'url': make_option('-U', '--url', help = 'Set URL field of bug'),
 		'status': make_option('-s', '--status',
-							  choices=config.choices['status'].values(),
-							  help = 'Set new status of bug (eg. RESOLVED)'),
+									choices=config.choices['status'].values(),
+									help = 'Set new status of bug (eg. RESOLVED)'),
 		'resolution': make_option('-r', '--resolution',
-								  choices=config.choices['resolution'].values(),
-								  help = 'Set new resolution (only if status = RESOLVED)'),
+									choices=config.choices['resolution'].values(),
+									help = 'Set new resolution (only if status = RESOLVED)'),
 		'assigned_to': make_option('-a', '--assigned-to'),
 		'duplicate': make_option('-d', '--duplicate', type='int', default=0),
-		'priority': make_option('--priority', 
+		'priority': make_option('--priority',
 								choices=config.choices['priority'].values()),
 		'severity': make_option('-S', '--severity',
 								choices=config.choices['severity']),
 		'fixed': make_option('--fixed', action='callback',
-							 callback = modify_opt_fixed,
-							 help = "Mark bug as RESOLVED, FIXED"),
+								callback = modify_opt_fixed,
+								help = "Mark bug as RESOLVED, FIXED"),
 		'invalid': make_option('--invalid', action='callback',
-							   callback = modify_opt_invalid,
-							   help = "Mark bug as RESOLVED, INVALID"),
+								callback = modify_opt_invalid,
+								help = "Mark bug as RESOLVED, INVALID"),
 		'add_cc': make_option('--add-cc', action = 'append',
-							  help = 'Add an email to the CC list'),
+								help = 'Add an email to the CC list'),
 		'remove_cc': make_option('--remove-cc', action = 'append',
-								 help = 'Remove an email from the CC list'),
+								help = 'Remove an email from the CC list'),
 		'add_dependson': make_option('--add-dependson', action = 'append',
-							  help = 'Add a bug to the depends list'),
+								help = 'Add a bug to the depends list'),
 		'remove_dependson': make_option('--remove-dependson', action = 'append',
-								 help = 'Remove a bug from the depends list'),
+								help = 'Remove a bug from the depends list'),
 		'add_blocked': make_option('--add-blocked', action = 'append',
-							  help = 'Add a bug to the blocked list'),
+								help = 'Add a bug to the blocked list'),
 		'remove_blocked': make_option('--remove-blocked', action = 'append',
-								 help = 'Remove a bug from the blocked list'),
+								help = 'Remove a bug from the blocked list'),
 		'whiteboard': make_option('-w', '--whiteboard',
-								  help = 'Set Status whiteboard'),
+								help = 'Set Status whiteboard'),
 		'keywords': make_option('-k', '--keywords',
 								help = 'Set bug keywords'),
 		}
@@ -710,7 +709,7 @@ class PrettyBugz(Bugz):
 		if not description:
 			description = block_edit('Enter description (optional)')
 		result = Bugz.attach(self, bugid, filename, description, filename,
-							 content_type)
+				content_type)
 
 	attach.args = "<bugid> <filename> [-c=<mimetype>] [-d=<description>]"
 	attach.options = {
@@ -789,8 +788,8 @@ class PrettyBugz(Bugz):
 									   "args", "[options]")
 				"""
 				parser = OptionParser(usage = '%%prog %s %s' % (cmd,cmd_args),
-									  description = cmd_desc,
-									  option_list = cmd_options)
+						description = cmd_desc,
+						option_list = cmd_options)
 				print 'Subcommand Options for %s:' % cmd
 				parser.print_help()
 			except:

@@ -41,7 +41,7 @@ class LaxOptionParser(OptionParser):
 						self.error("%s option requires an argument" % opt)
 					else:
 						self.error("%s option requires %d arguments"
-								   % (opt, nargs))
+								% (opt, nargs))
 				elif nargs == 1:
 					value = rargs.pop(0)
 				else:

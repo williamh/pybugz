@@ -47,7 +47,7 @@ def main():
 
 		# parse options
 		parser = OptionParser(usage = '%%prog %s %s' % (cmd, cmd_args),
-							  description = cmd_func.__doc__)
+				description = cmd_func.__doc__)
 
 		for x in cmd_options.values():
 			parser.add_option(x)

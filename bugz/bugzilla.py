@@ -144,7 +144,7 @@ class Bugz:
 	"""
 
 	def __init__(self, base, user = None, password = None, forget = False,
-				 always_auth = False, httpuser = None, httppassword = None ):
+			always_auth = False, httpuser = None, httppassword = None ):
 		"""
 		{user} and {password} will be prompted if an action needs them
 		and they are not supplied.
@@ -303,10 +303,10 @@ class Bugz:
 		return results
 
 	def search(self, query, comments = False, order = 'number',
-			   assigned_to = None, reporter = None, cc = None,
-			   commenter = None, whiteboard = None, keywords = None,
-			   status = [], severity = [], priority = [], product = [],
-			   component = []):
+			assigned_to = None, reporter = None, cc = None,
+			commenter = None, whiteboard = None, keywords = None,
+			status = [], severity = [], priority = [], product = [],
+			component = []):
 		"""Search bugzilla for a bug.
 
 		@param query: query string to search in title or {comments}.
@@ -317,7 +317,7 @@ class Bugz:
 		@keyword assigned_to: email address which the bug is assigned to.
 		@type    assigned_to: string
 		@keyword reporter: email address matching the bug reporter.
-		@type    reporter: string 
+		@type    reporter: string
 		@keyword cc: email that is contained in the CC list
 		@type    cc: string
 		@keyword commenter: email of a commenter.
@@ -385,7 +385,7 @@ class Bugz:
 				qparams['emaillongdesc%d' % n] = int(e == commenter)
 		else:
 			raise AssertionError('Cannot set assigned_to, cc, and '
-								 'reporter in the same query')
+					'reporter in the same query')
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base, config.urls['list'])
@@ -399,7 +399,7 @@ class Bugz:
 
 	def namedcmd(self, cmd):
 		"""Run command stored in Bugzilla by name.
- 
+
 		@return: Result from the stored command.
 		@rtype: list of dicts
 		"""
@@ -423,7 +423,7 @@ class Bugz:
 		resp = self.opener.open(req)
 
 		return self.extractResults(resp)
- 
+
 	def get(self, bugid):
 		"""Get an ElementTree representation of a bug.
 
@@ -458,13 +458,13 @@ class Bugz:
 			return etree
 
 	def modify(self, bugid, title = None, comment = None, url = None,
-			   status = None, resolution = None, 
-			   assigned_to = None, duplicate = 0,
-			   priority = None, severity = None,
-			   add_cc = [], remove_cc = [],
-			   add_dependson = [], remove_dependson = [],
-			   add_blocked = [], remove_blocked = [],
-			   whiteboard = None, keywords = None):
+			status = None, resolution = None,
+			assigned_to = None, duplicate = 0,
+			priority = None, severity = None,
+			add_cc = [], remove_cc = [],
+			add_dependson = [], remove_dependson = [],
+			add_blocked = [], remove_blocked = [],
+			whiteboard = None, keywords = None):
 		"""Modify an existing bug
 
 		@param bugid: bug id
@@ -523,9 +523,9 @@ class Bugz:
 
 		# copy existing fields
 		FIELDS = ('bug_file_loc', 'bug_severity', 'short_desc', 'bug_status',
-				  'status_whiteboard', 'keywords',
-				  'op_sys', 'priority', 'version', 'target_milestone',
-				  'assigned_to', 'rep_platform', 'product', 'component')
+				'status_whiteboard', 'keywords',
+				'op_sys', 'priority', 'version', 'target_milestone',
+				'assigned_to', 'rep_platform', 'product', 'component')
 
 		FIELDS_MULTI = ('blocked', 'dependson')
 
@@ -758,7 +758,7 @@ class Bugz:
 		return 0
 
 	def attach(self, bugid, title, description, filename,
-			   content_type = 'text/plain'):
+			content_type = 'text/plain'):
 		"""Attach a file to a bug.
 
 		@param bugid: bug id
@@ -786,7 +786,7 @@ class Bugz:
 
 		filedata = [('data', filename, open(filename).read())]
 		content_type, body = encode_multipart_formdata(qparams.items(),
-													   filedata)
+				filedata)
 
 		req_headers = config.headers.copy()
 		req_headers['Content-type'] = content_type
