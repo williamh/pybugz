@@ -1,18 +1,10 @@
 #!/usr/bin/env python
 
+from bugz import __version__
 import csv
 import locale
 
-__version__ = '0.7.4'
-__author__ = 'Alastair Tse <http://www.liquidx.net/>'
-__contributors__ = ['Santiago M. Mola <cooldwind@gmail.com']
-__revision__ = '$Id: $'
-__license__ = """Copyright (c) 2006, Alastair Tse, All rights reserved.
-This following source code is licensed under the GPL v2 License."""
-
 BUGZ_USER_AGENT = 'PyBugz/%s +http://www.github.com/ColdWind/pybugz/' % __version__
-
-CONFIG_FILE = '.bugz'
 
 class BugzConfig:
 	urls = {
