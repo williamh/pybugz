@@ -387,7 +387,7 @@ class PrettyBugz(Bugz):
 
 	def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
 			cc = None, url = None, keywords = None, emerge_info = False,
-			description_from = None, pversion = None, append_command = None,
+			description_from = None, prodversion = None, append_command = None,
 			dependson = None, blocked = None, no_confirm = False,
 			no_append_command = False, default_confirm = 'y',
 			priority = None, severity = None):
@@ -414,10 +414,10 @@ class PrettyBugz(Bugz):
 
 		# check for version
 		# FIXME: This default behaviour is not too nice.
-		if pversion is None:
-			pversion = self.get_input('Enter version (default: unspecified): ')
+		if prodversion is None:
+			prodversion = self.get_input('Enter version (default: unspecified): ')
 		else:
-			self.log('Enter version: %s' % pversion)
+			self.log('Enter version: %s' % prodversion)
 
 		# check for component
 		if not component:
@@ -545,7 +545,7 @@ class PrettyBugz(Bugz):
 				self.log('Submission aborted')
 				return
 
-		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, pversion, dependson, blocked, priority, severity)
+		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, prodversion, dependson, blocked, priority, severity)
 		if result != None:
 			self.log('Bug %d submitted' % result)
 		else:
@@ -555,7 +555,8 @@ class PrettyBugz(Bugz):
 	post.options = {
 		'product': make_option('--product', help = 'Product'),
 		'component': make_option('--component', help = 'Component'),
-		'pversion': make_option('--pversion', help = 'Version of the product'),
+		'prodversion': make_option('--prodversion',
+									help = 'Version of the product'),
 		'title': make_option('-t', '--title', help = 'Title of bug'),
 		'description': make_option('-d', '--description',
 									help = 'Description of the bug'),
