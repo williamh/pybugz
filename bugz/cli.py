@@ -252,7 +252,7 @@ class PrettyBugz(Bugz):
 								help = 'Restrict by priority (1 or more)'),
 		'comments': make_option('-c', '--comments',  action='store_true',
 								help = 'Search comments instead of title'),
-		'product': make_option('-P', '--product', action='append',
+		'product': make_option('--product', action='append',
 								help = 'Restrict by product (1 or more)'),
 		'component': make_option('-C', '--component', action='append',
 								help = 'Restrict by component (1 or more)'),
@@ -387,7 +387,7 @@ class PrettyBugz(Bugz):
 
 	def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
 			cc = None, url = None, keywords = None, emerge_info = False,
-			description_from = None, version = None, append_command = None,
+			description_from = None, pversion = None, append_command = None,
 			dependson = None, blocked = None, no_confirm = False,
 			no_append_command = False, default_confirm = 'y',
 			priority = None, severity = None):
@@ -414,10 +414,10 @@ class PrettyBugz(Bugz):
 
 		# check for version
 		# FIXME: This default behaviour is not too nice.
-		if version is None:
-			version = self.get_input('Enter version (default: unspecified): ')
+		if pversion is None:
+			pversion = self.get_input('Enter version (default: unspecified): ')
 		else:
-			self.log('Enter version: %s' % version)
+			self.log('Enter version: %s' % pversion)
 
 		# check for component
 		if not component:
@@ -545,7 +545,7 @@ class PrettyBugz(Bugz):
 				self.log('Submission aborted')
 				return
 
-		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, version, dependson, blocked, priority, severity)
+		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, pversion, dependson, blocked, priority, severity)
 		if result != None:
 			self.log('Bug %d submitted' % result)
 		else:
@@ -555,7 +555,7 @@ class PrettyBugz(Bugz):
 	post.options = {
 		'product': make_option('--product', help = 'Product'),
 		'component': make_option('--component', help = 'Component'),
-		'version': make_option('--version', help = 'Version of the component'),
+		'pversion': make_option('--pversion', help = 'Version of the product'),
 		'title': make_option('-t', '--title', help = 'Title of bug'),
 		'description': make_option('-d', '--description',
 									help = 'Description of the bug'),
@@ -739,58 +739,25 @@ class PrettyBugz(Bugz):
 				print line[:self.columns]
 
 	@classmethod
-	def usage(self, cmd = None):
+	def help(self):
 		print 'Usage: bugz <subcommand> [parameter(s)] [options..]'
 		print
-		print 'Options:'
-		print '  -b, --base <bugzilla_url>    Bugzilla base URL'
-		print '  -u, --user <username>        User name (if required)'
-		print '  -p, --password <password>    Password (if required)'
-		print '  -H, --httpuser <username>       Basic http auth User name (if required)'
-		print '  -P, --httppassword <password>   Basic http auth Password (if required)'
-		print '  -f, --forget                 Do not remember authentication'
-		print '  --columns <columns>          Number of columns to use when'
-		print '                               displaying output'
-		print '  -A, --always-auth            Authenticate on every command.'
-		print '  -q, --quiet                  Do not display status messages.'
+		print 'Subcommands:'
+		print '  search      Search for bugs in bugzilla'
+		print '  get         Get a bug from bugzilla'
+		print '  attachment  Get an attachment from bugzilla'
+		print '  post        Post a new bug into bugzilla'
+		print '  modify      Modify a bug (eg. post a comment)'
+		print '  attach      Attach file to a bug'
+		print '  namedcmd    Run a stored search,'
 		print
-
-		if cmd == None:
-			print 'Subcommands:'
-			print '  search      Search for bugs in bugzilla'
-			print '  get         Get a bug from bugzilla'
-			print '  attachment  Get an attachment from bugzilla'
-			print '  post        Post a new bug into bugzilla'
-			print '  modify      Modify a bug (eg. post a comment)'
-			print '  attach      Attach file to a bug'
-			print '  namedcmd    Run a stored search,'
-			print
-			print 'Examples:'
-			print '  bugz get 12345'
-			print '  bugz search python --assigned-to liquidx@gentoo.org'
-			print '  bugz attachment 5000 --view'
-			print '  bugz attach 140574 python-2.4.3.ebuild'
-			print '  bugz modify 140574 -c "Me too"'
-			print '  bugz namedcmd "Amd64 stable"'
-			print
-			print 'For more information on subcommands, run:'
-			print '  bugz <subcommand> --help'
-		else:
-			try:
-				cmd_options = getattr(self, cmd).options.values()
-				cmd_args = getattr(self, cmd).args
-				cmd_desc = getattr(self, cmd).__doc__
-				"""
-				if getattr(PrettyBugz, cmd):
-					cmd_options = getattr(getattr(PrettyBugz, cmd),
-										  "options", {})
-					cmd_args = getattr(getattr(PrettyBugz, cmd),
-									   "args", "[options]")
-				"""
-				parser = OptionParser(usage = '%%prog %s %s' % (cmd,cmd_args),
-						description = cmd_desc,
-						option_list = cmd_options)
-				print 'Subcommand Options for %s:' % cmd
-				parser.print_help()
-			except:
-				print 'Unknown subcommand: %s' % cmd
+		print 'Examples:'
+		print '  bugz get 12345'
+		print '  bugz search python --assigned-to liquidx@gentoo.org'
+		print '  bugz attachment 5000 --view'
+		print '  bugz attach 140574 python-2.4.3.ebuild'
+		print '  bugz modify 140574 -c "Me too"'
+		print '  bugz namedcmd "Amd64 stable"'
+		print
+		print 'For more information on subcommands, run:'
+		print '  bugz <subcommand> --help'

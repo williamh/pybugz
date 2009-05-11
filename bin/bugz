@@ -2,101 +2,89 @@
 
 import locale
 import sys
+import traceback
 
-from laxoptionparser import LaxOptionParser
 from optparse import OptionParser
 
-from bugz import cli
+from bugz import cli, __version__
 from bugz.cli import BugzError, PrettyBugz
 
 def main():
 	if len(sys.argv) < 2:
-		PrettyBugz.usage()
+		PrettyBugz.help()
 		sys.exit(-1)
 
-	try:
-		# do one global option search first to find those options
-		# that are global across all sub commands.
-		global_opts = PrettyBugz.options
-		global_parser = LaxOptionParser(add_help_option = False)
+	cmd = sys.argv[1]
 
-		for x in global_opts.values():
-			global_parser.add_option(x)
+	global_opts = PrettyBugz.options
+	parser = OptionParser(version = '%%prog %s' % __version__)
 
-		gopts, gargs = global_parser.parse_args()
-		if gargs:
-			cmd = gargs[0]
-		else:
-			PrettyBugz.usage()
-			sys.exit(0)
+	for x in global_opts.values():
+		parser.add_option(x)
 
-		# gather options
-		cmd_options = {}
-		cmd_args = ''
-		cmd_func = getattr(PrettyBugz, cmd, None)
+	cmd_func = getattr(PrettyBugz, cmd, None)
+	cmd_options = {}
+	cmd_args = ''
+	if cmd_func:
+		cmd_options = getattr(cmd_func, "options", {})
+		cmd_args = getattr(cmd_func, "args", "[options]")
+		parser.set_description(cmd_func.__doc__)
+		parser.set_usage('%%prog %s %s' % (cmd, cmd_args))
+	else:
+		print '!! Error: Unable to recognise command: %s' % cmd
+		print
+		PrettyBugz.help()
+		sys.exit(-1)
 
-		if cmd_func:
-			cmd_options = getattr(cmd_func, "options", {})
-			cmd_args = getattr(cmd_func, "args", "[options]")
-		else:
-			if not cmd == "--help" and not cmd == "-h":
-				print '!! Error: Unable to recognise command: %s' % cmd
-				print
-			PrettyBugz.usage()
-			sys.exit(-1)
+	for x in cmd_options.values():
+		parser.add_option(x)
 
-		# parse options
-		parser = OptionParser(usage = '%%prog %s %s' % (cmd, cmd_args),
-				description = cmd_func.__doc__)
+	# parse options
+	opts, args = parser.parse_args(sys.argv[2:])
 
-		for x in cmd_options.values():
-			parser.add_option(x)
-
-		opts, args = parser.parse_args(gargs[1:])
-
-		# separate bugz options and cmd options
-		bugz_kwds = {}
-		for name, opt in global_opts.items():
-			try:
-				bugz_kwds[name] = getattr(gopts, name)
-			except AttributeError:
-				pass
-
-		cmd_kwds = {}
-		for name, opt in cmd_options.items():
-			try:
-				cmd_kwds[name] = getattr(opts, name)
-			except AttributeError:
-				pass
-
+	# separate bugz options and cmd options
+	bugz_kwds = {}
+	for name, opt in global_opts.items():
 		try:
-			bugz = PrettyBugz(**bugz_kwds)
-			getattr(bugz, cmd)(*args, **cmd_kwds)
-		except BugzError, e:
-			print ' ! Error: %s' % e
-			print
-			parser.print_help()
-			sys.exit(-1)
-		except TypeError, e:
-			print ' ! Error: Incorrect number of arguments supplied'
-			print
-			import traceback
-			traceback.print_exc()
-			parser.print_help()
-			sys.exit(-1)
-		except RuntimeError, e:
-			print ' ! Error: %s' % e
-			sys.exit(-1)
+			bugz_kwds[name] = getattr(opts, name)
+		except AttributeError:
+			pass
+
+	cmd_kwds = {}
+	for name, opt in cmd_options.items():
+		try:
+			cmd_kwds[name] = getattr(opts, name)
+		except AttributeError:
+			pass
+
+	try:
+		bugz = PrettyBugz(**bugz_kwds)
+		getattr(bugz, cmd)(*args, **cmd_kwds)
+
+	except BugzError, e:
+		print ' ! Error: %s' % e
+		print
+		parser.print_help()
+		sys.exit(-1)
+
+	except TypeError, e:
+		print ' ! Error: Incorrect number of arguments supplied'
+		print
+		traceback.print_exc()
+		parser.print_help()
+		sys.exit(-1)
+
+	except RuntimeError, e:
+		print ' ! Error: %s' % e
+		sys.exit(-1)
 
 	except KeyboardInterrupt:
 		print
 		print 'Stopped.'
 		sys.exit(-1)
+
 	except:
 		raise
 
 if __name__ == "__main__":
-	try:
-		main()
-	except KeyboardInterrupt:
-		print '\n ! Exiting.'
+	main()
