@@ -385,87 +385,13 @@ class PrettyBugz(Bugz):
 								help = 'Do not show comments'),
 	}
 
-	def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
+	def post(self, product = None, component = None,
+			title = None, description = None, assigned_to = None,
 			cc = None, url = None, keywords = None,
 			description_from = None, prodversion = None, append_command = None,
-			dependson = None, blocked = None, no_confirm = False,
-			no_append_command = False, default_confirm = 'y',
-			priority = None, severity = None):
+			dependson = None, blocked = None, batch = False,
+			default_confirm = 'y', priority = None, severity = None):
 		"""Post a new bug"""
-		# As we are submitting something, we should really
-		# grab entry from console rather than from the command line:
-		if not self.authenticated:
-			self.auth()
-
-		self.log('Press Ctrl+C at any time to abort.')
-
-		#
-		#  Check all bug fields.
-		#  XXX: We use "if not <field>" for mandatory fields
-		#       and "if <field> is None" for optional ones.
-		#
-
-		# check for product
-		if not product:
-			while not product or len(product) < 1:
-				product = self.get_input('Enter product: ')
-		else:
-			self.log('Enter product: %s' % product)
-
-		# check for version
-		# FIXME: This default behaviour is not too nice.
-		if prodversion is None:
-			prodversion = self.get_input('Enter version (default: unspecified): ')
-		else:
-			self.log('Enter version: %s' % prodversion)
-
-		# check for component
-		if not component:
-			while not component or len(component) < 1:
-				component = self.get_input('Enter component: ')
-		else:
-			self.log('Enter component: %s' % component)
-
-		# check for default priority
-		if priority is None:
-			priority_msg ='Enter priority (eg. P2) (optional): '
-			priority = self.get_input(priority_msg)
-		else:
-			self.log('Enter priority (optional): %s' % priority)
-
-		# check for default severity
-		if severity is None:
-			severity_msg ='Enter severity (eg. normal) (optional): '
-			severity = self.get_input(severity_msg)
-		else:
-			self.log('Enter severity (optional): %s' % severity)
-
-		# check for default assignee
-		if assigned_to is None:
-			assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
-			assigned_to = self.get_input(assigned_msg)
-		else:
-			self.log('Enter assignee (optional): %s' % assigned_to)
-
-		# check for CC list
-		if cc is None:
-			cc_msg = 'Enter a CC list (comma separated) (optional): '
-			cc = self.get_input(cc_msg)
-		else:
-			self.log('Enter a CC list (optional): %s' % cc)
-
-		# check for optional URL
-		if url is None:
-			url = self.get_input('Enter URL (optional): ')
-		else:
-			self.log('Enter URL (optional): %s' % url)
-
-		# check for title
-		if not title:
-			while not title or len(title) < 1:
-				title = self.get_input('Enter title: ')
-		else:
-			self.log('Enter title: %s' % title)
 
 		# load description from file if possible
 		if description_from:
@@ -475,47 +401,148 @@ class PrettyBugz(Bugz):
 				raise BugzError('Unable to read from file: %s: %s' % \
 								(description_from, e))
 
-		# check for description
-		if not description:
-			description = block_edit('Enter bug description: ')
-		else:
-			self.log('Enter bug description: %s' % description)
+		if not batch:
+			self.log('Press Ctrl+C at any time to abort.')
 
-		if not no_append_command:
+			#
+			#  Check all bug fields.
+			#  XXX: We use "if not <field>" for mandatory fields
+			#       and "if <field> is None" for optional ones.
+			#
+
+			# check for product
+			if not product:
+				while not product or len(product) < 1:
+					product = self.get_input('Enter product: ')
+			else:
+				self.log('Enter product: %s' % product)
+
+			# check for version
+			# FIXME: This default behaviour is not too nice.
+			if prodversion is None:
+				prodversion = self.get_input('Enter version (default: unspecified): ')
+			else:
+				self.log('Enter version: %s' % prodversion)
+
+			# check for component
+			if not component:
+				while not component or len(component) < 1:
+					component = self.get_input('Enter component: ')
+			else:
+				self.log('Enter component: %s' % component)
+
+			# check for default priority
+			if priority is None:
+				priority_msg ='Enter priority (eg. P2) (optional): '
+				priority = self.get_input(priority_msg)
+			else:
+				self.log('Enter priority (optional): %s' % priority)
+
+			# check for default severity
+			if severity is None:
+				severity_msg ='Enter severity (eg. normal) (optional): '
+				severity = self.get_input(severity_msg)
+			else:
+				self.log('Enter severity (optional): %s' % severity)
+
+			# check for default assignee
+			if assigned_to is None:
+				assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
+				assigned_to = self.get_input(assigned_msg)
+			else:
+				self.log('Enter assignee (optional): %s' % assigned_to)
+
+			# check for CC list
+			if cc is None:
+				cc_msg = 'Enter a CC list (comma separated) (optional): '
+				cc = self.get_input(cc_msg)
+			else:
+				self.log('Enter a CC list (optional): %s' % cc)
+
+			# check for optional URL
+			if url is None:
+				url = self.get_input('Enter URL (optional): ')
+			else:
+				self.log('Enter URL (optional): %s' % url)
+
+			# check for title
+			if not title:
+				while not title or len(title) < 1:
+					title = self.get_input('Enter title: ')
+			else:
+				self.log('Enter title: %s' % title)
+
+			# check for description
+			if not description:
+				description = block_edit('Enter bug description: ')
+			else:
+				self.log('Enter bug description: %s' % description)
+
 			if append_command is None:
 				append_command = self.get_input('Append the output of the following command (leave blank for none): ')
 			else:
 				self.log('Append command (optional): %s' % append_command)
 
-			if append_command is not None and append_command != '':
-				append_command_output = commands.getoutput(append_command)
-				description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
+			# check for Keywords list
+			if keywords is None:
+				kwd_msg = 'Enter a Keywords list (comma separated) (optional): '
+				keywords = self.get_input(kwd_msg)
+			else:
+				self.log('Enter a Keywords list (optional): %s' % keywords)
 
-		# check for Keywords list
+			# check for bug dependencies
+			if dependson is None:
+				dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional): '
+				dependson = self.get_input(dependson_msg)
+			else:
+				self.log('Enter a list of bug dependencies (optional): %s' % dependson)
+
+			# check for blocker bugs
+			if blocked is None:
+				blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional): '
+				blocked = self.get_input(blocked_msg)
+			else:
+				self.log('Enter a list of blocker bugs (optional): %s' % blocked)
+
+		# append the output from append_command to the description
+		if append_command is not None and append_command != '':
+			append_command_output = commands.getoutput(append_command)
+			description = description + '\n\n' + '$ ' + append_command + '\n' +  append_command_output
+
+		# raise an exception if mandatory fields are not specified.
+		if product is None:
+			raise RuntimeError('Product not specified')
+		if component is None:
+			raise RuntimeError('Component not specified')
+		if title is None:
+			raise RuntimeError('Title not specified')
+		if description is None:
+			raise RuntimeError('Description not specified')
+
+		# set optional fields to their defaults if they are not set.
+		if prodversion is None:
+			prodversion = ''
+		if priority is None:
+			priority = ''
+		if severity is None:
+			severity = ''
+		if assigned_to is None:
+			assigned_to = ''
+		if cc is None:
+			cc = ''
+		if url is None:
+			url = ''
 		if keywords is None:
-			kwd_msg = 'Enter a Keywords list (comma separated) (optional): '
-			keywords = self.get_input(kwd_msg)
-		else:
-			self.log('Enter a Keywords list (optional): %s' % keywords)
-
-		# check for bug dependencies
+			keywords = ''
 		if dependson is None:
-			dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional): '
-			dependson = self.get_input(dependson_msg)
-		else:
-			self.log('Enter a list of bug dependencies (optional): %s' % dependson)
-
-		# check for blocker bugs
+			dependson = ''
 		if blocked is None:
-			blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional): '
-			blocked = self.get_input(blocked_msg)
-		else:
-			self.log('Enter a list of blocker bugs (optional): %s' % blocked)
+			blocked = ''
 
 		# print submission confirmation
 		print '-' * (self.columns - 1)
 		print 'Product     : ' + product
-		print 'Version     : ' + version
+		print 'Version     : ' + prodversion
 		print 'Component   : ' + component
 		print 'priority    : ' + priority
 		print 'severity    : ' + severity
@@ -529,7 +556,7 @@ class PrettyBugz(Bugz):
 		print 'Blocks      : ' + blocked
 		print '-' * (self.columns - 1)
 
-		if not no_confirm:
+		if not batch:
 			if default_confirm in ['Y','y']:
 				confirm = raw_input('Confirm bug submission (Y/n)? ')
 			else:
@@ -539,6 +566,9 @@ class PrettyBugz(Bugz):
 			if confirm[0] not in ('y', 'Y'):
 				self.log('Submission aborted')
 				return
+
+		if not self.authenticated:
+			self.auth()
 
 		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, prodversion, dependson, blocked, priority, severity)
 		if result != None:
@@ -569,11 +599,8 @@ class PrettyBugz(Bugz):
 		'dependson': make_option('--depends-on', dest='dependson', help = 'Add a list of bug dependencies'),
 		'blocked': make_option('--blocked', help = 'Add a list of blocker bugs'),
 		'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
-		'no_confirm': make_option('--no-confirm', action="store_true",
-									help = 'Do not confirm bug submission'),
-		'no_append_command': make_option('--no-append-command',
-									action="store_true",
-									help = 'do not ask about appending command output'),
+		'batch': make_option('--batch', action="store_true",
+									help = 'do not prompt for any values'),
 		'default_confirm': make_option('--default-confirm',
 									choices = ['y','Y','n','N'],
 									default = 'y',
