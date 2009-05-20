@@ -386,7 +386,7 @@ class PrettyBugz(Bugz):
 	}
 
 	def post(self, product = None, component = None, title = None, description = None, assigned_to = None,
-			cc = None, url = None, keywords = None, emerge_info = False,
+			cc = None, url = None, keywords = None,
 			description_from = None, prodversion = None, append_command = None,
 			dependson = None, blocked = None, no_confirm = False,
 			no_append_command = False, default_confirm = 'y',
@@ -481,11 +481,6 @@ class PrettyBugz(Bugz):
 		else:
 			self.log('Enter bug description: %s' % description)
 
-		#FIXME: Remove in 0.8
-		if emerge_info is True:
-			self.warn('--emerge-info is deprecated. Please, use --append-command.')
-			append_command = 'emerge --ignore-default-opts --info'
-
 		if not no_append_command:
 			if append_command is None:
 				append_command = self.get_input('Append the output of the following command (leave blank for none): ')
@@ -563,8 +558,6 @@ class PrettyBugz(Bugz):
 		'description_from': make_option('-F' , '--description-from',
 									help = 'Description from contents of'
 									' file'),
-		'emerge_info': make_option('-e', '--emerge-info', action="store_true",
-									help = 'Include emerge --info (DEPRECATED, use --append-command)'),
 		'append_command': make_option('--append-command',
 									help = 'Append the output of a command to the description.'),
 		'assigned_to': make_option('-a', '--assigned-to',
