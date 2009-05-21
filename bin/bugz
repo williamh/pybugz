@@ -43,7 +43,7 @@ def main():
 		parser.add_option(x)
 
 	# parse options
-	opts, args = parser.parse_args()
+	opts, args = parser.parse_args(sys.argv[2:])
 
 	# separate bugz options and cmd options
 	bugz_kwds = {}
