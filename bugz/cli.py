@@ -571,7 +571,7 @@ class PrettyBugz(Bugz):
 			self.auth()
 
 		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, prodversion, dependson, blocked, priority, severity)
-		if result != None:
+		if result != None and result != 0:
 			self.log('Bug %d submitted' % result)
 		else:
 			raise RuntimeError('Failed to submit bug')
