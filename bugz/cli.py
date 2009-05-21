@@ -742,7 +742,6 @@ class PrettyBugz(Bugz):
 	}
 
 	def listbugs(self, buglist, show_url = False):
-		self.log("%i bug(s) found." % len(buglist))
 		for row in buglist:
 			desc = row['desc']
 			bugid = row['bugid']
@@ -758,6 +757,8 @@ class PrettyBugz(Bugz):
 				print line.encode(self.enc)[:self.columns]
 			except UnicodeDecodeError:
 				print line[:self.columns]
+
+		self.log("%i bug(s) found." % len(buglist))
 
 	@classmethod
 	def help(self):
