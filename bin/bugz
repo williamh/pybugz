@@ -30,7 +30,10 @@ def main():
 		cmd_args = getattr(cmd_func, "args", "[options]")
 		parser.set_description(cmd_func.__doc__)
 		parser.set_usage('%%prog %s %s' % (cmd, cmd_args))
-	else:
+	elif cmd == '--help' or cmd == '-h':
+		PrettyBugz.help()
+		sys.exit(0)
+	elif cmd != '--version':
 		print '!! Error: Unable to recognise command: %s' % cmd
 		print
 		PrettyBugz.help()
@@ -40,7 +43,7 @@ def main():
 		parser.add_option(x)
 
 	# parse options
-	opts, args = parser.parse_args(sys.argv[2:])
+	opts, args = parser.parse_args()
 
 	# separate bugz options and cmd options
 	bugz_kwds = {}
