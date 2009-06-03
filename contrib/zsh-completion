@@ -141,7 +141,7 @@ _bugz_cmd_search()
     '(--keywords= -k)'{--keywords=,-k}'[bug keywords]:keywords: ' \
     '--severity=[restrict by severity]:severity: ' \
     '(--status= -s)'{--status=,-s}'[bug status]:status: ' \
-    '(--order= -o)'{--order=,-o} \
+    '(--order= -o)'{--order=,-o}'[sort by]:order:((number\:"bug number" assignee\:"assignee field" importance\:"importance field" date\:"last changed"))' \
     '--priority=[restrict by priority]:priority: ' \
     '(--product= -P)'{--product=,-P}'[restrict by product]:product: ' \
     '(--reporter= -r)'{--reporter=,-r}'[email of the reporter]:email: ' \
