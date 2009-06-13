@@ -21,6 +21,7 @@ _bugz() {
     'attach:attach file to a bug'
     'attachment:get an attachment from bugzilla'
     'get:get a bug from bugzilla'
+    'help:display subcommands'
     'modify:modify a bug (eg. post a comment)'
     'namedcmd:run a stored search'
     'post:post a new bug into bugzilla'
@@ -114,7 +115,7 @@ _bugz_cmd_post()
 {
   _arguments -s : \
     '(--assigned-to= -a)'{--assigned-to=,-a}'[assign bug to someone other than the default assignee]:assignee: ' \
-    '(--no-append-command)--append-command[append the output of a command to the description]:command:_command' \
+    '--batch[work in batch mode, non-interactively]' \
     '--blocked[add a list of blocker bugs]:blockers: ' \
     '--cc=[add a list of emails to cc list]:email(s): ' \
     '--commenter[email of a commenter]:email: ' \
@@ -123,7 +124,6 @@ _bugz_cmd_post()
     '(--description-from= -F)'{--description-from=,-f}'[description from contents of a file]:file:_files' \
     '--help[show help message and exit]' \
     '(--keywords= -k)'{--keywords=,-k}'[list of bugzilla keywords]:keywords: ' \
-    '--no-confirm[do not confirm bug submission]' \
     '(--append-command)--no-append-command[do not append command output]' \
     '(--title= -t)'{--title=,-t}'[title of your bug]:title: ' \
     '(--url= -U)'{--url=,-U}'[URL associated with the bug]:url: ' \
@@ -147,7 +147,7 @@ _bugz_cmd_search()
     '(--status= -s)'{--status=,-s}'[bug status]:status: ' \
     '(--order= -o)'{--order=,-o}'[sort by]:order:((number\:"bug number" assignee\:"assignee field" importance\:"importance field" date\:"last changed"))' \
     '--priority=[restrict by priority]:priority: ' \
-    '(--product= -P)'{--product=,-P}'[restrict by product]:product: ' \
+    '--product=[restrict by product]:product: ' \
     '(--reporter= -r)'{--reporter=,-r}'[email of the reporter]:email: ' \
     '(--whiteboard= -w)'{--whiteboard=,-w}'[status whiteboard]:status whiteboard: '
 }
