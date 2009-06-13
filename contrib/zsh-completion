@@ -125,7 +125,9 @@ _bugz_cmd_post()
     '--no-confirm[do not confirm bug submission]' \
     '(--append-command)--no-append-command[do not append command output]' \
     '(--title= -t)'{--title=,-t}'[title of your bug]:title: ' \
-    '(--url= -U)'{--url=,-U}'[URL associated with the bug]:url: '
+    '(--url= -U)'{--url=,-U}'[URL associated with the bug]:url: ' \
+    '--priority[priority of this bug]:priority: ' \
+    '--severity[severity of this bug]:severity: '
 }
 
 (( ${+functions[_bugz_cmd_search]} )) ||
