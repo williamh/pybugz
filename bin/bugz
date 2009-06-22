@@ -16,28 +16,30 @@ def main():
 
 	cmd = sys.argv[1]
 
-	global_opts = PrettyBugz.options
 	parser = OptionParser(version = '%%prog %s' % __version__)
 
+	global_opts = PrettyBugz.options
 	for x in global_opts.values():
 		parser.add_option(x)
 
-	cmd_func = getattr(PrettyBugz, cmd, None)
-	cmd_options = {}
-	cmd_args = ''
-	if cmd_func:
-		cmd_options = getattr(cmd_func, "options", {})
-		cmd_args = getattr(cmd_func, "args", "[options]")
-		parser.set_description(cmd_func.__doc__)
-		parser.set_usage('%%prog %s %s' % (cmd, cmd_args))
-	elif cmd == '--help' or cmd == '-h':
+	if cmd == '--help' or cmd == '-h':
 		PrettyBugz.help()
 		sys.exit(0)
-	elif cmd != '--version':
+	elif cmd == '--version' :
+		parser.print_version()
+		sys.exit(0)
+
+	cmd_func = getattr(PrettyBugz, cmd, None)
+	if cmd_func is None:
 		print '!! Error: Unable to recognise command: %s' % cmd
 		print
 		PrettyBugz.help()
 		sys.exit(-1)
+
+	cmd_options = getattr(cmd_func, "options", {})
+	cmd_args = getattr(cmd_func, "args", "[options]")
+	parser.set_description(cmd_func.__doc__)
+	parser.set_usage('%%prog %s %s' % (cmd, cmd_args))
 
 	for x in cmd_options.values():
 		parser.add_option(x)
