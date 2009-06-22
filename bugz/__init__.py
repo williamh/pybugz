@@ -20,7 +20,7 @@ Classes
 
 """
 
-__version__ = '0.7.4'
+__version__ = '0.8.0_rc1'
 __author__ = 'Alastair Tse <http://www.liquidx.net/>'
 __contributors__ = ['Santiago M. Mola <cooldwind@gmail.com']
 __revision__ = '$Id: $'
