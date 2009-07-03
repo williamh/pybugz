@@ -22,7 +22,7 @@ def main():
 	for x in global_opts.values():
 		parser.add_option(x)
 
-	if cmd == '--help' or cmd == '-h':
+	if cmd == '--help' or cmd == '-h' or cmd == 'help':
 		PrettyBugz.help()
 		sys.exit(0)
 	elif cmd == '--version' :
