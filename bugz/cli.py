@@ -567,9 +567,6 @@ class PrettyBugz(Bugz):
 				self.log('Submission aborted')
 				return
 
-		if not self.authenticated:
-			self.auth()
-
 		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, prodversion, dependson, blocked, priority, severity)
 		if result != None and result != 0:
 			self.log('Bug %d submitted' % result)
@@ -614,9 +611,6 @@ class PrettyBugz(Bugz):
 
 	def modify(self, bugid, **kwds):
 		"""Modify an existing bug (eg. adding a comment or changing resolution.)"""
-		if not self.authenticated:
-			self.auth()
-
 		if 'comment_from' in kwds:
 			if kwds['comment_from']:
 				try:
@@ -722,9 +716,6 @@ class PrettyBugz(Bugz):
 
 	def attach(self, bugid, filename, content_type = 'text/plain', description = None):
 		""" Attach a file to a bug given a filename. """
-		if not self.authenticated:
-			self.auth()
-
 		if not os.path.exists(filename):
 			raise BugzError('File not found: %s' % filename)
 		if not description:
