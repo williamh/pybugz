@@ -153,20 +153,20 @@ class PrettyBugz(Bugz):
 							help = 'Maximum number of columns output should use'),
 		'encoding': make_option('--encoding',
 							help = 'Output encoding (default: utf-8).'),
-		'always_auth': make_option('-A', '--always-auth', action='store_true',
-							default = False, help = 'Authenticated for every command.'),
+		'skip_auth': make_option('--skip-auth', action='store_true',
+							default = False, help = 'Skip Authentication.'),
 		'quiet': make_option('-q', '--quiet', action='store_true',
 							default = False, help = 'Quiet mode'),
 	}
 
 	def __init__(self, base, user = None, password =None, forget = False,
-			columns = 0, encoding = '', always_auth = False,
+			columns = 0, encoding = '', skip_auth = False,
 			quiet = False, httpuser = None, httppassword = None ):
 
 		self.quiet = quiet
 		self.columns = columns or terminal_width()
 
-		Bugz.__init__(self, base, user, password, forget, always_auth, httpuser, httppassword)
+		Bugz.__init__(self, base, user, password, forget, skip_auth, httpuser, httppassword)
 
 		self.log("Using %s " % self.base)
 

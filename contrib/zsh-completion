@@ -14,7 +14,7 @@ _bugz() {
     '(-P --httppassword)'{-P,--httppassword}'[basic http auth nassword (if required)]:nassword: '
     '(-f --forget)'{-f,--forget}'[do not remember authentication]'
     '--columns[number of columns to use when displaying output]:number: '
-    '(-A --always-auth)'{-A,--always-auth}'[authenticate on every command]'
+    '(--skip-auth)'{--skip-auth}'[do not authenticate]'
     '(-q --quiet)'{-q,--quiet}'[do not display status messages]'
   )
   _bugz_commands=(

@@ -144,7 +144,7 @@ class Bugz:
 	"""
 
 	def __init__(self, base, user = None, password = None, forget = False,
-			always_auth = False, httpuser = None, httppassword = None ):
+			skip_auth = False, httpuser = None, httppassword = None ):
 		"""
 		{user} and {password} will be prompted if an action needs them
 		and they are not supplied.
@@ -159,8 +159,8 @@ class Bugz:
 		@type    password: string
 		@keyword forget: forget login session after termination.
 		@type    forget: bool
-		@keyword always_auth: authenticate on every command
-		@type    always_auth: bool
+		@keyword skip_auth: do not authenticate
+		@type    skip_auth: bool
 		"""
 		self.base = base
 		scheme, self.host, self.path, query, frag  = urlsplit(self.base)
@@ -190,10 +190,7 @@ class Bugz:
 		self.password = password
 		self.httpuser = httpuser
 		self.httppassword = httppassword
-		self.always_auth = always_auth
-
-		if always_auth:
-			self.auth()
+		self.skip_auth = skip_auth
 
 	def log(self, status_msg):
 		"""Default logging handler. Expected to be overridden by
@@ -346,7 +343,7 @@ class Bugz:
 		@rtype: list of dicts
 		"""
 
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 		qparams = config.params['list'].copy()
@@ -404,7 +401,7 @@ class Bugz:
 		@rtype: list of dicts
 		"""
 
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 		qparams = config.params['namedcmd'].copy()
@@ -432,7 +429,7 @@ class Bugz:
 
 		@rtype: ElementTree
 		"""
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 		qparams = config.params['show'].copy()
@@ -508,7 +505,7 @@ class Bugz:
 		@return: list of fields modified.
 		@rtype: list of strings
 		"""
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 
@@ -655,7 +652,7 @@ class Bugz:
 		@return: dict with three keys, 'filename', 'size', 'fd'
 		@rtype: dict
 		"""
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 		qparams = config.params['attach'].copy()
@@ -712,7 +709,7 @@ class Bugz:
 		@rtype: int
 		@return: the bug number, or 0 if submission failed.
 		"""
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 		qparams = config.params['post'].copy()
@@ -775,7 +772,7 @@ class Bugz:
 		@rtype: bool
 		@return: True if successful, False if not successful.
 		"""
-		if not self.authenticated:
+		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
 		qparams = config.params['attach_post'].copy()
