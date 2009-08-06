@@ -551,6 +551,9 @@ class Bugz:
 
 			modified.append(('status', status))
 			modified.append(('resolution', qparams['resolution']))
+		elif status == 'ASSIGNED' and status != qparams['bug_status']:
+			qparams['knob'] = 'accept'
+			modified.append(('status', status))
 		elif status == 'REOPENED' and status != qparams['bug_status']:
 			qparams['knob'] = 'reopen'
 			modified.append(('status', status))
