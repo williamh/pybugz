@@ -107,6 +107,7 @@ _bugz_cmd_modify()
 _bugz_cmd_namedcmd()
 {
   _arguments -s : \
+    '--show-status[show bug status]'
     '--show-url[show bug ID as url]'
 }
 

@@ -261,13 +261,13 @@ class PrettyBugz(Bugz):
 		'keywords': make_option('-k', '--keywords', help = 'Bug keywords'),
 		'whiteboard': make_option('-w', '--whiteboard',
 								help = 'Status whiteboard'),
-		'show_status': make_option('--show-status', help='show status of bug.',
+		'show_status': make_option('--show-status', help='show status of bugs',
 								action = 'store_true', default = False),
 		'show_url': make_option('--show-url', help='Show bug id as a url.',
 								action = 'store_true', default = False),
 	}
 
-	def namedcmd(self, command, show_url = False):
+	def namedcmd(self, command, show_status=False, show_url=False):
 		"""Run a command stored in Bugzilla by name."""
 		log_msg = 'Running namedcmd \'%s\''%command
 		result = Bugz.namedcmd(self, command)
@@ -278,10 +278,12 @@ class PrettyBugz(Bugz):
 			self.log('No result from command')
 			return
 
-		self.listbugs(result, show_url)
+		self.listbugs(result, show_url, show_status)
 
 	namedcmd.args = "<command name>"
 	namedcmd.options = {
+		'show_status': make_option('--show-status', help='show status of bugs',
+								action = 'store_true', default = False),
 		'show_url': make_option('--show-url', help='Show bug id as a url.',
 								action = 'store_true', default = False),
 	}
