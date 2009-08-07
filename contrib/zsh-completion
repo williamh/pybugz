@@ -143,6 +143,7 @@ _bugz_cmd_search()
     '--help[show help message and exit]' \
     '(--keywords= -k)'{--keywords=,-k}'[bug keywords]:keywords: ' \
     '--severity=[restrict by severity]:severity: ' \
+    '--show-status[show bug status]' \
     '--show-url[show bug ID as url]' \
     '(--status= -s)'{--status=,-s}'[bug status]:status: ' \
     '(--order= -o)'{--order=,-o}'[sort by]:order:((number\:"bug number" assignee\:"assignee field" importance\:"importance field" date\:"last changed"))' \
