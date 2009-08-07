@@ -11,7 +11,7 @@ _bugz() {
     '(-u --user)'{-u,--user}'[user name (if required)]:user name:_users'
     '(-p --password)'{-p,--password}'[password (if required)]:password: '
     '(-H --httpuser)'{-H,--httpuser}'[basic http auth user name (if required)]:user name:_users'
-    '(-P --httppassword)'{-P,--httppassword}'[basic http auth nassword (if required)]:nassword: '
+    '(-P --httppassword)'{-P,--httppassword}'[basic http auth password (if required)]:password: '
     '(-f --forget)'{-f,--forget}'[do not remember authentication]'
     '--columns[number of columns to use when displaying output]:number: '
     '(--skip-auth)'{--skip-auth}'[do not authenticate]'
