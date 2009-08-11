@@ -731,7 +731,7 @@ class PrettyBugz(Bugz):
 
 	attach.args = "<bugid> <filename> [-c=<mimetype>] [-d=<description>]"
 	attach.options = {
-		'content_type': make_option('-c', '--content_type',
+		'content_type': make_option('-c', '--content-type',
 									default='text/plain',
 									help = 'Mimetype of the file (default: text/plain)'),
 		'description': make_option('-d', '--description',
