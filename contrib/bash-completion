@@ -1,0 +1,66 @@
+#
+# Bash completion support for bugz
+#
+_bugz() {
+	local cur prev commands opts
+	commands="attach attachment get help modify namedcmd post search"
+	opts="--version -h --help --skip-auth -f --forget --encoding -q --quiet
+		-b --base -u --user  -H --httpuser -p --password --columns
+		-P --httppassword"
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	if [[ $COMP_CWORD -eq 1 ]]; then
+		if [[ "$cur" == -* ]]; then
+			COMPREPLY=( $( compgen -W '--help -h --version' -- $cur ) )
+		else
+			COMPREPLY=( $( compgen -W "$commands" -- $cur ) )
+		fi
+	else
+		prev="${COMP_WORDS[COMP_CWORD-1]}"
+		command="${COMP_WORDS[1]}"
+		case ${command} in
+			attach)
+				opts="${opts} -d --description -c --content_type"
+				;;
+			attachment)
+				opts="${opts} -v --view"
+				;;
+			get)
+				opts="${opts} -n --no-comments"
+				;;
+			modify)
+				opts="${opts}
+					-c --comment -s --status -F --comment-from
+					--fixed -S --severity -t --title -U --url
+					-w --whiteboard --add-dependson --invalid
+					--add-blocked --priority --remove-cc -d --duplicate
+					--remove-dependson -a --assigned-to -k --keywords
+					--add-cc -C --comment-editor -r --resolution
+					--remove-blocked"
+				;;
+			namedcmd)
+				opts="${opts} --show-url --show-status"
+				;;
+			post)
+				opts="${opts}
+				--product -d --description -t --title
+				--append-command -S --severity --depends-on --component
+				--batch --prodversion --default-confirm --priority
+				-F --description-from -U --url -a --assigned-to
+				-k --keywords --cc --blocked"
+				;;
+			search)
+				opts="${opts}
+					-s --status --show-url --product -w --whiteboard
+					--severity -r --reporter --cc --commenter
+					-C --component -c --comments --priority
+					-a --assigned-to -k --keywords -o --order --show-status"
+				;;
+			*)
+				;;
+		esac
+			COMPREPLY=( $( compgen -W "$opts" -- $cur ) )
+	fi
+	return 0
+}
+complete -F _bugz bugz
