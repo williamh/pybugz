@@ -10,8 +10,7 @@ Simple command-line interface to bugzilla to allow:
 
 Requirements
 ------------
- - Python 2.4 or later
- - ElementTree (only for Python 2.4)
+ - Python 2.5 or later
 
 Classes
 -------

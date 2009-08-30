@@ -16,12 +16,7 @@ from urllib2 import build_opener, HTTPCookieProcessor, Request
 
 from config import config
 
-try:
-	# Python standard library implementation
-	from xml.etree import ElementTree
-except ImportError:
-	# Old stand-alone implementation
-	from elementtree import ElementTree
+from xml.etree import ElementTree
 
 COOKIE_FILE = '.bugz_cookie'
 
