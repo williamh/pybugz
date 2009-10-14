@@ -255,6 +255,8 @@ class Bugz:
 		qparams = config.params['auth'].copy()
 		qparams['Bugzilla_login'] = self.user
 		qparams['Bugzilla_password'] = self.password
+		if not self.forget:
+			qparams['Bugzilla_remember'] = 'on'
 
 		req_url = urljoin(self.base, config.urls['auth'])
 		req = Request(req_url, urlencode(qparams), config.headers)
