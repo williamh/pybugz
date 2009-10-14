@@ -287,7 +287,7 @@ class Bugz:
 				self.log('Unknown field: ' + field)
 				columns.append(field)
 		for row in rows[1:]:
-			if row[0].find("Missing Search") != -1:
+			if "Missing Search" in row[0]:
 				self.log('Bugzilla error (Missing search found)')
 				return None
 			fields = {}
