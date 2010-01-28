@@ -639,6 +639,11 @@ class Bugz:
 
 		try:
 			resp = self.opener.open(req)
+			re_error = re.compile(r'id="error_msg".*>([^<]+)<')
+			error = re_error.search(resp.read())
+			if error:
+				print error.group(1)
+				return []
 			return modified
 		except:
 			return []
