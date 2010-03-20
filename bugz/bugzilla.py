@@ -235,7 +235,7 @@ class Bugz:
 			base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
 			req.add_header("Authorization", "Basic %s" % base64string)
 		resp = self.opener.open(req)
-		re_request_login = re.compile(r'<title>.*Log in to Bugzilla</title>')
+		re_request_login = re.compile(r'<title>.*Log in to .*</title>')
 		if not re_request_login.search(resp.read()):
 			self.log('Already logged in.')
 			self.authenticated = True
