@@ -7,6 +7,7 @@ import locale
 import mimetypes
 import os
 import re
+import sys
 
 from cookielib import LWPCookieJar, CookieJar
 from cStringIO import StringIO
@@ -84,6 +85,8 @@ def get_content_type(filename):
 #
 # Override the behaviour of elementtree and allow us to
 # force the encoding to utf-8
+# Not needed in Python 2.7, since ElementTree.XMLTreeBuilder uses the forced
+# encoding.
 #
 
 class ForcedEncodingXMLTreeBuilder(ElementTree.XMLTreeBuilder):
@@ -442,8 +445,21 @@ class Bugz:
 		resp = self.opener.open(req)
 
 		fd = StringIO(resp.read())
+
 		# workaround for ill-defined XML templates in bugzilla 2.20.2
-		parser = ForcedEncodingXMLTreeBuilder(encoding = 'utf-8')
+		(major_version, minor_version) = \
+		    (sys.version_info[0], sys.version_info[1])
+		if major_version > 2 or \
+			    (major_version == 2 and minor_version >= 7):
+			# If this is 2.7 or greater, then XMLTreeBuilder
+			# does what we want.
+			parser_class = ElementTree.XMLParser
+		else:
+			# Running under Python 2.6, so we need to use our
+			# subclass of XMLTreeBuilder instead.
+			parser_class = ForcedEncodingXMLTreeBuilder
+		parser = parser_class(encoding = 'utf-8')
+
 		etree = ElementTree.parse(fd, parser)
 		bug = etree.find('.//bug')
 		if bug and bug.attrib.has_key('error'):
