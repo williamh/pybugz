@@ -8,8 +8,6 @@ import sys
 import tempfile
 import textwrap
 
-from optparse import OptionParser
-from optparse import make_option
 from urlparse import urljoin
 
 try:
@@ -122,43 +120,7 @@ def block_edit(comment, comment_from = ''):
 class BugzError(Exception):
 	pass
 
-#
-# ugly optparse callbacks (really need to integrate this somehow)
-#
-
-def modify_opt_fixed(opt, opt_str, val, parser):
-	parser.values.status = 'RESOLVED'
-	parser.values.resolution = 'FIXED'
-
-def modify_opt_invalid(opt, opt_str, val, parser):
-	parser.values.status = 'RESOLVED'
-	parser.values.resolution = 'INVALID'
-
 class PrettyBugz(Bugz):
-	options = {
-		'base': make_option('-b', '--base', type='string',
-							default = 'https://bugs.gentoo.org/',
-							help = 'Base URL of Bugzilla'),
-		'user': make_option('-u', '--user', type='string',
-							help = 'Username for commands requiring authentication'),
-		'password': make_option('-p', '--password', type='string',
-							help = 'Password for commands requiring authentication'),
-		'httpuser': make_option('-H', '--httpuser', type='string',
-							help = 'Username for basic http auth'),
-		'httppassword': make_option('-P', '--httppassword', type='string',
-							help = 'Password for basic http auth'),
-		'forget': make_option('-f', '--forget', action='store_true',
-							help = 'Forget login after execution'),
-		'columns': make_option('--columns', type='int', default = 0,
-							help = 'Maximum number of columns output should use'),
-		'encoding': make_option('--encoding',
-							help = 'Output encoding (default: utf-8).'),
-		'skip_auth': make_option('--skip-auth', action='store_true',
-							default = False, help = 'Skip Authentication.'),
-		'quiet': make_option('-q', '--quiet', action='store_true',
-							default = False, help = 'Quiet mode'),
-	}
-
 	def __init__(self, base, user = None, password =None, forget = False,
 			columns = 0, encoding = '', skip_auth = False,
 			quiet = False, httpuser = None, httppassword = None ):
@@ -195,10 +157,11 @@ class PrettyBugz(Bugz):
 	def get_input(self, prompt):
 		return raw_input(prompt)
 
-	def search(self, *args, **kwds):
+	def search(self, **kwds):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
-		search_term = ' '.join(args).strip()
+		search_term = ' '.join(kwds['terms']).strip()
+		del kwds['terms']
 		show_status = kwds['show_status']
 		del kwds['show_status']
 		show_url = kwds['show_url']
@@ -232,41 +195,6 @@ class PrettyBugz(Bugz):
 
 		self.listbugs(result, show_url, show_status)
 
-	search.args = "<search term> [options..]"
-	search.options = {
-		'order': make_option('-o', '--order', type='choice',
-								choices = config.choices['order'].keys(),
-								default = 'number'),
-		'assigned_to': make_option('-a', '--assigned-to',
-								help = 'email the bug is assigned to'),
-		'reporter': make_option('-r', '--reporter',
-								help = 'email the bug was reported by'),
-		'cc': make_option('--cc',help = 'Restrict by CC email address'),
-		'commenter': make_option('--commenter',help = 'email that commented the bug'),
-		'status': make_option('-s', '--status', action='append',
-								help = 'Bug status (for multiple choices,'
-								'use --status=NEW --status=ASSIGNED) or --status=all for all statuses'),
-		'severity': make_option('--severity', action='append',
-								choices = config.choices['severity'],
-								help = 'Restrict by severity.'),
-		'priority': make_option('--priority', action='append',
-								choices = config.choices['priority'].values(),
-								help = 'Restrict by priority (1 or more)'),
-		'comments': make_option('-c', '--comments',  action='store_true',
-								help = 'Search comments instead of title'),
-		'product': make_option('--product', action='append',
-								help = 'Restrict by product (1 or more)'),
-		'component': make_option('-C', '--component', action='append',
-								help = 'Restrict by component (1 or more)'),
-		'keywords': make_option('-k', '--keywords', help = 'Bug keywords'),
-		'whiteboard': make_option('-w', '--whiteboard',
-								help = 'Status whiteboard'),
-		'show_status': make_option('--show-status', help='show status of bugs',
-								action = 'store_true', default = False),
-		'show_url': make_option('--show-url', help='Show bug id as a url.',
-								action = 'store_true', default = False),
-	}
-
 	def namedcmd(self, command, show_status=False, show_url=False):
 		"""Run a command stored in Bugzilla by name."""
 		log_msg = 'Running namedcmd \'%s\''%command
@@ -279,14 +207,6 @@ class PrettyBugz(Bugz):
 			return
 
 		self.listbugs(result, show_url, show_status)
-
-	namedcmd.args = "<command name>"
-	namedcmd.options = {
-		'show_status': make_option('--show-status', help='show status of bugs',
-								action = 'store_true', default = False),
-		'show_url': make_option('--show-url', help='Show bug id as a url.',
-								action = 'store_true', default = False),
-	}
 
 	def get(self, bugid, comments = True, attachments = True):
 		""" Fetch bug details given the bug id """
@@ -383,13 +303,6 @@ class PrettyBugz(Bugz):
 							print shortline.encode(self.enc)
 				i += 1
 			print
-
-	get.args = "<bug_id> [options..]"
-	get.options = {
-		'comments': make_option("-n", "--no-comments", dest = 'comments',
-								action="store_false", default = True,
-								help = 'Do not show comments'),
-	}
 
 	def post(self, product = None, component = None,
 			title = None, description = None, assigned_to = None,
@@ -579,42 +492,6 @@ class PrettyBugz(Bugz):
 		else:
 			raise RuntimeError('Failed to submit bug')
 
-	post.args = "[options]"
-	post.options = {
-		'product': make_option('--product', help = 'Product'),
-		'component': make_option('--component', help = 'Component'),
-		'prodversion': make_option('--prodversion',
-									help = 'Version of the product'),
-		'title': make_option('-t', '--title', help = 'Title of bug'),
-		'description': make_option('-d', '--description',
-									help = 'Description of the bug'),
-		'description_from': make_option('-F' , '--description-from',
-									help = 'Description from contents of'
-									' file'),
-		'append_command': make_option('--append-command',
-									help = 'Append the output of a command to the description.'),
-		'assigned_to': make_option('-a', '--assigned-to',
-									help = 'Assign bug to someone other than '
-									'the default assignee'),
-		'cc': make_option('--cc', help = 'Add a list of emails to CC list'),
-		'url': make_option('-U', '--url',
-									help = 'URL associated with the bug'),
-		'dependson': make_option('--depends-on', dest='dependson', help = 'Add a list of bug dependencies'),
-		'blocked': make_option('--blocked', help = 'Add a list of blocker bugs'),
-		'keywords': make_option('-k', '--keywords', help = 'List of bugzilla keywords'),
-		'batch': make_option('--batch', action="store_true",
-									help = 'do not prompt for any values'),
-		'default_confirm': make_option('--default-confirm',
-									choices = ['y','Y','n','N'],
-									default = 'y',
-									help = 'default answer to confirmation question (y/n)'),
-		'priority': make_option('--priority',
-								choices=config.choices['priority'].values()),
-		'severity': make_option('-S', '--severity',
-								choices=config.choices['severity']),
-	}
-
-
 	def modify(self, bugid, **kwds):
 		"""Modify an existing bug (eg. adding a comment or changing resolution.)"""
 		if 'comment_from' in kwds:
@@ -637,6 +514,15 @@ class PrettyBugz(Bugz):
 				kwds['comment'] = block_edit('Enter comment:')
 			del kwds['comment_editor']
 
+		if kwds['fixed']:
+			kwds['STATUS'] = 'CLOSED'
+			kwds['resolution'] = 'FIXED'
+		del kwds['fixed']
+
+		if kwds['invalid']:
+			kwds['STATUS'] = 'CLOSED'
+			kwds['resolution'] = 'INVALID'
+		del kwds['invalid']
 		result = Bugz.modify(self, bugid, **kwds)
 		if not result:
 			raise RuntimeError('Failed to modify bug')
@@ -644,53 +530,6 @@ class PrettyBugz(Bugz):
 			self.log('Modified bug %s with the following fields:' % bugid)
 			for field, value in result:
 				self.log('  %-12s: %s' % (field, value))
-
-
-	modify.args = "<bug_id> [options..]"
-	modify.options = {
-		'title': make_option('-t', '--title', help = 'Set title of bug'),
-		'comment_from': make_option('-F', '--comment-from',
-									help = 'Add comment from file.  If -C is also specified, the editor will be opened with this file as its contents.'),
-		'comment_editor': make_option('-C', '--comment-editor',
-									action='store_true', default = False,
-									help = 'Add comment via default editor'),
-		'comment': make_option('-c', '--comment', help = 'Add comment to bug'),
-		'url': make_option('-U', '--url', help = 'Set URL field of bug'),
-		'status': make_option('-s', '--status',
-									choices=config.choices['status'].values(),
-									help = 'Set new status of bug (eg. RESOLVED)'),
-		'resolution': make_option('-r', '--resolution',
-									choices=config.choices['resolution'].values(),
-									help = 'Set new resolution (only if status = RESOLVED)'),
-		'assigned_to': make_option('-a', '--assigned-to'),
-		'duplicate': make_option('-d', '--duplicate', type='int', default=0),
-		'priority': make_option('--priority',
-								choices=config.choices['priority'].values()),
-		'severity': make_option('-S', '--severity',
-								choices=config.choices['severity']),
-		'fixed': make_option('--fixed', action='callback',
-								callback = modify_opt_fixed,
-								help = "Mark bug as RESOLVED, FIXED"),
-		'invalid': make_option('--invalid', action='callback',
-								callback = modify_opt_invalid,
-								help = "Mark bug as RESOLVED, INVALID"),
-		'add_cc': make_option('--add-cc', action = 'append',
-								help = 'Add an email to the CC list'),
-		'remove_cc': make_option('--remove-cc', action = 'append',
-								help = 'Remove an email from the CC list'),
-		'add_dependson': make_option('--add-dependson', action = 'append',
-								help = 'Add a bug to the depends list'),
-		'remove_dependson': make_option('--remove-dependson', action = 'append',
-								help = 'Remove a bug from the depends list'),
-		'add_blocked': make_option('--add-blocked', action = 'append',
-								help = 'Add a bug to the blocked list'),
-		'remove_blocked': make_option('--remove-blocked', action = 'append',
-								help = 'Remove a bug from the blocked list'),
-		'whiteboard': make_option('-w', '--whiteboard',
-								help = 'Set Status whiteboard'),
-		'keywords': make_option('-k', '--keywords',
-								help = 'Set bug keywords'),
-		}
 
 	def attachment(self, attachid, view = False):
 		""" Download or view an attachment given the id."""
@@ -713,13 +552,6 @@ class PrettyBugz(Bugz):
 
 			open(safe_filename, 'wb').write(result['fd'].read())
 
-	attachment.args = "<attachid> [-v]"
-	attachment.options = {
-		'view': make_option('-v', '--view', action="store_true",
-							default = False,
-							help = "Print attachment rather than save")
-	}
-
 	def attach(self, bugid, filename, content_type = 'text/plain', description = None):
 		""" Attach a file to a bug given a filename. """
 		if not os.path.exists(filename):
@@ -728,15 +560,6 @@ class PrettyBugz(Bugz):
 			description = block_edit('Enter description (optional)')
 		result = Bugz.attach(self, bugid, filename, description, filename,
 				content_type)
-
-	attach.args = "<bugid> <filename> [-c=<mimetype>] [-d=<description>]"
-	attach.options = {
-		'content_type': make_option('-c', '--content-type',
-									default='text/plain',
-									help = 'Mimetype of the file (default: text/plain)'),
-		'description': make_option('-d', '--description',
-									help = 'A description of the attachment.')
-	}
 
 	def listbugs(self, buglist, show_url=False, show_status=False):
 		for row in buglist:
@@ -760,27 +583,3 @@ class PrettyBugz(Bugz):
 				print line[:self.columns]
 
 		self.log("%i bug(s) found." % len(buglist))
-
-	@classmethod
-	def help(self):
-		print 'Usage: bugz <subcommand> [parameter(s)] [options..]'
-		print
-		print 'Subcommands:'
-		print '  search      Search for bugs in bugzilla'
-		print '  get         Get a bug from bugzilla'
-		print '  attachment  Get an attachment from bugzilla'
-		print '  post        Post a new bug into bugzilla'
-		print '  modify      Modify a bug (eg. post a comment)'
-		print '  attach      Attach file to a bug'
-		print '  namedcmd    Run a stored search,'
-		print
-		print 'Examples:'
-		print '  bugz get 12345'
-		print '  bugz search python --assigned-to liquidx@gentoo.org'
-		print '  bugz attachment 5000 --view'
-		print '  bugz attach 140574 python-2.4.3.ebuild'
-		print '  bugz modify 140574 -c "Me too"'
-		print '  bugz namedcmd "Amd64 stable"'
-		print
-		print 'For more information on subcommands, run:'
-		print '  bugz <subcommand> --help'
