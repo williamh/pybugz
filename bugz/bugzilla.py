@@ -444,7 +444,10 @@ class Bugz:
 			req.add_header("Authorization", "Basic %s" % base64string)
 		resp = self.opener.open(req)
 
-		fd = StringIO(resp.read())
+		data = resp.read()
+		# Get rid of control characters.
+		data = re.sub('[\x00-\x08\x0e-\x1f\x0b\x0c]', '', data)
+		fd = StringIO(data)
 
 		# workaround for ill-defined XML templates in bugzilla 2.20.2
 		(major_version, minor_version) = \
