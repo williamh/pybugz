@@ -54,6 +54,7 @@ class BugzConfig:
 
 		'attach_post': {
 		'action': 'insert',
+		'ispatch': '',
 		'contenttypemethod': 'manual',
 		'bugid': '',
 		'description': '',

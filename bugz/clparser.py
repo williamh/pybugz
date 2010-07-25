@@ -18,6 +18,9 @@ def make_attach_parser(subparsers):
 		help = 'mimetype of the file (default: text/plain)')
 	attach_parser.add_argument('-d', '--description',
 		help = 'a description of the attachment.')
+	attach_parser.add_argument('-p', '--patch',
+		action='store_true',
+	help = 'attachment is a patch')
 	attach_parser.set_defaults(func = PrettyBugz.attach)
 
 def make_attachment_parser(subparsers):

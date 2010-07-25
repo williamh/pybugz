@@ -552,14 +552,14 @@ class PrettyBugz(Bugz):
 
 			open(safe_filename, 'wb').write(result['fd'].read())
 
-	def attach(self, bugid, filename, content_type = 'text/plain', description = None):
+	def attach(self, bugid, filename, content_type = 'text/plain', patch = False, description = None):
 		""" Attach a file to a bug given a filename. """
 		if not os.path.exists(filename):
 			raise BugzError('File not found: %s' % filename)
 		if not description:
 			description = block_edit('Enter description (optional)')
 		result = Bugz.attach(self, bugid, filename, description, filename,
-				content_type)
+				content_type, patch)
 
 	def listbugs(self, buglist, show_url=False, show_status=False):
 		for row in buglist:
