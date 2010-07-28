@@ -242,7 +242,7 @@ class PrettyBugz(Bugz):
 
 		for field, name in FIELDS + MORE_FIELDS:
 			try:
-				value = result.find('//%s' % field).text
+				value = result.find('.//%s' % field).text
 			except AttributeError:
 				continue
 			print '%-12s: %s' % (name, value.encode(self.enc))
@@ -260,8 +260,8 @@ class PrettyBugz(Bugz):
 		if blocked:
 			print '%-12s: %s' % ('Blocked', blocked)
 
-		bug_comments = result.findall('//long_desc')
-		bug_attachments = result.findall('//attachment')
+		bug_comments = result.findall('.//long_desc')
+		bug_attachments = result.findall('.//attachment')
 
 		print '%-12s: %d' % ('Comments', len(bug_comments))
 		print '%-12s: %d' % ('Attachments', len(bug_attachments))

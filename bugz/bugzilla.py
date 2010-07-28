@@ -465,7 +465,7 @@ class Bugz:
 
 		etree = ElementTree.parse(fd, parser)
 		bug = etree.find('.//bug')
-		if bug and bug.attrib.has_key('error'):
+		if bug is not None and bug.attrib.has_key('error'):
 			return None
 		else:
 			return etree
