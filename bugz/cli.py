@@ -515,12 +515,12 @@ class PrettyBugz(Bugz):
 			del kwds['comment_editor']
 
 		if kwds['fixed']:
-			kwds['STATUS'] = 'CLOSED'
+			kwds['status'] = 'RESOLVED'
 			kwds['resolution'] = 'FIXED'
 		del kwds['fixed']
 
 		if kwds['invalid']:
-			kwds['STATUS'] = 'CLOSED'
+			kwds['status'] = 'RESOLVED'
 			kwds['resolution'] = 'INVALID'
 		del kwds['invalid']
 		result = Bugz.modify(self, bugid, **kwds)
