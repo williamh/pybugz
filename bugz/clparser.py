@@ -107,6 +107,8 @@ def make_modify_parser(subparsers):
 	modify_parser.add_argument('--remove-blocked',
 		action = 'append',
 		help = 'remove a bug from the blocked list')
+	modify_parser.add_argument('--component',
+		help = 'change the component for this bug')
 	modify_parser.add_argument('--fixed',
 		action='store_true',
 		help = 'mark bug as RESOLVED, FIXED')

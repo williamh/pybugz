@@ -477,7 +477,8 @@ class Bugz:
 			add_cc = [], remove_cc = [],
 			add_dependson = [], remove_dependson = [],
 			add_blocked = [], remove_blocked = [],
-			whiteboard = None, keywords = None):
+			whiteboard = None, keywords = None,
+			component = None):
 		"""Modify an existing bug
 
 		@param bugid: bug id
@@ -517,6 +518,8 @@ class Bugz:
 		@type    whiteboard: string
 		@keyword keywords: set keywords
 		@type    keywords: string
+		@keyword component: set component
+		@type    component: string
 
 		@return: list of fields modified.
 		@rtype: list of strings
@@ -648,6 +651,9 @@ class Bugz:
 		if keywords != None:
 			qparams['keywords'] = keywords
 			modified.append(('keywords', keywords))
+		if component != None:
+			qparams['component'] = component
+			modified.append(('component', component))
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base, config.urls['modify'])
