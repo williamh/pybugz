@@ -191,11 +191,15 @@ class BugzConfig:
 		'resolution': {
 		'fixed': 'FIXED',
 		'invalid': 'INVALID',
-		'duplicate': 'DUPLICATE',
-		'lated': 'LATER',
-		'needinfo': 'NEEDINFO',
 		'wontfix': 'WONTFIX',
+		'lated': 'LATER',
+		'remind': 'REMIND',
+		'worksforme': 'WORKSFORME',
+		'cantfix': 'CANTFIX',
+		'needinfo': 'NEEDINFO',
+		'test-request': 'TEST-REQUEST',
 		'upstream': 'UPSTREAM',
+		'duplicate': 'DUPLICATE',
 		},
 
 		'severity': [
