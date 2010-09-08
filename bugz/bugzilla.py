@@ -539,7 +539,7 @@ class Bugz:
 
 		# copy existing fields
 		FIELDS = ('bug_file_loc', 'bug_severity', 'short_desc', 'bug_status',
-				'status_whiteboard', 'keywords',
+				'status_whiteboard', 'keywords', 'token',
 				'op_sys', 'priority', 'version', 'target_milestone',
 				'assigned_to', 'rep_platform', 'product', 'component', 'token')
 
