@@ -414,8 +414,8 @@ class Bugz:
 		req_url = urljoin(self.base, config.urls['list'])
 		req_url += '?' + req_params
 		req = Request(req_url, None, config.headers)
-		if self.user and self.hpassword:
-			base64string = base64.encodestring('%s:%s' % (self.user, self.hpassword))[:-1]
+		if self.user and self.password:
+			base64string = base64.encodestring('%s:%s' % (self.user, self.password))[:-1]
 			req.add_header("Authorization", "Basic %s" % base64string)
 		resp = self.opener.open(req)
 
