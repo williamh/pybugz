@@ -4,7 +4,7 @@ from bugz import __version__
 import csv
 import locale
 
-BUGZ_USER_AGENT = 'PyBugz/%s +http://www.github.com/ColdWind/pybugz/' % __version__
+BUGZ_USER_AGENT = 'PyBugz/%s +http://www.github.com/williamh/pybugz/' % __version__
 
 class BugzConfig:
 	urls = {
