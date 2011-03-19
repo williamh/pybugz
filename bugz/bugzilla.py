@@ -775,7 +775,7 @@ class Bugz:
 		resp = self.opener.open(req)
 
 		try:
-			re_bug = re.compile(r'<title>.*Bug ([0-9]+) Submitted</title>')
+			re_bug = re.compile(r'(?:\s+)?<title>.*Bug ([0-9]+) Submitted.*</title>')
 			bug_match = re_bug.search(resp.read())
 			if bug_match:
 				return int(bug_match.group(1))
