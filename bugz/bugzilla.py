@@ -535,11 +535,12 @@ class Bugz:
 		modified = []
 		qparams = config.params['modify'].copy()
 		qparams['id'] = bugid
+		# NOTE: knob has been removed in bugzilla 4 and 3?
 		qparams['knob'] = 'none'
 
 		# copy existing fields
 		FIELDS = ('bug_file_loc', 'bug_severity', 'short_desc', 'bug_status',
-				'status_whiteboard', 'keywords',
+				'status_whiteboard', 'keywords', 'resolution',
 				'op_sys', 'priority', 'version', 'target_milestone',
 				'assigned_to', 'rep_platform', 'product', 'component', 'token')
 
@@ -561,28 +562,36 @@ class Bugz:
 		if resolution:
 			resolution = resolution.upper()
 
-		if status == 'RESOLVED' and status != qparams['bug_status']:
-			qparams['knob'] = 'resolve'
-			if resolution:
-				qparams['resolution'] = resolution
-			else:
-				qparams['resolution'] = 'FIXED'
+		if status and status != qparams['bug_status']:
+			# Bugzilla >= 3.x
+			qparams['bug_status'] = status
 
-			modified.append(('status', status))
-			modified.append(('resolution', qparams['resolution']))
-		elif status == 'ASSIGNED' and status != qparams['bug_status']:
-			qparams['knob'] = 'accept'
-			modified.append(('status', status))
-		elif status == 'REOPENED' and status != qparams['bug_status']:
-			qparams['knob'] = 'reopen'
-			modified.append(('status', status))
-		elif status == 'VERIFIED' and status != qparams['bug_status']:
-			qparams['knob'] = 'verified'
-			modified.append(('status', status))
-		elif status == 'CLOSED' and status != qparams['bug_status']:
-			qparams['knob'] = 'closed'
-			modified.append(('status', status))
+			if status == 'RESOLVED':
+				qparams['knob'] = 'resolve'
+				if resolution:
+					qparams['resolution'] = resolution
+				else:
+					qparams['resolution'] = 'FIXED'
+
+				modified.append(('status', status))
+				modified.append(('resolution', qparams['resolution']))
+			elif status == 'ASSIGNED':
+				qparams['knob'] = 'accept'
+				modified.append(('status', status))
+			elif status == 'REOPENED':
+				qparams['knob'] = 'reopen'
+				modified.append(('status', status))
+			elif status == 'VERIFIED':
+				qparams['knob'] = 'verified'
+				modified.append(('status', status))
+			elif status == 'CLOSED':
+				qparams['knob'] = 'closed'
+				modified.append(('status', status))
 		elif duplicate:
+			# Bugzilla >= 3.x
+			qparams['bug_status'] = "RESOLVED"
+			qparams['resolution'] = "DUPLICATE"
+
 			qparams['knob'] = 'duplicate'
 			qparams['dup_id'] = duplicate
 			modified.append(('status', 'RESOLVED'))
