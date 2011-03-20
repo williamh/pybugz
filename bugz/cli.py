@@ -560,6 +560,14 @@ class PrettyBugz(Bugz):
 			description = block_edit('Enter description (optional)')
 		result = Bugz.attach(self, bugid, filename, description, filename,
 				content_type, patch)
+		if result == True:
+			self.log("'%s' has been attached to bug %s" % (filename, bugid))
+		else:
+			reason = ""
+			if result and result != False:
+				reason = "\nreason: %s" % result
+			raise RuntimeError("Failed to attach '%s' to bug %s%s" % (filename,
+				bugid, reason))
 
 	def listbugs(self, buglist, show_url=False, show_status=False):
 		for row in buglist:

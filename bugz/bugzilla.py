@@ -840,9 +840,18 @@ class Bugz:
 
 		# TODO: return attachment id and success?
 		try:
-			re_success = re.compile(r'<title>Changes Submitted</title>')
-			if re_success.search(resp.read()):
-				return True
+			re_attach = re.compile(r'<title>(.+)</title>')
+			# Bugzilla 3/4
+			re_attach34 = re.compile(r'Attachment \d+ added to Bug \d+')
+			response = resp.read()
+			attach_match = re_attach.search(response)
+			if attach_match:
+				if attach_match.group(1) == "Changes Submitted" or re_attach34.match(attach_match.group(1)):
+					return True
+				else:
+					return attach_match.group(1)
+			else:
+				return False
 		except:
 			pass
 
