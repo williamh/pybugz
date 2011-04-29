@@ -243,6 +243,8 @@ class PrettyBugz(Bugz):
 		for field, name in FIELDS + MORE_FIELDS:
 			try:
 				value = result.find('.//%s' % field).text
+				if value == None:
+						continue
 			except AttributeError:
 				continue
 			print '%-12s: %s' % (name, value.encode(self.enc))
