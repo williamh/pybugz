@@ -29,6 +29,8 @@ class BugzConfig:
 		"GoAheadAndLogIn": "1",
 		},
 
+		# TODO: Add -s option (status) as cmdline arg instead of the hardcoded
+		# one. Bugzilla will set the status itself if not given
 		'post': {
 		'product': '',
 		'version': 'unspecified',
@@ -36,7 +38,6 @@ class BugzConfig:
 		'op_sys': 'Linux',
 		'priority': 'P2',
 		'bug_severity': 'normal',
-		'bug_status': 'NEW',
 		'assigned_to': '',
 		'keywords': '',
 		'dependson':'',
