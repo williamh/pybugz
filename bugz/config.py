@@ -77,7 +77,9 @@ class BugzConfig:
 		'bug_file_loc': '',
 		'status_whiteboard_type': 'allwordssubstr',
 		'status_whiteboard': '',
-		'bug_status': ['NEW', 'ASSIGNED', 'REOPENED'],
+		# NEW, ASSIGNED and REOPENED is obsolete as of bugzilla 3.x and has
+		# been removed from bugs.gentoo.org on 2011/05/01
+		'bug_status': ['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'IN_PROGRESS'],
 		'bug_severity': [],
 		'priority': [],
 		'emaillongdesc1': '1',
@@ -143,8 +145,10 @@ class BugzConfig:
 	choices = {
 		'status': {
 		'unconfirmed': 'UNCONFIRMED',
+		'confirmed': 'CONFIRMED',
 		'new': 'NEW',
 		'assigned': 'ASSIGNED',
+		'in_progress': 'IN_PROGRESS',
 		'reopened': 'REOPENED',
 		'resolved': 'RESOLVED',
 		'verified': 'VERIFIED',

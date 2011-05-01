@@ -356,7 +356,9 @@ class Bugz:
 		qparams['bug_severity'] = severity or []
 		qparams['priority'] = priority or []
 		if status == None:
-			qparams['bug_status'] = ['NEW', 'ASSIGNED', 'REOPENED']
+			# NEW, ASSIGNED and REOPENED is obsolete as of bugzilla 3.x and has
+			# been removed from bugs.gentoo.org on 2011/05/01
+			qparams['bug_status'] = ['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'IN_PROGRESS']
 		elif [s.upper() for s in status] == ['ALL']:
 			qparams['bug_status'] = config.choices['status']
 		else:
@@ -575,7 +577,7 @@ class Bugz:
 
 				modified.append(('status', status))
 				modified.append(('resolution', qparams['resolution']))
-			elif status == 'ASSIGNED':
+			elif status == 'ASSIGNED' or status == 'IN_PROGRESS':
 				qparams['knob'] = 'accept'
 				modified.append(('status', status))
 			elif status == 'REOPENED':
