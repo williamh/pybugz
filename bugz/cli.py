@@ -167,7 +167,7 @@ class PrettyBugz(Bugz):
 		show_url = kwds['show_url']
 		del kwds['show_url']
 		search_opts = sorted([(opt, val) for opt, val in kwds.items()
-			if val != None and opt != 'order'])
+			if val is not None and opt != 'order'])
 
 		if not (search_term or search_opts):
 			raise BugzError('Please give search terms or options.')
@@ -186,7 +186,7 @@ class PrettyBugz(Bugz):
 
 		result = Bugz.search(self, search_term, **kwds)
 
-		if result == None:
+		if result is None:
 			raise RuntimeError('Failed to perform search')
 
 		if len(result) == 0:
@@ -199,7 +199,7 @@ class PrettyBugz(Bugz):
 		"""Run a command stored in Bugzilla by name."""
 		log_msg = 'Running namedcmd \'%s\''%command
 		result = Bugz.namedcmd(self, command)
-		if result == None:
+		if result is None:
 			raise RuntimeError('Failed to run command\nWrong namedcmd perhaps?')
 
 		if len(result) == 0:
@@ -214,7 +214,7 @@ class PrettyBugz(Bugz):
 
 		result = Bugz.get(self, bugid)
 
-		if result == None:
+		if result is None:
 			raise RuntimeError('Bug %s not found' % bugid)
 
 		# Print out all the fields below by extract the text
@@ -243,7 +243,7 @@ class PrettyBugz(Bugz):
 		for field, name in FIELDS + MORE_FIELDS:
 			try:
 				value = result.find('.//%s' % field).text
-				if value == None:
+				if value is None:
 						continue
 			except AttributeError:
 				continue
@@ -489,7 +489,7 @@ class PrettyBugz(Bugz):
 				return
 
 		result = Bugz.post(self, product, component, title, description, url, assigned_to, cc, keywords, prodversion, dependson, blocked, priority, severity)
-		if result != None and result != 0:
+		if result is not None and result != 0:
 			self.log('Bug %d submitted' % result)
 		else:
 			raise RuntimeError('Failed to submit bug')

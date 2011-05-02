@@ -355,7 +355,7 @@ class Bugz:
 		qparams['order'] = config.choices['order'].get(order, 'Bug Number')
 		qparams['bug_severity'] = severity or []
 		qparams['priority'] = priority or []
-		if status == None:
+		if status is None:
 			# NEW, ASSIGNED and REOPENED is obsolete as of bugzilla 3.x and has
 			# been removed from bugs.gentoo.org on 2011/05/01
 			qparams['bug_status'] = ['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'IN_PROGRESS']
@@ -610,21 +610,21 @@ class Bugz:
 		if title:
 			qparams['short_desc'] = title or ''
 			modified.append(('title', title))
-		if url != None:
+		if url is not None:
 			qparams['bug_file_loc'] = url
 			modified.append(('url', url))
-		if severity != None:
+		if severity is not None:
 			qparams['bug_severity'] = severity
 			modified.append(('severity', severity))
-		if priority != None:
+		if priority is not None:
 			qparams['priority'] = priority
 			modified.append(('priority', priority))
 
 		# cc manipulation
-		if add_cc != None:
+		if add_cc is not None:
 			qparams['newcc'] = ', '.join(add_cc)
 			modified.append(('newcc', qparams['newcc']))
-		if remove_cc != None:
+		if remove_cc is not None:
 			qparams['cc'] = remove_cc
 			qparams['removecc'] = 'on'
 			modified.append(('cc', remove_cc))
@@ -656,13 +656,13 @@ class Bugz:
 		if changed_blocked:
 			modified.append(('blocked', qparams['blocked']))
 
-		if whiteboard != None:
+		if whiteboard is not None:
 			qparams['status_whiteboard'] = whiteboard
 			modified.append(('status_whiteboard', whiteboard))
-		if keywords != None:
+		if keywords is not None:
 			qparams['keywords'] = keywords
 			modified.append(('keywords', keywords))
-		if component != None:
+		if component is not None:
 			qparams['component'] = component
 			modified.append(('component', component))
 
