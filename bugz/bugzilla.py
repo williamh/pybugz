@@ -551,11 +551,14 @@ class Bugz:
 		for field in FIELDS:
 			try:
 				qparams[field] = buginfo.find('.//%s' % field).text
+				if qparams[field] is None:
+					del qparams[field]
 			except:
 				pass
 
 		for field in FIELDS_MULTI:
-			qparams[field] = [d.text for d in buginfo.findall('.//%s' % field)]
+			qparams[field] = [d.text for d in buginfo.findall('.//%s' % field)
+					if d is not None and d.text is not None]
 
 		# set 'knob' if we are change the status/resolution
 		# or trying to reassign bug.
