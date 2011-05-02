@@ -267,9 +267,6 @@ class PrettyBugz(Bugz):
 
 		print '%-12s: %d' % ('Comments', len(bug_comments))
 		print '%-12s: %d' % ('Attachments', len(bug_attachments))
-		print '%-12s: %s' % ('URL', '%s?id=%s' % (urljoin(self.base,
-													config.urls['show']),
-													bugid))
 		print
 
 		if attachments:
