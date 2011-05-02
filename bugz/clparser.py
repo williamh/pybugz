@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
+import ConfigParser
+import os
+import sys
 
 from bugz import __version__
 from bugz.cli import PrettyBugz
@@ -229,8 +232,11 @@ def make_search_parser(subparsers):
 def make_parser():
 	parser = argparse.ArgumentParser(
 		epilog = 'use -h after a sub-command for sub-command specific help')
+	parser.add_argument('--config-file',
+		help = 'read an alternate configuration file')
+	parser.add_argument('--connection',
+		help = 'use [connection] section of your configuration file')
 	parser.add_argument('-b', '--base',
-		default = 'https://bugs.gentoo.org/',
 		help = 'base URL of Bugzilla')
 	parser.add_argument('-u', '--user',
 		help = 'username for commands requiring authentication')
@@ -245,17 +251,14 @@ def make_parser():
 		help = 'forget login after execution')
 	parser.add_argument('-q', '--quiet',
 		action='store_true',
-		default = False,
 		help = 'quiet mode')
 	parser.add_argument('--columns', 
 		type = int,
-		default = 0,
 		help = 'maximum number of columns output should use')
 	parser.add_argument('--encoding',
 		help = 'output encoding (default: utf-8).')
 	parser.add_argument('--skip-auth',
 		action='store_true',
-		default = False,
 		help = 'skip Authentication.')
 	parser.add_argument('--version',
 		action='version',
@@ -271,15 +274,75 @@ def make_parser():
 	make_search_parser(subparsers)
 	return parser
 
-def get_kwds(args):
-	bugz = {}
-	cmd = {}
+def config_option(parser, get, section, option):
+	if parser.has_option(section, option):
+		try:
+			if get(section, option) != '':
+				return get(section, option)
+			else:
+				print "Error: "+option+" is not set"
+				sys.exit(1)
+		except ValueError as e:
+			print "Error: option "+option+" is not in the right format: "+str(e)
+			sys.exit(1)
+
+def get_config(args, bugz):
+	config_file = getattr(args, 'config_file')
+	if config_file is None:
+			config_file = '~/.bugzrc'
+	section = getattr(args, 'connection')
+	parser = ConfigParser.ConfigParser()
+	config_file_name = os.path.expanduser(config_file)
+
+	# try to open config file
+	try:
+		file = open(config_file_name)
+	except IOError:
+		if getattr(args, 'config_file') is not None:
+			print "Error: Can't find user configuration file: "+config_file_name
+			sys.exit(1)
+		else:
+			return bugz
+
+	# try to parce config file
+	try:
+		parser.readfp(file)
+		sections = parser.sections()
+	except ConfigParser.ParsingError as e:
+		print "Error: Can't parse user configuration file: "+str(e)
+		sys.exit(1)
+
+	# parse a specific section
+	if section in sections:
+		bugz['base'] = config_option(parser, parser.get, section, "base")
+		bugz['user'] = config_option(parser, parser.get, section, "user")
+		bugz['password'] = config_option(parser, parser.get, section, "password")
+		bugz['httpuser'] = config_option(parser, parser.get, section, "httpuser")
+		bugz['httppassword'] = config_option(parser, parser.get, section,
+				"httppassword")
+		bugz['forget'] = config_option(parser, parser.getboolean, section,
+				"forget")
+		bugz['columns'] = config_option(parser, parser.getint, section,
+				"columns")
+		bugz['encoding'] = config_option(parser, parser.get, section,
+				"encoding")
+		bugz['quiet'] = config_option(parser, parser.getboolean, section,
+				"quiet")
+	elif section is not None:
+		print "Error: Can't find section ["+section+"] in configuration file"
+		sys.exit(1)
+
+	return bugz
+
+def get_kwds(args, bugz, cmd):
 	global_attrs = ['user', 'password', 'httpuser', 'httppassword', 'forget',
 		'base', 'columns', 'encoding', 'quiet', 'skip_auth']
+	skip_attrs = ['config_file', 'connection', 'func']
 	for attr in dir(args):
-		if attr[0] != '_' and attr != 'func':
-			if attr in global_attrs:
+		if attr[0] == '_' or attr in skip_attrs:
+			continue
+		elif attr in global_attrs:
+			if attr not in bugz or getattr(args,attr):
 				bugz[attr] = getattr(args,attr)
-			else:
-				cmd[attr] = getattr(args,attr)
-	return bugz, cmd
+		else:
+			cmd[attr] = getattr(args,attr)

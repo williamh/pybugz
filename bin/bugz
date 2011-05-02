@@ -5,14 +5,21 @@ import sys
 import traceback
 
 from bugz.cli import BugzError, PrettyBugz
-from bugz.clparser import make_parser, get_kwds
+from bugz.clparser import make_parser, get_config, get_kwds
 
 def main():
 	parser = make_parser()
 
 	# parse options
 	args = parser.parse_args()
-	(bugz_kwds, cmd_kwds) = get_kwds(args)
+	bugz_kwds = {}
+	get_config(args, bugz_kwds)
+	cmd_kwds = {}
+	get_kwds(args, bugz_kwds, cmd_kwds)
+	if bugz_kwds['base'] is None:
+		bugz_kwds['base'] = 'https://bugs.gentoo.org'
+	if bugz_kwds['columns'] is None:
+		bugz_kwds['columns'] = 0
 
 	try:
 		bugz = PrettyBugz(**bugz_kwds)

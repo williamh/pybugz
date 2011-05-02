@@ -1,0 +1,25 @@
+#
+# bugzrc.example - an example configuration file for pybugz
+#
+# This file consists of sections which define parameters for each
+# bugzilla you plan to use.
+#
+# Each section begins with a name in square brackets. This is also the
+# name that should be used with the --connection  parameter to the bugz
+# command.
+#
+# Each section of this file consists of lines in the form:
+# key: value
+# as listed below.
+#
+# [sectionname]
+# base: http://my.project.com/bugzilla/
+# user: xyz@zyx.org
+# password: secret2
+# httpuser: xyz
+# httppassword: secret2
+# forget: True
+# columns: 80
+# encoding: utf-8
+# quiet: True
+
