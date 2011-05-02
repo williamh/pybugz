@@ -18,6 +18,35 @@ Features
 * Posting bugs, comments, and making changes to an existing bug.
 * Adding attachments to a bug.
 
+Configuration
+-------------
+~/.bugzrc:
+
+[gentoo]
+base: https://bugs.gentoo.org/
+user: abc@def.com
+password: secret
+
+[other]
+base: http://my.project.com/bugzilla/
+user: xyz@zyx.org
+password: secret2
+httpuser: xyz
+httppassword: secret2
+forget: True
+columns: 80
+encoding: utf-8
+quiet: True
+
+You can pass login informations either from rc-file or from command line
+arguments:
+$ bugz -d gentoo [action]
+OR
+$ bugz -b 'http://bugs.gentoo.org/' -u 'user' -p 'password' [action]
+
+If the forget option is 'False', a cookie is placed in the users home
+directory and last login will remembered.
+
 Usage/Workflow
 --------------
 
@@ -27,6 +56,9 @@ required for operation.
 
 To explain how it works, I will use a typical workflow for Gentoo
 development. 
+
+The most of this commands just works after a valid authentication (see
+steps above).
 
 1) Searching bugzilla for bugs I can fix, I'll run the command:
 ---------------------------------------------------------------

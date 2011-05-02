@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
+import ConfigParser
+import os
+import sys
 
 from bugz import __version__
 from bugz.cli import PrettyBugz
@@ -229,8 +232,12 @@ def make_search_parser(subparsers):
 def make_parser():
 	parser = argparse.ArgumentParser(
 		epilog = 'use -h after a sub-command for sub-command specific help')
+	parser.add_argument('-r', '--rc-file',
+		default = '~/.bugzrc',
+		help = 'read another rc file')
+	parser.add_argument('-d', '--bugzilla-db',
+		help = 'read the a [bugzilla-db] section from rc file')
 	parser.add_argument('-b', '--base',
-		default = 'https://bugs.gentoo.org/',
 		help = 'base URL of Bugzilla')
 	parser.add_argument('-u', '--user',
 		help = 'username for commands requiring authentication')
@@ -271,15 +278,71 @@ def make_parser():
 	make_search_parser(subparsers)
 	return parser
 
-def get_kwds(args):
+def get_usr_conf(args):
 	bugz = {}
+	section = getattr(args, 'bugzilla_db')
+	rc_file = getattr(args, 'rc_file')
+	parser = ConfigParser.ConfigParser()
+	usr_config_file = os.path.expanduser(rc_file)
+
+	# try to open rc-file
+	try:
+		FILE = open(usr_config_file)
+	except IOError:
+		print "Error: Can't find user configuration file: "+usr_config_file
+		return bugz
+
+	# try to parce rc-file
+	try:
+		parser.readfp(FILE)
+		sections = parser.sections()
+	except ConfigParser.ParsingError as e:
+		print "Error: Can't parse user configuration file: "+str(e)
+		sys.exit(1)
+
+	# parse a specific section
+	if section in sections:
+		bugz['base']     = get_usr_opt(parser, parser.get, section, "base", True)
+		bugz['user']     = get_usr_opt(parser, parser.get, section, "user", True)
+		bugz['password'] = get_usr_opt(parser, parser.get, section, "password", True)
+		bugz['httpuser'] = get_usr_opt(parser, parser.get, section, "httpuser", False)
+		bugz['httppassword'] = get_usr_opt(parser, parser.get, section, "httppassword", False)
+		bugz['forget']   = get_usr_opt(parser, parser.getboolean, section, "forget", False)
+		bugz['columns']  = get_usr_opt(parser, parser.getint, section, "columns", False)
+		bugz['encoding'] = get_usr_opt(parser, parser.get, section, "encoding", False)
+		bugz['quiet']    = get_usr_opt(parser, parser.getboolean, section, "quiet", False)
+	elif section != None:
+		print "Error: Can't find section ["+section+"] in user configuration file"
+		sys.exit(1)
+
+	return bugz
+
+def get_usr_opt(parser, get, section, option, needed):
+	if parser.has_option(section, option):
+		try:
+			if get(section, option) != '':
+				return get(section, option)
+			else:
+				print "Error: No complete configuration: "+option+" is not set"
+				sys.exit(1)
+		except ValueError as e:
+			print "Error: The option \""+option+"\" is not in the right format: "+str(e)
+			sys.exit(1)
+	elif needed:
+		print "Error: Can't obtian needed option \'"+option+"\' from " \
+		"user configuration file"
+		sys.exit(1)
+
+def get_kwds(args):
+	bugz = get_usr_conf(args)
 	cmd = {}
 	global_attrs = ['user', 'password', 'httpuser', 'httppassword', 'forget',
 		'base', 'columns', 'encoding', 'quiet', 'skip_auth']
 	for attr in dir(args):
-		if attr[0] != '_' and attr != 'func':
+		if attr[0] != '_' and attr not in ['func', 'bugzilla_db', 'rc_file']:
 			if attr in global_attrs:
-				bugz[attr] = getattr(args,attr)
+				if attr not in bugz:
+					bugz[attr] = getattr(args,attr)
 			else:
 				cmd[attr] = getattr(args,attr)
 	return bugz, cmd
