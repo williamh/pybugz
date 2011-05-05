@@ -458,12 +458,11 @@ class Bugz:
 			    (major_version == 2 and minor_version >= 7):
 			# If this is 2.7 or greater, then XMLTreeBuilder
 			# does what we want.
-			parser_class = ElementTree.XMLParser
+			parser = ElementTree.XMLParser()
 		else:
 			# Running under Python 2.6, so we need to use our
 			# subclass of XMLTreeBuilder instead.
-			parser_class = ForcedEncodingXMLTreeBuilder
-		parser = parser_class(encoding = 'utf-8')
+			parser = ForcedEncodingXMLTreeBuilder(encoding = 'utf-8')
 
 		etree = ElementTree.parse(fd, parser)
 		bug = etree.find('.//bug')
