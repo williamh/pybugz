@@ -174,7 +174,7 @@ class Bugz:
 						self.cookiejar.load()
 						self.cookiejar.clear()
 						self.cookiejar.save()
-						os.chmod(self.cookiejar.filename, 0700)
+						os.chmod(self.cookiejar.filename, 0600)
 					except IOError:
 						pass
 			except KeyError:
@@ -271,7 +271,7 @@ class Bugz:
 			self.authenticated = True
 			if not self.forget:
 				self.cookiejar.save()
-				os.chmod(self.cookiejar.filename, 0700)
+				os.chmod(self.cookiejar.filename, 0600)
 			return True
 		else:
 			raise RuntimeError("Failed to login")
