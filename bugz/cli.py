@@ -569,10 +569,13 @@ class PrettyBugz(Bugz):
 				bugid, reason))
 
 	def listbugs(self, buglist, show_url=False, show_status=False):
+		x = ''
+		if re.search("/$", self.base) is None:
+			x = '/'
 		for row in buglist:
 			bugid = row['bugid']
 			if show_url:
-				bugid = '%s%s?id=%s'%(self.base, config.urls['show'], bugid)
+				bugid = '%s%s%s?id=%s'%(self.base, x, config.urls['show'], bugid)
 			status = row['status']
 			desc = row['desc']
 			line = '%s' % (bugid)
