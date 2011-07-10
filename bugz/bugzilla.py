@@ -771,7 +771,7 @@ class Bugz:
 		if version != '':
 			qparams['version'] = version
 
-		#XXX: default priority is 'High'
+		#XXX: default priority is 'Normal'
 		if priority != '':
 			qparams['priority'] = priority
 

@@ -351,7 +351,7 @@ class PrettyBugz(Bugz):
 
 			# check for default priority
 			if priority is None:
-				priority_msg ='Enter priority (eg. High) (optional): '
+				priority_msg ='Enter priority (eg. Normal) (optional): '
 				priority = self.get_input(priority_msg)
 			else:
 				self.log('Enter priority (optional): %s' % priority)

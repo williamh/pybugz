@@ -36,7 +36,7 @@ class BugzConfig:
 		'version': 'unspecified',
 		'rep_platform': 'All',
 		'op_sys': 'Linux',
-		'priority': 'High',
+		'priority': 'Normal',
 		'bug_severity': 'normal',
 		'assigned_to': '',
 		'keywords': '',
