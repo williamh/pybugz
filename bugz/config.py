@@ -36,7 +36,7 @@ class BugzConfig:
 		'version': 'unspecified',
 		'rep_platform': 'All',
 		'op_sys': 'Linux',
-		'priority': 'P2',
+		'priority': 'High',
 		'bug_severity': 'normal',
 		'assigned_to': '',
 		'keywords': '',
@@ -219,11 +219,11 @@ class BugzConfig:
 		],
 
 		'priority': {
-		1:'P1',
-		2:'P2',
-		3:'P3',
-		4:'P4',
-		5:'P5',
+		1:'Highest',
+		2:'High',
+		3:'Normal',
+		4:'Low',
+		5:'Lowest',
 		}
 
 	}
