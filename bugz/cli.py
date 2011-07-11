@@ -335,6 +335,13 @@ class PrettyBugz(Bugz):
 			else:
 				self.log('Enter product: %s' % product)
 
+			# check for component
+			if not component:
+				while not component or len(component) < 1:
+					component = self.get_input('Enter component: ')
+			else:
+				self.log('Enter component: %s' % component)
+
 			# check for version
 			# FIXME: This default behaviour is not too nice.
 			if prodversion is None:
@@ -342,12 +349,16 @@ class PrettyBugz(Bugz):
 			else:
 				self.log('Enter version: %s' % prodversion)
 
-			# check for component
-			if not component:
-				while not component or len(component) < 1:
-					component = self.get_input('Enter component: ')
+			# check for default severity
+			if severity is None:
+				severity_msg ='Enter severity (eg. normal) (optional): '
+				severity = self.get_input(severity_msg)
 			else:
-				self.log('Enter component: %s' % component)
+				self.log('Enter severity (optional): %s' % severity)
+
+			# fixme: hw platform
+			# fixme: os
+			# fixme: milestone
 
 			# check for default priority
 			if priority is None:
@@ -356,12 +367,7 @@ class PrettyBugz(Bugz):
 			else:
 				self.log('Enter priority (optional): %s' % priority)
 
-			# check for default severity
-			if severity is None:
-				severity_msg ='Enter severity (eg. normal) (optional): '
-				severity = self.get_input(severity_msg)
-			else:
-				self.log('Enter severity (optional): %s' % severity)
+			# fixme: status
 
 			# check for default assignee
 			if assigned_to is None:
@@ -422,6 +428,7 @@ class PrettyBugz(Bugz):
 			else:
 				self.log('Enter a list of blocker bugs (optional): %s' % blocked)
 
+		# fixme: groups
 		# append the output from append_command to the description
 		if append_command is not None and append_command != '':
 			append_command_output = commands.getoutput(append_command)
@@ -460,10 +467,14 @@ class PrettyBugz(Bugz):
 		# print submission confirmation
 		print '-' * (self.columns - 1)
 		print 'Product     : ' + product
-		print 'Version     : ' + prodversion
 		print 'Component   : ' + component
-		print 'priority    : ' + priority
+		print 'Version     : ' + prodversion
 		print 'severity    : ' + severity
+		# fixme: hardware
+		# fixme: OS
+		# fixme: Milestone
+		print 'priority    : ' + priority
+		# fixme: status
 		print 'Assigned to : ' + assigned_to
 		print 'CC          : ' + cc
 		print 'URL         : ' + url
@@ -472,6 +483,7 @@ class PrettyBugz(Bugz):
 		print 'Keywords    : ' + keywords
 		print 'Depends on  : ' + dependson
 		print 'Blocks      : ' + blocked
+		# fixme: groups
 		print '-' * (self.columns - 1)
 
 		if not batch:
