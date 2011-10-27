@@ -310,8 +310,6 @@ def get_config(args, bugz):
 	try:
 		parser.readfp(file)
 		sections = parser.sections()
-		if section is None:
-			section = parser.get('DEFAULT', 'section')
 	except ConfigParser.ParsingError as e:
 		print " ! Error: Can't parse user configuration file: "+str(e)
 		sys.exit(1)
