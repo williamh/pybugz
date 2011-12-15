@@ -508,10 +508,13 @@ class PrettyBugz(Bugz):
 		if 'comment_from' in kwds:
 			if kwds['comment_from']:
 				try:
-					kwds['comment']  = open(kwds['comment_from'], 'r').read()
+					if kwds['comment_from'] == '-':
+						kwds['comment'] = sys.stdin.read()
+					else:
+						kwds['comment'] = open(kwds['comment_from'], 'r').read()
 				except IOError, e:
 					raise BugzError('Failed to get read from file: %s: %s' % \
-									(comment_from, e))
+									(kwds['comment_from'], e))
 
 				if 'comment_editor' in kwds:
 					if kwds['comment_editor']:
