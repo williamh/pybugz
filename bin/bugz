@@ -185,7 +185,7 @@ def make_search_parser(subparsers):
 		help = 'search for bugs in bugzilla')
 	search_parser.add_argument('terms',
 		nargs='*',
-		help = 'strings to search for in title or body')
+		help = 'strings to search for in title and/or body')
 	search_parser.add_argument('-o', '--order',
 		choices = config.choices['order'].keys(),
 		default = 'number',
@@ -212,7 +212,7 @@ def make_search_parser(subparsers):
 	search_parser.add_argument('-c', '--comments',
 		action='store_true',
 		default=None,
-		help = 'search comments instead of title')
+		help = 'search comments in addition to summary')
 	search_parser.add_argument('--product',
 		action='append',
 		help = 'restrict by product (one or more)')

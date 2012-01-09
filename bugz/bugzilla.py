@@ -347,10 +347,10 @@ class Bugz:
 			self.auth()
 
 		qparams = config.params['list'].copy()
+		qparams['value0-0-0'] = query
 		if comments:
-			qparams['long_desc'] = query
-		else:
-			qparams['short_desc'] = query
+			qparams['type0-0-1'] = qparams['type0-0-0']
+			qparams['value0-0-1'] = query
 
 		qparams['order'] = config.choices['order'].get(order, 'Bug Number')
 		qparams['bug_severity'] = severity or []
