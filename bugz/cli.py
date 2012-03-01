@@ -314,7 +314,10 @@ class PrettyBugz(Bugz):
 		# load description from file if possible
 		if description_from:
 			try:
-				description = open(description_from, 'r').read()
+					if description_from == '-':
+						description = sys.stdin.read()
+					else:
+						description = open(description_from, 'r').read()
 			except IOError, e:
 				raise BugzError('Unable to read from file: %s: %s' % \
 								(description_from, e))
