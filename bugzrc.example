@@ -22,4 +22,15 @@
 # columns: 80
 # encoding: utf-8
 # quiet: True
+#
+# The special section named 'default' may also be used. Other sections will
+# override any values specified here. The optional special key 'connection' is
+# used to name the default connection, to use when no --connection parameter is
+# specified to the bugz command.
+#
+# [default]
+# connection: sectionname
+# httpuser: xyz
+# httppassword: secret2
+# etc.
 
