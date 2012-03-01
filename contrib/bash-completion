@@ -1,66 +1,82 @@
 #
-# Bash completion support for bugz
+# Bash completion support for bugz.
 #
+# Copyright 2012 Tim Stoakes <tim@stoakes.net>
+#
+
+# Complete a list of command names by scanning the help output.
+__bugz_comp_commands_from_help ()
+{
+	local cur="${3#$2}"
+	local opts
+	opts="$($1 --help | \
+					awk -F, '/^\s+\{/ {for(i=1; i<=NF; ++i) {sub(/\W+/, "", $i); print $i} exit;}')"
+	COMPREPLY=( $( compgen -W "$opts" -- $cur ) )
+}
+
+
+# Complete a list of options, both generic, and specific to the given command,
+# by scanning the help output.
+__bugz_comp_opts_from_help ()
+{
+	local cur="${3#$2}"
+	local opts
+
+	if [ "x" == "x$2" ]; then
+		opts="$($1 --help | \
+						awk '/^\s+-/ {for(i=1; i<=NF; ++i) if ($i~/^-.+$/) {sub(/,$/, "", $i); print $i}}')"
+		COMPREPLY=( $( compgen -W "$opts" -- $cur ) )
+	else
+		opts="$($1 $2 --help 2>/dev/null | \
+						awk '/^\s+-/ {for(i=1; i<=NF; ++i) if ($i~/^-.+$/) {sub(/,$/, "", $i); print $i}}')"
+		if [ $? -eq 0 ]; then
+			COMPREPLY=( $( compgen -W "$opts" -- $cur ) )
+		fi
+	fi
+}
+
+
 _bugz() {
-	local cur prev commands opts
-	commands="attach attachment get help modify namedcmd post search"
-	opts="--version -h --help --skip-auth -f --forget --encoding -q --quiet
-		-b --base -u --user  -H --httpuser -p --password --columns
-		-P --httppassword"
+	local i c=1 command cur command_valid=0 bugz
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
-	if [[ $COMP_CWORD -eq 1 ]]; then
-		if [[ "$cur" == -* ]]; then
-			COMPREPLY=( $( compgen -W '--help -h --version' -- $cur ) )
-		else
-			COMPREPLY=( $( compgen -W "$commands" -- $cur ) )
-		fi
-	else
-		prev="${COMP_WORDS[COMP_CWORD-1]}"
-		command="${COMP_WORDS[1]}"
-		case ${command} in
-			attach)
-				opts="${opts} -d --description -c --content_type"
-				;;
-			attachment)
-				opts="${opts} -v --view"
-				;;
-			get)
-				opts="${opts} -n --no-comments"
-				;;
-			modify)
-				opts="${opts}
-					-c --comment -s --status -F --comment-from
-					--fixed -S --severity -t --title -U --url
-					-w --whiteboard --add-dependson --invalid
-					--add-blocked --priority --remove-cc -d --duplicate
-					--remove-dependson -a --assigned-to -k --keywords
-					--add-cc -C --comment-editor -r --resolution
-					--remove-blocked"
-				;;
-			namedcmd)
-				opts="${opts} --show-url --show-status"
-				;;
-			post)
-				opts="${opts}
-				--product -d --description -t --title
-				--append-command -S --severity --depends-on --component
-				--batch --prodversion --default-confirm --priority
-				-F --description-from -U --url -a --assigned-to
-				-k --keywords --cc --blocked"
-				;;
-			search)
-				opts="${opts}
-					-s --status --show-url --product -w --whiteboard
-					--severity -r --reporter --cc --commenter
-					-C --component -c --comments --priority
-					-a --assigned-to -k --keywords -o --order --show-status"
-				;;
+	bugz="${COMP_WORDS[0]}"
+
+	# Find the command name.
+	while [ $c -le $COMP_CWORD ]; do
+		i="${COMP_WORDS[c]}"
+		case "$i" in
+			-*) ;;
 			*)
+				# This is the best guess so far.
+				command="$i"
+				# Is it a valid command already?
+				$bugz $i --help > /dev/null 2>&1
+				if [ $? -eq 0 ]; then
+					# Yes! Stop looking.
+					command_valid=1
+					break 2
+				fi
 				;;
 		esac
-			COMPREPLY=( $( compgen -W "$opts" -- $cur ) )
-	fi
-	return 0
+		c=$((++c))
+	done
+
+	case "$cur" in
+		-*)
+			# Complete an option.
+			__bugz_comp_opts_from_help "$bugz" "$command" "$cur"
+			return 0
+			;;
+
+			*)
+			if [ $command_valid -ne 1 ]; then
+				# Complete the command name if required.
+				__bugz_comp_commands_from_help "$bugz" "" $command
+			fi
+			# If there's anything left, don't complete it.
+			return 0
+			;;
+	esac
 }
 complete -F _bugz bugz
