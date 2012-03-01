@@ -288,6 +288,22 @@ def config_option(parser, get, section, option):
 			print " ! Error: option "+option+" is not in the right format: "+str(e)
 			sys.exit(1)
 
+def fill_config_option(bugz, parser, get, section, option):
+	value = config_option(parser, get, section, option)
+	if value is not None:
+		bugz[option] = value
+
+def fill_config(bugz, parser, section):
+	fill_config_option(bugz, parser, parser.get, section, 'base')
+	fill_config_option(bugz, parser, parser.get, section, 'user')
+	fill_config_option(bugz, parser, parser.get, section, 'password')
+	fill_config_option(bugz, parser, parser.get, section, 'httpuser')
+	fill_config_option(bugz, parser, parser.get, section, 'httppassword')
+	fill_config_option(bugz, parser, parser.get, section, 'forget')
+	fill_config_option(bugz, parser, parser.get, section, 'columns')
+	fill_config_option(bugz, parser, parser.get, section, 'encoding')
+	fill_config_option(bugz, parser, parser.get, section, 'quiet')
+
 def get_config(args, bugz):
 	config_file = getattr(args, 'config_file')
 	if config_file is None:
@@ -314,22 +330,15 @@ def get_config(args, bugz):
 		print " ! Error: Can't parse user configuration file: "+str(e)
 		sys.exit(1)
 
+	# parse the default section first
+	if "default" in sections:
+		fill_config(bugz, parser, "default")
+	if section is None:
+		section = config_option(parser, parser.get, "default", "connection")
+
 	# parse a specific section
 	if section in sections:
-		bugz['base'] = config_option(parser, parser.get, section, "base")
-		bugz['user'] = config_option(parser, parser.get, section, "user")
-		bugz['password'] = config_option(parser, parser.get, section, "password")
-		bugz['httpuser'] = config_option(parser, parser.get, section, "httpuser")
-		bugz['httppassword'] = config_option(parser, parser.get, section,
-				"httppassword")
-		bugz['forget'] = config_option(parser, parser.getboolean, section,
-				"forget")
-		bugz['columns'] = config_option(parser, parser.getint, section,
-				"columns")
-		bugz['encoding'] = config_option(parser, parser.get, section,
-				"encoding")
-		bugz['quiet'] = config_option(parser, parser.getboolean, section,
-				"quiet")
+		fill_config(bugz, parser, section)
 	elif section is not None:
 		print " ! Error: Can't find section ["+section+"] in configuration file"
 		sys.exit(1)
