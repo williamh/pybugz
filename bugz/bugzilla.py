@@ -471,6 +471,36 @@ class Bugz:
 		else:
 			return etree
 
+	def request_and_check_errors(self, req_url, req_params, headers):
+		""" Send an HTTP request, handling authorization if required. Return the
+		response, but check for errors first.
+
+		@param req_url: Request URL
+		@type  req_url: string
+		@param req_params: Request parameters, urlencoded.
+		@type  req_params: string
+		@param headers: Request HTTP headers.
+		@type  headers: string
+
+		@rtype: Response data
+		"""
+		req = Request(req_url, req_params, config.headers)
+		if self.httpuser and self.httppassword:
+			base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
+			req.add_header("Authorization", "Basic %s" % base64string)
+
+		try:
+			resp = self.opener.open(req)
+			resp_data = resp.read()
+			re_error = re.compile(r'id="error_msg".*>([^<]+)<')
+			error = re_error.search(resp_data)
+			if error:
+				print error.group(1)
+				return None
+			return resp_data
+		except:
+			return None
+
 	def modify(self, bugid, title = None, comment = None, url = None,
 			status = None, resolution = None,
 			assigned_to = None, duplicate = 0,
@@ -674,21 +704,32 @@ class Bugz:
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base, config.urls['modify'])
-		req = Request(req_url, req_params, config.headers)
-		if self.httpuser and self.httppassword:
-			base64string = base64.encodestring('%s:%s' % (self.httpuser, self.httppassword))[:-1]
-			req.add_header("Authorization", "Basic %s" % base64string)
 
-		try:
-			resp = self.opener.open(req)
-			re_error = re.compile(r'id="error_msg".*>([^<]+)<')
-			error = re_error.search(resp.read())
-			if error:
-				print error.group(1)
-				return []
-			return modified
-		except:
+		resp_data = self.request_and_check_errors(req_url, req_params, config.headers)
+
+		if resp_data is not None:
+			# Detect this bug in bugzilla 3.2.2 - the XML does not contain the
+			# required token, but does not issue the standard error page.
+			# See https://bugzilla.mozilla.org/show_bug.cgi?id=4766
+			re_suspicious = re.compile(r'<p>Bugzilla &ndash; Suspicious Action</p>')
+			if re_suspicious.search(resp_data):
+				# Tell the user, then pull the token out of the HTML response and
+				# resubmit the request.
+				self.warn("Activating 'Bugzilla Suspicious Action' workaround. Are you using Bugzilla 3.2.2?")
+				re_token = re.compile(r'<input type="hidden" name="token" value="([^"]+)">')
+				token = re_token.search(resp_data)
+				if token is None:
+					self.warn("Workaround failed - token not found.");
+					return []
+				else:
+					qparams['token'] = token.group(1)
+					req_params = urlencode(qparams, True)
+					resp_data = self.request_and_check_errors(req_url, req_params, config.headers)
+
+		if resp_data is None:
 			return []
+
+		return modified
 
 	def attachment(self, attachid):
 		"""Get an attachment by attachment_id
