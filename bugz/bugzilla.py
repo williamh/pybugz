@@ -802,7 +802,7 @@ class Bugz:
 		return 0
 
 	def attach(self, bugid, title, description, filename,
-			content_type, ispatch = False):
+			content_type, ispatch = False, isbigfile = False):
 		"""Attach a file to a bug.
 
 		@param bugid: bug id
@@ -815,6 +815,8 @@ class Bugz:
 		@type  filename: string
 		@keywords content_type: mime-type of the attachment
 		@type content_type: string
+		@param isbigfile: whether the attachment is a big file
+		@type  isbigfile: bool
 
 		@rtype: bool
 		@return: True if successful, False if not successful.
@@ -826,6 +828,8 @@ class Bugz:
 		qparams['bugid'] = bugid
 		qparams['description'] = title
 		qparams['comment'] = description
+		if isbigfile:
+			qparams['bigfile'] = 'bigfile'
 		if ispatch:
 			qparams['ispatch'] = '1'
 			qparams['contenttypemethod'] = 'manual'
