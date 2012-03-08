@@ -18,13 +18,12 @@ def make_attach_parser(subparsers):
 		help = 'the ID of the bug where the file should be attached')
 	attach_parser.add_argument('filename',
 		help = 'the name of the file to attach')
-	attach_parser.add_argument('-c', '--content-type',
-		default='text/plain',
-		help = 'mimetype of the file (default: text/plain)')
 	attach_parser.add_argument('-t', '--title',
 		help = 'a short description of the attachment (default: filename).')
 	attach_parser.add_argument('-d', '--description',
 		help = 'a long description of the attachment.')
+	attach_parser.add_argument('-c', '--content-type',
+		help = 'mimetype of the file e.g. text/plain (default: auto-detect)')
 	attach_parser.add_argument('-p', '--patch',
 		action='store_true',
 	help = 'attachment is a patch')

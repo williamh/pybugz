@@ -46,10 +46,10 @@ class BugzConfig:
 		'attach_post': {
 		'action': 'insert',
 		'ispatch': '',
-		'contenttypemethod': 'manual',
+		'contenttypemethod': 'autodetect',
 		'bugid': '',
 		'description': '',
-		'contenttypeentry': 'text/plain',
+		'contenttypeentry': '',
 		'comment': '',
 		},
 
