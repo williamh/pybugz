@@ -811,6 +811,8 @@ class Bugz:
 		@type  filename: string
 		@keywords content_type: mime-type of the attachment
 		@type content_type: string
+		@param ispatch: whether the attachment is a patch
+		@type  ispatch: bool
 		@param isbigfile: whether the attachment is a big file
 		@type  isbigfile: bool
 
