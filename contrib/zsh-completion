@@ -56,6 +56,7 @@ _bugz_cmd_attach()
     '(--content_type= -c)'{--content_type=,-c}'[mimetype of the file]:MIME-Type:_mime_types' \
     '(--title= -t)'{--title=,-t}'[a short description of the attachment]:title: ' \
     '(--description= -d)'{--description=,-d}'[a long description of the attachment]:description: ' \
+    '(--bigfile)'{--bigfile}'[the attachment is a big file]:bigfile: ' \
     '--help[show help message and exit]'
 }
 
