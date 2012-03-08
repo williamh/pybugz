@@ -798,7 +798,7 @@ class Bugz:
 		return 0
 
 	def attach(self, bugid, title, description, filename,
-			content_type = 'text/plain', ispatch = False):
+			content_type, ispatch = False):
 		"""Attach a file to a bug.
 
 		@param bugid: bug id
@@ -824,8 +824,10 @@ class Bugz:
 		qparams['comment'] = description
 		if ispatch:
 			qparams['ispatch'] = '1'
+			qparams['contenttypemethod'] = 'manual'
 			qparams['contenttypeentry'] = 'text/plain'
-		else:
+		elif content_type is not None:
+			qparams['contenttypemethod'] = 'manual'
 			qparams['contenttypeentry'] = content_type
 
 		filedata = [('data', filename, open(filename).read())]
