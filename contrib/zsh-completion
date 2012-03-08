@@ -54,7 +54,8 @@ _bugz_cmd_attach()
 {
   _arguments -s : \
     '(--content_type= -c)'{--content_type=,-c}'[mimetype of the file]:MIME-Type:_mime_types' \
-    '(--description= -d)'{--description=,-d}'[a description of the attachment]:description: ' \
+    '(--title= -t)'{--title=,-t}'[a short description of the attachment]:title: ' \
+    '(--description= -d)'{--description=,-d}'[a long description of the attachment]:description: ' \
     '--help[show help message and exit]'
 }
 
