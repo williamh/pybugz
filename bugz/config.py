@@ -180,6 +180,9 @@ class BugzConfig:
 		'resolution': 'resolution',
 		'short_desc': 'desc',
 		'short_short_desc': 'desc',
+		'product': 'product',
+		'component': 'component',
+		'changeddate': 'changeddate',
 		},
 		# Novell: bug_id,"bug_severity","priority","op_sys","bug_status","resolution","short_desc"
 		# Gentoo: bug_id,"bug_severity","priority","op_sys","assigned_to","bug_status","resolution","short_short_desc"
