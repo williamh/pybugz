@@ -303,10 +303,10 @@ def fill_config(bugz, parser, section):
 	fill_config_option(bugz, parser, parser.get, section, 'password')
 	fill_config_option(bugz, parser, parser.get, section, 'httpuser')
 	fill_config_option(bugz, parser, parser.get, section, 'httppassword')
-	fill_config_option(bugz, parser, parser.get, section, 'forget')
-	fill_config_option(bugz, parser, parser.get, section, 'columns')
+	fill_config_option(bugz, parser, parser.getboolean, section, 'forget')
+	fill_config_option(bugz, parser, parser.getint, section, 'columns')
 	fill_config_option(bugz, parser, parser.get, section, 'encoding')
-	fill_config_option(bugz, parser, parser.get, section, 'quiet')
+	fill_config_option(bugz, parser, parser.getboolean, section, 'quiet')
 
 def get_config(args, bugz):
 	config_file = getattr(args, 'config_file')
