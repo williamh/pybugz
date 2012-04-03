@@ -141,35 +141,26 @@ class Bugz:
 	@ivar authenticated: is this session authenticated already
 	"""
 
-	def __init__(self, base, user = None, password = None, forget = False,
-			skip_auth = False, httpuser = None, httppassword = None ):
+	def __init__(self, args):
 		"""
 		{user} and {password} will be prompted if an action needs them
 		and they are not supplied.
 
 		if {forget} is set, the login cookie will be destroyed on quit.
 
-		@param base: base url of the bugzilla
-		@type  base: string
-		@keyword user: username for authenticated actions.
-		@type    user: string
-		@keyword password: password for authenticated actions.
-		@type    password: string
-		@keyword forget: forget login session after termination.
-		@type    forget: bool
-		@keyword skip_auth: do not authenticate
-		@type    skip_auth: bool
+		@param args: arguments to be processed
+		@type  args: object containing the arguments as attributes
 		"""
-		self.base = base
+		self.base = args.base
 		scheme, self.host, self.path, query, frag  = urlsplit(self.base)
 		self.authenticated = False
-		self.forget = forget
+		self.forget = args.forget
 
 		if not self.forget:
 			try:
 				cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
 				self.cookiejar = LWPCookieJar(cookie_file)
-				if forget:
+				if args.forget:
 					try:
 						self.cookiejar.load()
 						self.cookiejar.clear()
@@ -184,11 +175,11 @@ class Bugz:
 			self.cookiejar = CookieJar()
 
 		self.opener = build_opener(HTTPCookieProcessor(self.cookiejar))
-		self.user = user
-		self.password = password
-		self.httpuser = httpuser
-		self.httppassword = httppassword
-		self.skip_auth = skip_auth
+		self.user = args.user
+		self.password = args.password
+		self.httpuser = args.httpuser
+		self.httppassword = args.httppassword
+		self.skip_auth = args.skip_auth
 
 	def log(self, status_msg):
 		"""Default logging handler. Expected to be overridden by
@@ -299,45 +290,14 @@ class Bugz:
 			results.append(fields)
 		return results
 
-	def search(self, query, comments = False, order = 'number',
-			assigned_to = None, reporter = None, cc = None,
-			commenter = None, whiteboard = None, keywords = None,
-			status = [], severity = [], priority = [], product = [],
-			component = []):
+	def search(self, args):
 		"""Search bugzilla for a bug.
 
-		@param query: query string to search in title or {comments}.
-		@type  query: string
-		@param order: what order to returns bugs in.
-		@type  order: string
+			status = [], severity = [], priority = [], product = [],
+			component = []):
 
-		@keyword assigned_to: email address which the bug is assigned to.
-		@type    assigned_to: string
-		@keyword reporter: email address matching the bug reporter.
-		@type    reporter: string
-		@keyword cc: email that is contained in the CC list
-		@type    cc: string
-		@keyword commenter: email of a commenter.
-		@type    commenter: string
 
-		@keyword whiteboard: string to search in status whiteboard (gentoo?)
-		@type    whiteboard: string
-		@keyword keywords: keyword to search for
-		@type    keywords: string
-
-		@keyword status: bug status to match. default is ['NEW', 'ASSIGNED',
-						 'REOPENED'].
-		@type    status: list
-		@keyword severity: severity to match, empty means all.
-		@type    severity: list
-		@keyword priority: priority levels to patch, empty means all.
-		@type    priority: list
-		@keyword comments: search comments instead of just bug title.
-		@type    comments: bool
-		@keyword product: search within products. empty means all.
-		@type    product: list
-		@keyword component: search within components. empty means all.
-		@type    component: list
+		@param args: argument object
 
 		@return: list of bugs, each bug represented as a dict
 		@rtype: list of dicts
@@ -347,41 +307,42 @@ class Bugz:
 			self.auth()
 
 		qparams = config.params['list'].copy()
-		qparams['value0-0-0'] = query
-		if comments:
+		qparams['value0-0-0'] = ' '.join(args.terms).strip()
+		if args.comments:
 			qparams['type0-0-1'] = qparams['type0-0-0']
-			qparams['value0-0-1'] = query
+			qparams['value0-0-1'] = ' '.join(args.terms).strip()
 
-		qparams['order'] = config.choices['order'].get(order, 'Bug Number')
-		qparams['bug_severity'] = severity or []
-		qparams['priority'] = priority or []
-		if status is None:
+		qparams['order'] = config.choices['order'].get(args.order, 'Bug Number')
+		qparams['bug_severity'] = args.severity or []
+		qparams['priority'] = args.priority or []
+		if args.status is None:
 			# NEW, ASSIGNED and REOPENED is obsolete as of bugzilla 3.x and has
 			# been removed from bugs.gentoo.org on 2011/05/01
 			qparams['bug_status'] = ['NEW', 'ASSIGNED', 'REOPENED', 'UNCONFIRMED', 'CONFIRMED', 'IN_PROGRESS']
-		elif [s.upper() for s in status] == ['ALL']:
+		elif [s.upper() for s in args.status] == ['ALL']:
 			qparams['bug_status'] = config.choices['status']
 		else:
-			qparams['bug_status'] = [s.upper() for s in status]
-		qparams['product'] = product or ''
-		qparams['component'] = component or ''
-		qparams['status_whiteboard'] = whiteboard or ''
-		qparams['keywords'] = keywords or ''
+			qparams['bug_status'] = [s.upper() for s in args.status]
+		qparams['product'] = args.product or ''
+		qparams['component'] = args.component or ''
+		qparams['status_whiteboard'] = args.whiteboard or ''
+		qparams['keywords'] = args.keywords or ''
 
 		# hoops to jump through for emails, since there are
 		# only two fields, we have to figure out what combinations
 		# to use if all three are set.
-		unique = list(set([assigned_to, cc, reporter, commenter]))
+		unique = list(set([args.assigned_to, args.cc, args.reporter,
+			args.commenter]))
 		unique = [u for u in unique if u]
 		if len(unique) < 3:
 			for i in range(len(unique)):
 				e = unique[i]
 				n = i + 1
 				qparams['email%d' % n] = e
-				qparams['emailassigned_to%d' % n] = int(e == assigned_to)
-				qparams['emailreporter%d' % n] = int(e == reporter)
-				qparams['emailcc%d' % n] = int(e == cc)
-				qparams['emaillongdesc%d' % n] = int(e == commenter)
+				qparams['emailassigned_to%d' % n] = int(e == args.assigned_to)
+				qparams['emailreporter%d' % n] = int(e == args.reporter)
+				qparams['emailcc%d' % n] = int(e == args.cc)
+				qparams['emaillongdesc%d' % n] = int(e == args.commenter)
 		else:
 			raise AssertionError('Cannot set assigned_to, cc, and '
 					'reporter in the same query')
@@ -396,7 +357,7 @@ class Bugz:
 		resp = self.opener.open(req)
 		return self.extractResults(resp)
 
-	def namedcmd(self, cmd):
+	def namedcmd(self, args):
 		"""Run command stored in Bugzilla by name.
 
 		@return: Result from the stored command.
@@ -409,7 +370,7 @@ class Bugz:
 		qparams = config.params['namedcmd'].copy()
 		# Is there a better way of getting a command with a space in its name
 		# to be encoded as foo%20bar instead of foo+bar or foo%2520bar?
-		qparams['namedcmd'] = quote(cmd)
+		qparams['namedcmd'] = quote(args.command)
 		req_params = urlencode(qparams, True)
 		req_params = req_params.replace('%25','%')
 
@@ -423,11 +384,11 @@ class Bugz:
 
 		return self.extractResults(resp)
 
-	def get(self, bugid):
+	def get(self, args):
 		"""Get an ElementTree representation of a bug.
 
-		@param bugid: bug id
-		@type  bugid: int
+		@param args: arguments to be processed
+		@type  args: object containing the arguments as attributes
 
 		@rtype: ElementTree
 		"""
@@ -435,7 +396,7 @@ class Bugz:
 			self.auth()
 
 		qparams = config.params['show'].copy()
-		qparams['id'] = bugid
+		qparams['id'] = args.bugid
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base,  config.urls['show'])
@@ -501,56 +462,10 @@ class Bugz:
 		except:
 			return None
 
-	def modify(self, bugid, title = None, comment = None, url = None,
-			status = None, resolution = None,
-			assigned_to = None, duplicate = 0,
-			priority = None, severity = None,
-			add_cc = [], remove_cc = [],
-			add_dependson = [], remove_dependson = [],
-			add_blocked = [], remove_blocked = [],
-			whiteboard = None, keywords = None,
-			component = None):
+	def modify(self, args):
 		"""Modify an existing bug
 
-		@param bugid: bug id
-		@type  bugid: int
-		@keyword title: new title for bug
-		@type    title: string
-		@keyword comment: comment to add
-		@type    comment: string
-		@keyword url: new url
-		@type    url: string
-		@keyword status: new status (note, if you are changing it to RESOLVED, you need to set {resolution} as well.
-		@type    status: string
-		@keyword resolution: new resolution (if status=RESOLVED)
-		@type    resolution: string
-		@keyword assigned_to: email (needs to exist in bugzilla)
-		@type    assigned_to: string
-		@keyword duplicate: bug id to duplicate against (if resolution = DUPLICATE)
-		@type    duplicate: int
-		@keyword priority: new priority for bug
-		@type    priority: string
-		@keyword severity: new severity for bug
-		@type    severity: string
-		@keyword add_cc: list of emails to add to the cc list
-		@type    add_cc: list of strings
-		@keyword remove_cc: list of emails to remove from cc list
-		@type    remove_cc: list of string.
-		@keyword add_dependson: list of bug ids to add to the depend list
-		@type    add_dependson: list of strings
-		@keyword remove_dependson: list of bug ids to remove from depend list
-		@type    remove_dependson: list of strings
-		@keyword add_blocked: list of bug ids to add to the blocked list
-		@type    add_blocked: list of strings
-		@keyword remove_blocked: list of bug ids to remove from blocked list
-		@type    remove_blocked: list of strings
-
-		@keyword whiteboard: set status whiteboard
-		@type    whiteboard: string
-		@keyword keywords: set keywords
-		@type    keywords: string
-		@keyword component: set component
-		@type    component: string
+		@param args: arguments object
 
 		@return: list of fields modified.
 		@rtype: list of strings
@@ -558,14 +473,13 @@ class Bugz:
 		if not self.authenticated and not self.skip_auth:
 			self.auth()
 
-
-		buginfo = Bugz.get(self, bugid)
+		buginfo = Bugz.get(self, args)
 		if not buginfo:
 			return False
 
 		modified = []
 		qparams = config.params['modify'].copy()
-		qparams['id'] = bugid
+		qparams['id'] = args.bugid
 		# NOTE: knob has been removed in bugzilla 4 and 3?
 		qparams['knob'] = 'none'
 
@@ -591,97 +505,97 @@ class Bugz:
 
 		# set 'knob' if we are change the status/resolution
 		# or trying to reassign bug.
-		if status:
-			status = status.upper()
-		if resolution:
-			resolution = resolution.upper()
+		if args.status:
+			args.status = args.status.upper()
+		if args.resolution:
+			args.resolution = args.resolution.upper()
 
-		if status and status != qparams['bug_status']:
+		if args.status and args.status != qparams['bug_status']:
 			# Bugzilla >= 3.x
-			qparams['bug_status'] = status
+			qparams['bug_status'] = args.status
 
-			if status == 'RESOLVED':
+			if args.status == 'RESOLVED':
 				qparams['knob'] = 'resolve'
-				if resolution:
-					qparams['resolution'] = resolution
+				if args.resolution:
+					qparams['resolution'] = args.resolution
 				else:
 					qparams['resolution'] = 'FIXED'
 
-				modified.append(('status', status))
+				modified.append(('status', args.status))
 				modified.append(('resolution', qparams['resolution']))
-			elif status == 'ASSIGNED' or status == 'IN_PROGRESS':
+			elif args.status == 'ASSIGNED' or args.status == 'IN_PROGRESS':
 				qparams['knob'] = 'accept'
-				modified.append(('status', status))
-			elif status == 'REOPENED':
+				modified.append(('status', args.status))
+			elif args.status == 'REOPENED':
 				qparams['knob'] = 'reopen'
-				modified.append(('status', status))
-			elif status == 'VERIFIED':
+				modified.append(('status', args.status))
+			elif args.status == 'VERIFIED':
 				qparams['knob'] = 'verified'
-				modified.append(('status', status))
-			elif status == 'CLOSED':
+				modified.append(('status', args.status))
+			elif args.status == 'CLOSED':
 				qparams['knob'] = 'closed'
-				modified.append(('status', status))
-		elif duplicate:
+				modified.append(('status', args.status))
+		elif args.duplicate:
 			# Bugzilla >= 3.x
 			qparams['bug_status'] = "RESOLVED"
 			qparams['resolution'] = "DUPLICATE"
 
 			qparams['knob'] = 'duplicate'
-			qparams['dup_id'] = duplicate
+			qparams['dup_id'] = args.duplicate
 			modified.append(('status', 'RESOLVED'))
 			modified.append(('resolution', 'DUPLICATE'))
-		elif assigned_to:
+		elif args.assigned_to:
 			qparams['knob'] = 'reassign'
-			qparams['assigned_to'] = assigned_to
-			modified.append(('assigned_to', assigned_to))
+			qparams['assigned_to'] = args.assigned_to
+			modified.append(('assigned_to', args.assigned_to))
 
 		# update status
-		if status is not None:
-			qparams['bug_status'] = status
+		if args.status is not None:
+			qparams['bug_status'] = args.status
 
 		# setup modification of other bits
-		if comment:
-			qparams['comment'] = comment
-			modified.append(('comment', ellipsis(comment, 60)))
-		if title:
-			qparams['short_desc'] = title or ''
-			modified.append(('title', title))
-		if url is not None:
-			qparams['bug_file_loc'] = url
-			modified.append(('url', url))
-		if severity is not None:
-			qparams['bug_severity'] = severity
-			modified.append(('severity', severity))
-		if priority is not None:
-			qparams['priority'] = priority
-			modified.append(('priority', priority))
+		if args.comment:
+			qparams['comment'] = args.comment
+			modified.append(('comment', ellipsis(args.comment, 60)))
+		if args.title:
+			qparams['short_desc'] = args.title or ''
+			modified.append(('title', args.title))
+		if args.url is not None:
+			qparams['bug_file_loc'] = args.url
+			modified.append(('url', args.url))
+		if args.severity is not None:
+			qparams['bug_severity'] = args.severity
+			modified.append(('severity', args.severity))
+		if args.priority is not None:
+			qparams['priority'] = args.priority
+			modified.append(('priority', args.priority))
 
 		# cc manipulation
-		if add_cc is not None:
-			qparams['newcc'] = ', '.join(add_cc)
+		if args.add_cc is not None:
+			qparams['newcc'] = ', '.join(args.add_cc)
 			modified.append(('newcc', qparams['newcc']))
-		if remove_cc is not None:
-			qparams['cc'] = remove_cc
+		if args.remove_cc is not None:
+			qparams['cc'] = args.remove_cc
 			qparams['removecc'] = 'on'
-			modified.append(('cc', remove_cc))
+			modified.append(('cc', args.remove_cc))
 
 		# bug depend/blocked manipulation
 		changed_dependson = False
 		changed_blocked = False
-		if remove_dependson:
-			for bug_id in remove_dependson:
+		if args.remove_dependson:
+			for bug_id in args.remove_dependson:
 				qparams['dependson'].remove(str(bug_id))
 				changed_dependson = True
-		if remove_blocked:
-			for bug_id in remove_blocked:
+		if args.remove_blocked:
+			for bug_id in args.remove_blocked:
 				qparams['blocked'].remove(str(bug_id))
 				changed_blocked = True
-		if add_dependson:
-			for bug_id in add_dependson:
+		if args.add_dependson:
+			for bug_id in args.add_dependson:
 				qparams['dependson'].append(str(bug_id))
 				changed_dependson = True
-		if add_blocked:
-			for bug_id in add_blocked:
+		if args.add_blocked:
+			for bug_id in args.add_blocked:
 				qparams['blocked'].append(str(bug_id))
 				changed_blocked = True
 
@@ -692,15 +606,15 @@ class Bugz:
 		if changed_blocked:
 			modified.append(('blocked', qparams['blocked']))
 
-		if whiteboard is not None:
-			qparams['status_whiteboard'] = whiteboard
-			modified.append(('status_whiteboard', whiteboard))
-		if keywords is not None:
-			qparams['keywords'] = keywords
-			modified.append(('keywords', keywords))
-		if component is not None:
-			qparams['component'] = component
-			modified.append(('component', component))
+		if args.whiteboard is not None:
+			qparams['status_whiteboard'] = args.whiteboard
+			modified.append(('status_whiteboard', args.whiteboard))
+		if args.keywords is not None:
+			qparams['keywords'] = args.keywords
+			modified.append(('keywords', args.keywords))
+		if args.component is not None:
+			qparams['component'] = args.component
+			modified.append(('component', args.component))
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base, config.urls['modify'])
@@ -731,11 +645,10 @@ class Bugz:
 
 		return modified
 
-	def attachment(self, attachid):
+	def attachment(self, args):
 		"""Get an attachment by attachment_id
 
-		@param attachid: attachment id
-		@type  attachid: int
+		@param args: argument object
 
 		@return: dict with three keys, 'filename', 'size', 'fd'
 		@rtype: dict
@@ -744,7 +657,7 @@ class Bugz:
 			self.auth()
 
 		qparams = config.params['attach'].copy()
-		qparams['id'] = attachid
+		qparams['id'] = args.attachid
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base, config.urls['attach'])
@@ -764,35 +677,10 @@ class Bugz:
 		except:
 			return {}
 
-	def post(self, product, component, title, description, url = '', assigned_to = '', cc = '', keywords = '', version = '', dependson = '', blocked = '', priority = '', severity = ''):
+	def post(self, args):
 		"""Post a bug
 
-		@param product: product where the bug should be placed
-		@type product: string
-		@param component: component where the bug should be placed
-		@type component: string
-		@param title: title of the bug.
-		@type  title: string
-		@param description: description of the bug
-		@type  description: string
-		@keyword url: optional url to submit with bug
-		@type url: string
-		@keyword assigned_to: optional email to assign bug to
-		@type assigned_to: string.
-		@keyword cc: option list of CC'd emails
-		@type: string
-		@keyword keywords: option list of bugzilla keywords
-		@type: string
-		@keyword version: version of the component
-		@type: string
-		@keyword dependson: bugs this one depends on
-		@type: string
-		@keyword blocked: bugs this one blocks
-		@type: string
-		@keyword priority: priority of this bug
-		@type: string
-		@keyword severity: severity of this bug
-		@type: string
+		@param args: argument object
 
 		@rtype: int
 		@return: the bug number, or 0 if submission failed.
@@ -801,28 +689,28 @@ class Bugz:
 			self.auth()
 
 		qparams = config.params['post'].copy()
-		qparams['product'] = product
-		qparams['component'] = component
-		qparams['short_desc'] = title
-		qparams['comment'] = description
-		qparams['assigned_to']  = assigned_to
-		qparams['cc'] = cc
-		qparams['bug_file_loc'] = url
-		qparams['dependson'] = dependson
-		qparams['blocked'] = blocked
-		qparams['keywords'] = keywords
+		qparams['product'] = args.product
+		qparams['component'] = args.component
+		qparams['short_desc'] = args.title
+		qparams['comment'] = args.description
+		qparams['assigned_to']  = args.assigned_to
+		qparams['cc'] = args.cc
+		qparams['bug_file_loc'] = args.url
+		qparams['dependson'] = args.dependson
+		qparams['blocked'] = args.blocked
+		qparams['keywords'] = args.keywords
 
 		#XXX: default version is 'unspecified'
-		if version != '':
-			qparams['version'] = version
+		if args.prodversion != '':
+			qparams['version'] = args.prodversion
 
 		#XXX: default priority is 'Normal'
-		if priority != '':
-			qparams['priority'] = priority
+		if args.priority != '':
+			qparams['priority'] = args.priority
 
 		#XXX: default severity is 'normal'
-		if severity != '':
-			qparams['bug_severity'] = severity
+		if args.severity != '':
+			qparams['bug_severity'] = args.severity
 
 		req_params = urlencode(qparams, True)
 		req_url = urljoin(self.base, config.urls['post'])
@@ -842,24 +730,10 @@ class Bugz:
 
 		return 0
 
-	def attach(self, bugid, title, description, filename,
-			content_type, ispatch = False, isbigfile = False):
+	def attach(self, args):
 		"""Attach a file to a bug.
 
-		@param bugid: bug id
-		@type  bugid: int
-		@param title: short description of attachment
-		@type  title: string
-		@param description: long description of the attachment
-		@type  description: string
-		@param filename: filename of the attachment
-		@type  filename: string
-		@keywords content_type: mime-type of the attachment
-		@type content_type: string
-		@param ispatch: whether the attachment is a patch
-		@type  ispatch: bool
-		@param isbigfile: whether the attachment is a big file
-		@type  isbigfile: bool
+		@param args: argument object
 
 		@rtype: bool
 		@return: True if successful, False if not successful.
@@ -868,26 +742,26 @@ class Bugz:
 			self.auth()
 
 		qparams = config.params['attach_post'].copy()
-		qparams['bugid'] = bugid
-		if title is not None:
-			qparams['description'] = title
-		qparams['comment'] = description
-		if isbigfile:
+		qparams['bugid'] = args.bugid
+		if args.title is not None:
+			qparams['description'] = args.title
+		qparams['comment'] = args.description
+		if args.bigfile:
 			qparams['bigfile'] = 'bigfile'
-		if ispatch:
+		if args.patch:
 			qparams['ispatch'] = '1'
 			qparams['contenttypemethod'] = 'manual'
 			qparams['contenttypeentry'] = 'text/plain'
-		elif content_type is not None:
+		elif args.content_type is not None:
 			qparams['contenttypemethod'] = 'manual'
-			qparams['contenttypeentry'] = content_type
+			qparams['contenttypeentry'] = args.content_type
 
-		filedata = [('data', filename, open(filename).read())]
-		content_type, body = encode_multipart_formdata(qparams.items(),
-				filedata)
+		filedata = [('data', args.filename, open(args.filename).read())]
+		args.content_type, body = encode_multipart_formdata(qparams.items(),
+			filedata)
 
 		req_headers = config.headers.copy()
-		req_headers['Content-type'] = content_type
+		req_headers['Content-type'] = args.content_type
 		req_headers['Content-length'] = len(body)
 		req_url = urljoin(self.base, config.urls['attach_post'])
 		req = Request(req_url, body, req_headers)
