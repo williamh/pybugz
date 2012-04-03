@@ -6,6 +6,7 @@ import getpass
 import locale
 import mimetypes
 import os
+import subprocess
 import re
 import sys
 
@@ -142,7 +143,7 @@ class Bugz:
 	"""
 
 	def __init__(self, base, user = None, password = None, forget = False,
-			skip_auth = False, httpuser = None, httppassword = None ):
+			skip_auth = False, httpuser = None, httppassword = None, passwordcmd = None ):
 		"""
 		{user} and {password} will be prompted if an action needs them
 		and they are not supplied.
@@ -186,6 +187,7 @@ class Bugz:
 		self.opener = build_opener(HTTPCookieProcessor(self.cookiejar))
 		self.user = user
 		self.password = password
+                self.passwordcmd = passwordcmd
 		self.httpuser = httpuser
 		self.httppassword = httppassword
 		self.skip_auth = skip_auth
@@ -250,6 +252,10 @@ class Bugz:
 			self.user = self.get_input('Username: ')
 
 		# prompt for password if we were not supplied with it
+                if self.passwordcmd and not self.password:
+                        process = subprocess.Popen(self.passwordcmd.split(), shell=False, stdout=subprocess.PIPE)
+                        self.password, _ = process.communicate()
+
 		if not self.password:
 			self.log('No password given.')
 			self.password = getpass.getpass()

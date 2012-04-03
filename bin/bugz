@@ -353,7 +353,7 @@ def get_config(args, bugz):
 def get_kwds(args, bugz, cmd):
 	global_attrs = ['user', 'password', 'httpuser', 'httppassword', 'forget',
 		'base', 'columns', 'encoding', 'quiet', 'skip_auth']
-	skip_attrs = ['config_file', 'connection', 'func']
+	skip_attrs = ['config_file', 'connection', 'func', 'passwordcmd' ]
 	for attr in dir(args):
 		if attr[0] == '_' or attr in skip_attrs:
 			continue
