@@ -303,10 +303,11 @@ def fill_config(bugz, parser, section):
 	fill_config_option(bugz, parser, parser.get, section, 'password')
 	fill_config_option(bugz, parser, parser.get, section, 'httpuser')
 	fill_config_option(bugz, parser, parser.get, section, 'httppassword')
-	fill_config_option(bugz, parser, parser.get, section, 'forget')
-	fill_config_option(bugz, parser, parser.get, section, 'columns')
+	fill_config_option(bugz, parser, parser.getboolean, section, 'forget')
+	fill_config_option(bugz, parser, parser.getint, section, 'columns')
 	fill_config_option(bugz, parser, parser.get, section, 'encoding')
-	fill_config_option(bugz, parser, parser.get, section, 'quiet')
+	fill_config_option(bugz, parser, parser.getboolean, section, 'quiet')
+	fill_config_option(bugz, parser, parser.get, section, 'passwordcmd')
 
 def get_config(args, bugz):
 	config_file = getattr(args, 'config_file')
@@ -352,7 +353,7 @@ def get_config(args, bugz):
 def get_kwds(args, bugz, cmd):
 	global_attrs = ['user', 'password', 'httpuser', 'httppassword', 'forget',
 		'base', 'columns', 'encoding', 'quiet', 'skip_auth']
-	skip_attrs = ['config_file', 'connection', 'func']
+	skip_attrs = ['config_file', 'connection', 'func', 'passwordcmd' ]
 	for attr in dir(args):
 		if attr[0] == '_' or attr in skip_attrs:
 			continue

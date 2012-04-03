@@ -123,12 +123,12 @@ class BugzError(Exception):
 class PrettyBugz(Bugz):
 	def __init__(self, base, user = None, password =None, forget = False,
 			columns = 0, encoding = '', skip_auth = False,
-			quiet = False, httpuser = None, httppassword = None ):
+			quiet = False, httpuser = None, httppassword = None, passwordcmd = None ):
 
 		self.quiet = quiet
 		self.columns = columns or terminal_width()
 
-		Bugz.__init__(self, base, user, password, forget, skip_auth, httpuser, httppassword)
+		Bugz.__init__(self, base, user, password, forget, skip_auth, httpuser, httppassword, passwordcmd)
 
 		self.log("Using %s " % self.base)
 
