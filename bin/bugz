@@ -361,6 +361,8 @@ def get_kwds(args, bugz, cmd):
 				bugz[attr] = getattr(args,attr)
 		else:
 			cmd[attr] = getattr(args,attr)
+	if not type(bugz['columns']) == int:
+		bugz['columns'] = int(bugz['columns'])
 
 def main():
 	parser = make_parser()
