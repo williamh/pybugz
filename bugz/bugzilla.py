@@ -869,7 +869,8 @@ class Bugz:
 
 		qparams = config.params['attach_post'].copy()
 		qparams['bugid'] = bugid
-		qparams['description'] = title
+		if title is not None:
+			qparams['description'] = title
 		qparams['comment'] = description
 		if isbigfile:
 			qparams['bigfile'] = 'bigfile'
