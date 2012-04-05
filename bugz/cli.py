@@ -312,7 +312,7 @@ class PrettyBugz(Bugz):
 					else:
 						args.description = open( args.description_from, 'r').read()
 			except IOError, e:
-				raise BugzError('Unable to read from file: %s: %s' % 
+				raise BugzError('Unable to read from file: %s: %s' %
 					(args.description_from, e))
 
 		if not args.batch:
