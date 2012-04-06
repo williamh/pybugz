@@ -128,7 +128,8 @@ class PrettyBugz:
 		self.bz = BugzillaProxy(self.base)
 		self.log("Using %s " % self.base)
 
-		if not args.skip_auth:
+		if not args.skip_auth and (getattr(args, 'username', None) and
+				getattr(args, 'password', None)):
 			self.log('Logging in')
 			self.bz.User.login({'login':args.username,'password':args.password})
 
