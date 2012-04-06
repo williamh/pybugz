@@ -9,7 +9,6 @@ import traceback
 
 from bugz import __version__
 from bugz.cli import BugzError, PrettyBugz
-from bugz.config import config
 
 def make_attach_parser(subparsers):
 	attach_parser = subparsers.add_parser('attach',
@@ -81,16 +80,12 @@ def make_modify_parser(subparsers):
 	modify_parser.add_argument('-k', '--keywords',
 		help = 'set bug keywords'),
 	modify_parser.add_argument('--priority',
-		choices=config.choices['priority'].values(),
 		help = 'change the priority for this bug')
 	modify_parser.add_argument('-r', '--resolution',
-		choices=config.choices['resolution'].values(),
 		help = 'set new resolution (only if status = RESOLVED)')
 	modify_parser.add_argument('-s', '--status',
-		choices=config.choices['status'].values(),
 		help = 'set new status of bug (eg. RESOLVED)')
 	modify_parser.add_argument('-S', '--severity',
-		choices=config.choices['severity'],
 		help = 'set severity for this bug')
 	modify_parser.add_argument('-t', '--title',
 		help = 'set title of bug')
@@ -134,9 +129,6 @@ def make_namedcmd_parser(subparsers):
 	namedcmd_parser.add_argument('--show-status',
 		action = 'store_true',
 		help = 'show status of bugs')
-	namedcmd_parser.add_argument('--show-url',
-		action = 'store_true',
-		help = 'show bug id as a url')
 	namedcmd_parser.set_defaults(func = PrettyBugz.namedcmd)
 
 def make_post_parser(subparsers):
@@ -177,10 +169,8 @@ def make_post_parser(subparsers):
 		default = 'y',
 		help = 'default answer to confirmation question')
 	post_parser.add_argument('--priority',
-		choices=config.choices['priority'].values(),
 		help = 'set priority for the new bug')
 	post_parser.add_argument('-S', '--severity',
-		choices=config.choices['severity'],
 		help = 'set the severity for the new bug')
 	post_parser.set_defaults(func = PrettyBugz.post)
 
@@ -191,7 +181,6 @@ def make_search_parser(subparsers):
 		nargs='*',
 		help = 'strings to search for in title and/or body')
 	search_parser.add_argument('-o', '--order',
-		choices = config.choices['order'].keys(),
 		default = 'number',
 		help = 'display bugs in this order')
 	search_parser.add_argument('-a', '--assigned-to',
@@ -207,11 +196,9 @@ def make_search_parser(subparsers):
 		help = 'restrict by status (one or more, use all for all statuses)')
 	search_parser.add_argument('--severity',
 		action='append',
-		choices = config.choices['severity'],
 		help = 'restrict by severity (one or more)')
 	search_parser.add_argument('--priority',
 		action='append',
-		choices = config.choices['priority'].values(),
 		help = 'restrict by priority (one or more)')
 	search_parser.add_argument('-c', '--comments',
 		action='store_true',
@@ -229,9 +216,6 @@ def make_search_parser(subparsers):
 	search_parser.add_argument('--show-status',
 		action = 'store_true',
 		help='show status of bugs')
-	search_parser.add_argument('--show-url',
-		action = 'store_true',
-		help='show bug id as a url.')
 	search_parser.set_defaults(func = PrettyBugz.search)
 
 def make_parser():

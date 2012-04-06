@@ -16,7 +16,6 @@ except ImportError:
 	readline = None
 
 from bugzilla import Bugz
-from config import config
 
 BUGZ_COMMENT_TEMPLATE = \
 """
@@ -160,7 +159,7 @@ class PrettyBugz(Bugz):
 		search_term = ' '.join(args.terms).strip()
 
 		skip_opts = ['base', 'columns', 'connection', 'comments', 'forget',
-			'func', 'order', 'quiet', 'show_status', 'show_url',
+			'func', 'order', 'quiet', 'show_status',
 			'skip_auth', 'terms']
 		search_opts = sorted([(opt, val) for opt, val in args.__dict__.items()
 			if val is not None and not opt in skip_opts])
@@ -189,7 +188,7 @@ class PrettyBugz(Bugz):
 			self.log('No bugs found.')
 			return
 
-		self.listbugs(result, args.show_url, args.show_status)
+		self.listbugs(result, args.show_status)
 
 	def namedcmd(self, args):
 		"""Run a command stored in Bugzilla by name."""
@@ -202,7 +201,7 @@ class PrettyBugz(Bugz):
 			self.log('No result from command')
 			return
 
-		self.listbugs(result, args.show_url, args.show_status)
+		self.listbugs(result, args.show_status)
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
@@ -570,14 +569,12 @@ class PrettyBugz(Bugz):
 			raise RuntimeError("Failed to attach '%s' to bug %s%s" %
 				(args.filename, args.bugid, reason))
 
-	def listbugs(self, buglist, show_url=False, show_status=False):
+	def listbugs(self, buglist, show_status=False):
 		x = ''
 		if re.search("/$", self.base) is None:
 			x = '/'
 		for row in buglist:
 			bugid = row['bugid']
-			if show_url:
-				bugid = '%s%s%s?id=%s'%(self.base, x, config.urls['show'], bugid)
 			status = row['status']
 			desc = row['desc']
 			line = '%s' % (bugid)
