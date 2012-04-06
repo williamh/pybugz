@@ -211,97 +211,10 @@ class PrettyBugz:
 	def get(self, args):
 		""" Fetch bug details given the bug id """
 		self.log('Getting bug %s ..' % args.bugid)
+		result = self.bz.Bug.get({'ids':[args.bugid]})
 
-		result = Bugz.get(self, args)
-
-		if result is None:
-			raise RuntimeError('Bug %s not found' % args.bugid)
-
-		# Print out all the fields below by extract the text
-		# directly from the tag, and just ignore if we don't
-		# see the tag.
-		FIELDS = (
-			('short_desc', 'Title'),
-			('assigned_to', 'Assignee'),
-			('creation_ts', 'Reported'),
-			('delta_ts', 'Updated'),
-			('bug_status', 'Status'),
-			('resolution', 'Resolution'),
-			('bug_file_loc', 'URL'),
-			('bug_severity', 'Severity'),
-			('priority', 'Priority'),
-			('reporter', 'Reporter'),
-		)
-
-		MORE_FIELDS = (
-			('product', 'Product'),
-			('component', 'Component'),
-			('status_whiteboard', 'Whiteboard'),
-			('keywords', 'Keywords'),
-		)
-
-		for field, name in FIELDS + MORE_FIELDS:
-			try:
-				value = result.find('.//%s' % field).text
-				if value is None:
-						continue
-			except AttributeError:
-				continue
-			print '%-12s: %s' % (name, value.encode(self.enc))
-
-		# Print out the cc'ed people
-		cced = result.findall('.//cc')
-		for cc in cced:
-			print '%-12s: %s' %  ('CC', cc.text)
-
-		# print out depends
-		dependson = ', '.join([d.text for d in result.findall('.//dependson')])
-		blocked = ', '.join([d.text for d in result.findall('.//blocked')])
-		if dependson:
-			print '%-12s: %s' % ('DependsOn', dependson)
-		if blocked:
-			print '%-12s: %s' % ('Blocked', blocked)
-
-		bug_comments = result.findall('.//long_desc')
-		bug_attachments = result.findall('.//attachment')
-
-		print '%-12s: %d' % ('Comments', len(bug_comments))
-		print '%-12s: %d' % ('Attachments', len(bug_attachments))
-		print
-
-		if args.attachments:
-			for attachment in bug_attachments:
-				aid = attachment.find('.//attachid').text
-				desc = attachment.find('.//desc').text
-				when = attachment.find('.//date').text
-				print '[Attachment] [%s] [%s]' % (aid, desc.encode(self.enc))
-
-		if args.comments:
-			i = 0
-			wrapper = textwrap.TextWrapper(width = self.columns)
-			for comment in bug_comments:
-				try:
-					who = comment.find('.//who').text.encode(self.enc)
-				except AttributeError:
-					# Novell doesn't use 'who' on xml
-					who = ""
-				when = comment.find('.//bug_when').text.encode(self.enc)
-				what =  comment.find('.//thetext').text
-				print '\n[Comment #%d] %s : %s'  % (i, who, when)
-				print '-' * (self.columns - 1)
-
-				if what is None:
-					what = ''
-
-				# print wrapped version
-				for line in what.split('\n'):
-					if len(line) < self.columns:
-						print line.encode(self.enc)
-					else:
-						for shortline in wrapper.wrap(line):
-							print shortline.encode(self.enc)
-				i += 1
-			print
+		for bug in result['bugs']:
+			self.showbuginfo(bug, args.attachments, args.comments)
 
 	def post(self, args):
 		"""Post a new bug"""
@@ -597,3 +510,89 @@ class PrettyBugz:
 				print line[:self.columns]
 
 		self.log("%i bug(s) found." % len(buglist))
+
+	def showbuginfo(self, bug, show_attachments, show_comments):
+		FIELDS = (
+			('summary', 'Title'),
+			('assigned_to', 'Assignee'),
+			('creation_time', 'Reported'),
+			('last_change_time', 'Updated'),
+			('status', 'Status'),
+			('resolution', 'Resolution'),
+			('url', 'URL'),
+			('severity', 'Severity'),
+			('priority', 'Priority'),
+			('creator', 'Reporter'),
+		)
+
+		MORE_FIELDS = (
+			('product', 'Product'),
+			('component', 'Component'),
+			('whiteboard', 'Whiteboard'),
+		)
+
+		for field, name in FIELDS + MORE_FIELDS:
+			try:
+				value = bug[field]
+				if value is None or value == '':
+						continue
+			except AttributeError:
+				continue
+			print '%-12s: %s' % (name, value)
+
+		# print keywords
+		k = ', '.join(bug['keywords'])
+		if k:
+			print '%-12s: %s' % ('Keywords', k)
+
+		# Print out the cc'ed people
+		cced = bug['cc']
+		for cc in cced:
+			print '%-12s: %s' %  ('CC', cc)
+
+		# print out depends
+		dependson = ', '.join(["%s" % x for x in bug['depends_on']])
+		if dependson:
+			print '%-12s: %s' % ('DependsOn', dependson)
+		blocked = ', '.join(["%s" % x for x in bug['blocks']])
+		if blocked:
+			print '%-12s: %s' % ('Blocked', blocked)
+
+		bug_comments = self.bz.Bug.comments({'ids':[bug['id']]})
+		bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
+		print '%-12s: %d' % ('Comments', len(bug_comments))
+
+		bug_attachments = self.bz.Bug.attachments({'ids':[bug['id']]})
+		bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
+		print '%-12s: %d' % ('Attachments', len(bug_attachments))
+		print
+
+		if show_attachments:
+			for attachment in bug_attachments:
+				aid = attachment['id']
+				desc = attachment['summary']
+				when = attachment['creation_time']
+				print '[Attachment] [%s] [%s]' % (aid, desc.encode(self.enc))
+
+		if show_comments:
+			i = 0
+			wrapper = textwrap.TextWrapper(width = self.columns)
+			for comment in bug_comments:
+				who = comment['creator']
+				when = comment['time']
+				what = comment['text']
+				print '\n[Comment #%d] %s : %s' % (i, who, when)
+				print '-' * (self.columns - 1)
+
+				if what is None:
+					what = ''
+
+				# print wrapped version
+				for line in what.split('\n'):
+					if len(line) < self.columns:
+						print line.encode(self.enc)
+					else:
+						for shortline in wrapper.wrap(line):
+							print shortline.encode(self.enc)
+				i += 1
+			print
