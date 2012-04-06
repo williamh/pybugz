@@ -15,7 +15,7 @@ try:
 except ImportError:
 	readline = None
 
-from bugzilla import Bugz
+from bugzilla import BugzillaProxy
 
 BUGZ_COMMENT_TEMPLATE = \
 """
@@ -119,14 +119,18 @@ def block_edit(comment, comment_from = ''):
 class BugzError(Exception):
 	pass
 
-class PrettyBugz(Bugz):
+class PrettyBugz:
 	def __init__(self, args):
 		self.quiet = args.quiet
 		self.columns = args.columns or terminal_width()
+		self.base = args.base
 
-		Bugz.__init__(self, args)
-
+		self.bz = BugzillaProxy(self.base)
 		self.log("Using %s " % self.base)
+
+		if not args.skip_auth:
+			self.log('Logging in')
+			self.bz.User.login({'login':args.username,'password':args.password})
 
 		if not getattr(args, 'encoding'):
 			try:
