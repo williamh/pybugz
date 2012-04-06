@@ -18,11 +18,22 @@ class RequestTransport(Transport):
 		req = Request(self.uri)
 		req.add_header('User-Agent', self.user_agent)
 		req.add_header('Content-Type', 'text/xml')
+
+		if self.accept_gzip_encoding:
+			req.add_header('Accept-Encoding', 'gzip')
+
 		req.add_data(request_body)
+
 		resp = self.opener.open(req)
+
+		# resp is a urllib.addinfourl instance, which does not have the
+		# getheader method that parse_response expects.
+		resp.getheader = resp.headers.getheader
+
 		if resp.code == 200:
 			self.verbose = verbose
 			return self.parse_response(resp)
+
 		resp.close()
 		raise ProtocolError(self.uri, resp.status, resp.reason, resp.msg)
 
