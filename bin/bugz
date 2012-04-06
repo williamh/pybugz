@@ -242,7 +242,7 @@ def make_parser():
 	parser.add_argument('--connection',
 		help = 'use [connection] section of your configuration file')
 	parser.add_argument('-b', '--base',
-				default = 'https://bugs.gentoo.org',
+				default = 'https://bugs.gentoo.org/xmlrpc.cgi',
 		help = 'base URL of Bugzilla')
 	parser.add_argument('-u', '--user',
 		help = 'username for commands requiring authentication')
