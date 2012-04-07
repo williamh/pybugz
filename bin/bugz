@@ -121,16 +121,6 @@ def make_modify_parser(subparsers):
 		help = 'mark bug as RESOLVED, INVALID')
 	modify_parser.set_defaults(func = PrettyBugz.modify)
 
-def make_namedcmd_parser(subparsers):
-	namedcmd_parser = subparsers.add_parser('namedcmd',
-		help = 'run a stored search')
-	namedcmd_parser.add_argument('command',
-		help = 'the name of the stored search')
-	namedcmd_parser.add_argument('--show-status',
-		action = 'store_true',
-		help = 'show status of bugs')
-	namedcmd_parser.set_defaults(func = PrettyBugz.namedcmd)
-
 def make_post_parser(subparsers):
 	post_parser = subparsers.add_parser('post',
 		help = 'post a new bug into bugzilla')
@@ -257,7 +247,6 @@ def make_parser():
 	make_attachment_parser(subparsers)
 	make_get_parser(subparsers)
 	make_modify_parser(subparsers)
-	make_namedcmd_parser(subparsers)
 	make_post_parser(subparsers)
 	make_search_parser(subparsers)
 	return parser

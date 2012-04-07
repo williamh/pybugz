@@ -203,19 +203,6 @@ class PrettyBugz:
 		else:
 			self.listbugs(buglist, args.show_status)
 
-	def namedcmd(self, args):
-		"""Run a command stored in Bugzilla by name."""
-		log_msg = 'Running namedcmd \'%s\''%args.command
-		result = Bugz.namedcmd(self, args)
-		if result is None:
-			raise RuntimeError('Failed to run command\nWrong namedcmd perhaps?')
-
-		if len(result) == 0:
-			self.log('No result from command')
-			return
-
-		self.listbugs(result, args.show_status)
-
 	def get(self, args):
 		""" Fetch bug details given the bug id """
 		self.log('Getting bug %s ..' % args.bugid)

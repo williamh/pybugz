@@ -23,7 +23,6 @@ _bugz() {
     'get:get a bug from bugzilla'
     'help:display subcommands'
     'modify:modify a bug (eg. post a comment)'
-    'namedcmd:run a stored search'
     'post:post a new bug into bugzilla'
     'search:search for bugs in bugzilla'
   )
@@ -103,13 +102,6 @@ _bugz_cmd_modify()
     '(--title= -t)'{--title=,-t}'[set title of the bug]:title: ' \
     '(--url= -U)'{--url=,-u}'[set URL field of the bug]:URL: ' \
     '(--whiteboard= -w)'{--whiteboard=,-w}'[set status whiteboard]:status whiteboard: '
-}
-
-(( ${+functions[_bugz_cmd_namedcmd]} )) ||
-_bugz_cmd_namedcmd()
-{
-  _arguments -s : \
-    '--show-status[show bug status]'
 }
 
 (( ${+functions[_bugz_cmd_post]} )) ||
