@@ -448,22 +448,24 @@ class PrettyBugz:
 		""" Download or view an attachment given the id."""
 		self.log('Getting attachment %s' % args.attachid)
 
-		result = Bugz.attachment(self, args)
-		if not result:
-			raise RuntimeError('Unable to get attachment')
+		result = self.bz.Bug.attachments({'attachment_ids':[args.attachid]})
+		result = result['attachments'][args.attachid]
 
 		action = {True:'Viewing', False:'Saving'}
-		self.log('%s attachment: "%s"' % (action[args.view], result['filename']))
+		self.log('%s attachment: "%s"' %
+			(action[args.view], result['file_name']))
 		safe_filename = os.path.basename(re.sub(r'\.\.', '',
-												result['filename']))
+												result['file_name']))
 
 		if args.view:
-			print result['fd'].read()
+			print result['data'].data
 		else:
-			if os.path.exists(result['filename']):
+			if os.path.exists(result['file_name']):
 				raise RuntimeError('Filename already exists')
 
-			open(safe_filename, 'wb').write(result['fd'].read())
+			fd = open(safe_filename, 'wb')
+			fd.write(result['data'].data)
+			fd.close()
 
 	def attach(self, args):
 		""" Attach a file to a bug given a filename. """
