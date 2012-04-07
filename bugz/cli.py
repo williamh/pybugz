@@ -161,15 +161,21 @@ class PrettyBugz:
 	def search(self, args):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
-		search_term = ' '.join(args.terms).strip()
-
-		skip_opts = ['base', 'columns', 'connection', 'comments', 'forget',
-			'func', 'order', 'quiet', 'show_status',
+		search_dict = {}
+		skip_opts = ['base', 'columns', 'connection', 'comments',
+				'encoding', 'forget', 'func', 'order', 'quiet', 'show_status',
 			'skip_auth', 'terms']
+
 		search_opts = sorted([(opt, val) for opt, val in args.__dict__.items()
 			if val is not None and not opt in skip_opts])
 
-		if not (search_term or search_opts):
+		for key in args.__dict__.keys():
+			if not key in skip_opts and getattr(args, key) is not None:
+				search_dict[key] = getattr(args, key)
+
+		search_term = ' '.join(args.terms).strip()
+
+		if not (search_dict or search_term):
 			raise BugzError('Please give search terms or options.')
 
 		if search_term:
@@ -184,16 +190,18 @@ class PrettyBugz:
 		else:
 			self.log(log_msg)
 
-		result = Bugz.search(self, args)
+		if not 'status' in search_dict.keys():
+			search_dict['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
+		elif 'ALL' in search_dict['status']:
+			del search_dict['status']
 
-		if result is None:
-			raise RuntimeError('Failed to perform search')
+		result = self.bz.Bug.search(search_dict)
+		buglist = result['bugs']
 
-		if len(result) == 0:
+		if not len(buglist):
 			self.log('No bugs found.')
-			return
-
-		self.listbugs(result, args.show_status)
+		else:
+			self.listbugs(buglist, args.show_status)
 
 	def namedcmd(self, args):
 		"""Run a command stored in Bugzilla by name."""
@@ -488,20 +496,15 @@ class PrettyBugz:
 				(args.filename, args.bugid, reason))
 
 	def listbugs(self, buglist, show_status=False):
-		x = ''
-		if re.search("/$", self.base) is None:
-			x = '/'
-		for row in buglist:
-			bugid = row['bugid']
-			status = row['status']
-			desc = row['desc']
+		for bug in buglist:
+			bugid = bug['id']
+			status = bug['status']
+			assignee = bug['assigned_to'].split('@')[0]
+			desc = bug['summary']
 			line = '%s' % (bugid)
 			if show_status:
 				line = '%s %s' % (line, status)
-			if row.has_key('assignee'): # Novell does not have 'assignee' field
-				assignee = row['assignee'].split('@')[0]
-				line = '%s %-20s' % (line, assignee)
-
+			line = '%s %-20s' % (line, assignee)
 			line = '%s %s' % (line, desc)
 
 			try:

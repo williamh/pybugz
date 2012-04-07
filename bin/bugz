@@ -180,37 +180,35 @@ def make_search_parser(subparsers):
 	search_parser.add_argument('terms',
 		nargs='*',
 		help = 'strings to search for in title and/or body')
-	search_parser.add_argument('-o', '--order',
-		default = 'number',
-		help = 'display bugs in this order')
+	search_parser.add_argument('--alias',
+		help='The unique alias for this bug')
 	search_parser.add_argument('-a', '--assigned-to',
 		help = 'email the bug is assigned to')
-	search_parser.add_argument('-r', '--reporter',
-		help = 'email the bug was reported by')
-	search_parser.add_argument('--cc',
-		help = 'restrict by CC email address')
-	search_parser.add_argument('--commenter',
-		help = 'email that commented the bug')
-	search_parser.add_argument('-s', '--status',
-		action='append',
-		help = 'restrict by status (one or more, use all for all statuses)')
-	search_parser.add_argument('--severity',
-		action='append',
-		help = 'restrict by severity (one or more)')
-	search_parser.add_argument('--priority',
-		action='append',
-		help = 'restrict by priority (one or more)')
-	search_parser.add_argument('-c', '--comments',
-		action='store_true',
-		help = 'search comments in addition to summary')
-	search_parser.add_argument('--product',
-		action='append',
-		help = 'restrict by product (one or more)')
 	search_parser.add_argument('-C', '--component',
 		action='append',
 		help = 'restrict by component (1 or more)')
-	search_parser.add_argument('-k', '--keywords',
-		help = 'restrict by keywords')
+	search_parser.add_argument('-r', '--creator',
+		help = 'email of the person who created the bug')
+	search_parser.add_argument('-l', '--limit',
+		type = int,
+		help='Limit the number of records returned in a search')
+	search_parser.add_argument('--offset',
+		type = int,
+		help='Set the start position for a search')
+	search_parser.add_argument('--priority',
+		action='append',
+		help = 'restrict by priority (one or more)')
+	search_parser.add_argument('--product',
+		action='append',
+		help = 'restrict by product (one or more)')
+	search_parser.add_argument('--resolution',
+		help = 'restrict by resolution')
+	search_parser.add_argument('--severity',
+		action='append',
+		help = 'restrict by severity (one or more)')
+	search_parser.add_argument('-s', '--status',
+		action='append',
+		help = 'restrict by status (one or more, use all for all statuses)')
 	search_parser.add_argument('-w', '--whiteboard',
 		help = 'status whiteboard')
 	search_parser.add_argument('--show-status',
