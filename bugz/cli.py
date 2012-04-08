@@ -2,11 +2,13 @@
 
 import commands
 import locale
+import mimetypes
 import os
 import re
 import sys
 import tempfile
 import textwrap
+import xmlrpclib
 
 from urlparse import urljoin
 
@@ -30,6 +32,9 @@ DEFAULT_NUM_COLS = 80
 #
 # Auxiliary functions
 #
+
+def get_content_type(filename):
+	return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
 
 def raw_input_block():
 	""" Allows multiple line input until a Ctrl+D is detected.
@@ -469,20 +474,38 @@ class PrettyBugz:
 
 	def attach(self, args):
 		""" Attach a file to a bug given a filename. """
-		if not os.path.exists(args.filename):
-			raise BugzError('File not found: %s' % args.filename)
-		if not args.description:
-			args.description = block_edit('Enter description (optional)')
-		result = Bugz.attach(self,args)
-		if result == True:
-			self.log("'%s' has been attached to bug %s" %
-				(args.filename, args.bugid))
-		else:
-			reason = ""
-			if result and result != False:
-				reason = "\nreason: %s" % result
-			raise RuntimeError("Failed to attach '%s' to bug %s%s" %
-				(args.filename, args.bugid, reason))
+		filename = args.filename
+		content_type = args.content_type
+		bugid = args.bugid
+		title = args.title
+		patch = args.patch
+		description = args.description
+
+		if not os.path.exists(filename):
+			raise BugzError('File not found: %s' % filename)
+
+		if content_type is None:
+			content_type = get_content_type(filename)
+		if title is None:
+			title = os.path.basename(filename)
+
+		attach_dict = {}
+		attach_dict['ids'] = [bugid]
+
+		fd = open(filename, 'rb')
+		attach_dict['data'] = xmlrpclib.Binary(fd.read())
+		fd.close()
+
+		attach_dict['file_name'] = os.path.basename(filename)
+		attach_dict['summary'] = title
+		if not patch:
+			attach_dict['content_type'] = content_type;
+		if not description:
+			description = block_edit('Enter description (optional)')
+		attach_dict['comment'] = description
+		attach_dict['is_patch'] = patch
+		result =  self.bz.Bug.add_attachment(attach_dict)
+		print result
 
 	def listbugs(self, buglist, show_status=False):
 		for bug in buglist:

@@ -26,9 +26,6 @@ def make_attach_parser(subparsers):
 	attach_parser.add_argument('-p', '--patch',
 		action = 'store_true',
 		help = 'attachment is a patch')
-	attach_parser.add_argument('--bigfile',
-		action = 'store_true',
-		help = 'attachment is a big file')
 	attach_parser.set_defaults(func = PrettyBugz.attach)
 
 def make_attachment_parser(subparsers):
