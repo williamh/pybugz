@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import commands
+from cookielib import CookieJar, LWPCookieJar
 import locale
 import mimetypes
 import os
@@ -26,6 +27,8 @@ BUGZ: ---------------------------------------------------
 BUGZ: Any line beginning with 'BUGZ:' will be ignored.
 BUGZ: ---------------------------------------------------
 """
+
+COOKIE_FILE = '.bugz_cookie'
 
 DEFAULT_NUM_COLS = 80
 
@@ -129,25 +132,44 @@ class PrettyBugz:
 		self.quiet = args.quiet
 		self.columns = args.columns or terminal_width()
 		self.base = args.base
+		self.authenticated = False
+		self.forget = args.forget
+		self.user = args.user
+		self.password = args.password
+		self.httpuser = args.httpuser
+		self.httppassword = args.httppassword
+		self.skip_auth = args.skip_auth
 
-		self.bz = BugzillaProxy(self.base)
-		self.log("Using %s " % self.base)
+		if not self.forget:
+			try:
+				cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
+				self.cookiejar = LWPCookieJar(cookie_file)
+				if self.forget:
+					try:
+						self.cookiejar.load()
+						self.cookiejar.clear()
+						self.cookiejar.save()
+						os.chmod(self.cookiejar.filename, 0600)
+					except IOError:
+						pass
+			except KeyError:
+				self.warn('Unable to save session cookies in %s' % cookie_file)
+				self.cookiejar = CookieJar()
+		else:
+			self.cookiejar = CookieJar()
 
-		if not args.skip_auth and (getattr(args, 'username', None) and
-				getattr(args, 'password', None)):
-			self.log('Logging in')
-			self.bz.User.login({'login':args.username,'password':args.password})
-
-		if not getattr(args, 'encoding'):
+		if getattr(args, 'encoding'):
+			self.enc = args.encoding
+		else:
 			try:
 				self.enc = locale.getdefaultlocale()[1]
 			except:
 				self.enc = 'utf-8'
-
 			if not self.enc:
 				self.enc = 'utf-8'
-		else:
-			self.enc = args.encoding
+
+		self.log("Using %s " % args.base)
+		self.bz = BugzillaProxy(self.base ,cookies=self.cookiejar)
 
 	def log(self, status_msg, newline = True):
 		if not self.quiet:
@@ -163,9 +185,51 @@ class PrettyBugz:
 	def get_input(self, prompt):
 		return raw_input(prompt)
 
+	def login(self):
+		"""Authenticate a session.
+		"""
+		# check if we need to authenticate
+		if self.authenticated:
+			return
+
+		# try seeing if we really need to request login
+		if not self.forget:
+			try:
+				self.cookiejar.load()
+				self.log('Already logged in')
+				self.authenticated = True
+			except IOError:
+				pass
+			return
+
+		# prompt for username if we were not supplied with it
+		if not self.user:
+			self.log('No username given.')
+			self.user = self.get_input('Username: ')
+
+		# prompt for password if we were not supplied with it
+		if not self.password:
+			self.log('No password given.')
+			self.password = getpass.getpass()
+
+		# perform login
+		qparams = {}
+		qparams['login'] = self.user
+		qparams['password'] = self.password
+		if not self.forget:
+			qparams['remember'] = True
+		self.log('Logging in')
+		self.bz.User.login(qparams)
+		self.authenticated = True
+
+		if not self.forget:
+			self.cookiejar.save()
+			os.chmod(self.cookiejar.filename, 0600)
+
 	def search(self, args):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
+		self.login()
 		search_dict = {}
 		skip_opts = ['base', 'columns', 'connection', 'comments',
 				'encoding', 'forget', 'func', 'order', 'quiet', 'show_status',
@@ -210,6 +274,7 @@ class PrettyBugz:
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
+		self.login()
 		self.log('Getting bug %s ..' % args.bugid)
 		result = self.bz.Bug.get({'ids':[args.bugid]})
 
@@ -451,6 +516,7 @@ class PrettyBugz:
 
 	def attachment(self, args):
 		""" Download or view an attachment given the id."""
+		self.login()
 		self.log('Getting attachment %s' % args.attachid)
 
 		result = self.bz.Bug.attachments({'attachment_ids':[args.attachid]})
@@ -474,6 +540,7 @@ class PrettyBugz:
 
 	def attach(self, args):
 		""" Attach a file to a bug given a filename. """
+		self.login()
 		filename = args.filename
 		content_type = args.content_type
 		bugid = args.bugid
