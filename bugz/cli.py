@@ -188,7 +188,7 @@ class PrettyBugz:
 		"""Authenticate a session.
 		"""
 		# check if we need to authenticate
-		if self.authenticated:
+		if self.authenticated or self.skip_auth:
 			return
 
 		# try seeing if we really need to request login
