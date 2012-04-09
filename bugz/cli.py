@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import commands
+import getpass
 from cookielib import CookieJar, LWPCookieJar
 import locale
 import mimetypes
@@ -11,14 +12,12 @@ import tempfile
 import textwrap
 import xmlrpclib
 
-from urlparse import urljoin
-
 try:
 	import readline
 except ImportError:
 	readline = None
 
-from bugzilla import BugzillaProxy
+from bugz.bugzilla import BugzillaProxy
 
 BUGZ_COMMENT_TEMPLATE = \
 """
