@@ -228,17 +228,19 @@ class PrettyBugz:
 	def search(self, args):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
-		search_dict = {}
-		skip_opts = ['base', 'columns', 'connection', 'comments',
-				'encoding', 'forget', 'func', 'order', 'quiet', 'show_status',
-			'skip_auth', 'terms']
+		valid_keys = ['alias', 'assigned_to', 'component', 'creator',
+			'limit', 'offset', 'priority', 'product', 'resolution',
+			'severity', 'status', 'version', 'whiteboard']
 
 		search_opts = sorted([(opt, val) for opt, val in args.__dict__.items()
-			if val is not None and not opt in skip_opts])
+			if val is not None and opt in valid_keys])
 
+		search_dict = {}
 		for key in args.__dict__.keys():
-			if not key in skip_opts and getattr(args, key) is not None:
+			if key in valid_keys and getattr(args, key) is not None:
 				search_dict[key] = getattr(args, key)
+		if getattr(args, 'terms'):
+			search_dict['summary'] = args.terms
 
 		search_term = ' '.join(args.terms).strip()
 
@@ -263,13 +265,12 @@ class PrettyBugz:
 			del search_dict['status']
 
 		self.login()
-		result = self.bz.Bug.search(search_dict)
-		buglist = result['bugs']
+		result = self.bz.Bug.search(search_dict)['bugs']
 
-		if not len(buglist):
+		if not len(result):
 			self.log('No bugs found.')
 		else:
-			self.listbugs(buglist, args.show_status)
+			self.listbugs(result, args.show_status)
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
