@@ -197,9 +197,9 @@ class PrettyBugz:
 				self.cookiejar.load()
 				self.log('Already logged in')
 				self.authenticated = True
+				return
 			except IOError:
 				pass
-			return
 
 		# prompt for username if we were not supplied with it
 		if not self.user:
