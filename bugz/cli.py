@@ -228,7 +228,6 @@ class PrettyBugz:
 	def search(self, args):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
-		self.login()
 		search_dict = {}
 		skip_opts = ['base', 'columns', 'connection', 'comments',
 				'encoding', 'forget', 'func', 'order', 'quiet', 'show_status',
@@ -263,6 +262,7 @@ class PrettyBugz:
 		elif 'ALL' in search_dict['status']:
 			del search_dict['status']
 
+		self.login()
 		result = self.bz.Bug.search(search_dict)
 		buglist = result['bugs']
 
@@ -273,8 +273,8 @@ class PrettyBugz:
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
-		self.login()
 		self.log('Getting bug %s ..' % args.bugid)
+		self.login()
 		result = self.bz.Bug.get({'ids':[args.bugid]})
 
 		for bug in result['bugs']:
@@ -515,9 +515,9 @@ class PrettyBugz:
 
 	def attachment(self, args):
 		""" Download or view an attachment given the id."""
-		self.login()
 		self.log('Getting attachment %s' % args.attachid)
 
+		self.login()
 		result = self.bz.Bug.attachments({'attachment_ids':[args.attachid]})
 		result = result['attachments'][args.attachid]
 
@@ -539,7 +539,6 @@ class PrettyBugz:
 
 	def attach(self, args):
 		""" Attach a file to a bug given a filename. """
-		self.login()
 		filename = args.filename
 		content_type = args.content_type
 		bugid = args.bugid
@@ -570,6 +569,7 @@ class PrettyBugz:
 			description = block_edit('Enter description (optional)')
 		attach_dict['comment'] = description
 		attach_dict['is_patch'] = patch
+		self.login()
 		result =  self.bz.Bug.add_attachment(attach_dict)
 		print result
 
