@@ -498,21 +498,93 @@ class PrettyBugz:
 		if args.comment_editor:
 			args.comment = block_edit('Enter comment:')
 
+		params = {}
+		if args.blocks_add is not None or args.blocks_remove is not None:
+			params['blocks'] = {}
+		if args.depends_on_add is not None \
+			or args.depends_on_remove is not None:
+			params['depends_on'] = {}
+		if args.cc_add is not None or args.cc_remove is not None:
+			params['cc'] = {}
+		if args.comment is not None:
+			params['comment'] = {}
+		if args.groups_add is not None or args.groups_remove is not None:
+			params['groups'] = {}
+		if args.keywords_set is not None:
+			params['keywords'] = {}
+		if args.see_also_add is not None or args.see_also_remove is not None:
+			params['see_also'] = {}
+
+		params['ids'] = [args.bugid]
+		if args.alias is not None:
+			params['alias'] = args.alias
+		if args.assigned_to is not None:
+			params['assigned_to'] = args.assigned_to
+		if args.blocks_add is not None:
+			params['blocks']['add'] = args.blocks_add
+		if args.blocks_remove is not None:
+			params['blocks']['remove'] = args.blocks_remove
+		if args.depends_on_add is not None:
+			params['depends_on']['add'] = args.depends_on_add
+		if args.depends_on_remove is not None:
+			params['depends_on']['remove'] = args.depends_on_remove
+		if args.cc_add is not None:
+			params['cc']['add'] = args.cc_add
+		if args.cc_remove is not None:
+			params['cc']['remove'] = args.cc_remove
+		if args.comment is not None:
+			params['comment']['body'] = args.comment
+		if args.component is not None:
+			params['component'] = args.component
+		if args.dupe_of:
+			params['dupe_of'] = args.dupe_of
+			args.status = None
+			args.resolution = None
+		if args.groups_add is not None:
+			params['groups']['add'] = args.groups_add
+		if args.groups_remove is not None:
+			params['groups']['remove'] = args.groups_remove
+		if args.keywords_set is not None:
+			params['keywords']['set'] = args.keywords_set
+		if args.priority is not None:
+			params['priority'] = args.priority
+		if args.product is not None:
+			params['product'] = args.product
+		if args.resolution is not None:
+			params['resolution'] = args.resolution
+		if args.see_also_add is not None:
+			params['see_also']['add'] = args.see_also_add
+		if args.see_also_remove is not None:
+			params['see_also']['remove'] = args.see_also_remove
+		if args.severity is not None:
+			params['severity'] = args.severity
+		if args.status is not None:
+			params['status'] = args.status
+		if args.summary is not None:
+			params['summary'] = args.summary
+		if args.url is not None:
+			params['url'] = args.url
+		if args.version is not None:
+			params['version'] = args.version
+		if args.whiteboard is not None:
+			params['whiteboard'] = args.whiteboard
+
 		if args.fixed:
-			args.status = 'RESOLVED'
-			args.resolution = 'FIXED'
+			params['status'] = 'RESOLVED'
+			params['resolution'] = 'FIXED'
 
 		if args.invalid:
-			args.status = 'RESOLVED'
-			args.resolution = 'INVALID'
-		result = Bugz.modify(self, args)
-		if not result:
-			raise RuntimeError('Failed to modify bug')
-		else:
-			self.log('Modified bug %s with the following fields:' %
-					args.bugid)
-			for field, value in result:
-				self.log('  %-12s: %s' % (field, value))
+			params['status'] = 'RESOLVED'
+			params['resolution'] = 'INVALID'
+
+		self.login()
+		result = self.bz.Bug.update(params)
+		for bug in result['bugs']:
+			self.log('Modified the following fields in bug %s' % bug['id'])
+			changes = bug['changes']
+			for key in changes.keys():
+				self.log('%-12s: removed %s' %(key, changes[key]['removed']))
+				self.log('%-12s: added %s' %(key, changes[key]['added']))
 
 	def attachment(self, args):
 		""" Download or view an attachment given the id."""

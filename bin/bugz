@@ -64,55 +64,87 @@ def make_modify_parser(subparsers):
 		help = 'modify a bug (eg. post a comment)')
 	modify_parser.add_argument('bugid',
 		help = 'the ID of the bug to modify')
+	modify_parser.add_argument('--alias',
+		help = 'change the alias for this bug')
 	modify_parser.add_argument('-a', '--assigned-to',
 		help = 'change assignee for this bug')
+	modify_parser.add_argument('--add-blocked',
+		action = 'append',
+		help = 'add a bug to the blocked list',
+		dest = 'blocks_add')
+	modify_parser.add_argument('--remove-blocked',
+		action = 'append',
+		help = 'remove a bug from the blocked list',
+		dest = 'blocks_remove')
+	modify_parser.add_argument('--add-dependson',
+		action = 'append',
+		help = 'add a bug to the depends list',
+		dest = 'depends_on_add')
+	modify_parser.add_argument('--remove-dependson',
+		action = 'append',
+		help = 'remove a bug from the depends list',
+		dest = 'depends_on_remove')
+	modify_parser.add_argument('--add-cc',
+		action = 'append',
+		help = 'add an email to the CC list',
+		dest = 'cc_add')
+	modify_parser.add_argument('--remove-cc',
+		action = 'append',
+		help = 'remove an email from the CC list',
+		dest = 'cc_remove')
+	modify_parser.add_argument('-c', '--comment',
+		help = 'add comment from command line')
 	modify_parser.add_argument('-C', '--comment-editor',
 		action='store_true',
 		help = 'add comment via default editor')
 	modify_parser.add_argument('-F', '--comment-from',
 		help = 'add comment from file.  If -C is also specified, the editor will be opened with this file as its contents.')
-	modify_parser.add_argument('-c', '--comment',
-		help = 'add comment from command line')
+	modify_parser.add_argument('--component',
+		help = 'change the component for this bug')
 	modify_parser.add_argument('-d', '--duplicate',
 		type = int,
 		default = 0,
-		help = 'this bug is a duplicate')
-	modify_parser.add_argument('-k', '--keywords',
-		help = 'set bug keywords'),
+		help = 'this bug is a duplicate',
+		dest = 'dupe_of')
+	modify_parser.add_argument('--add-group',
+		action = 'append',
+		help = 'add a group to this bug',
+		dest = 'groups_add')
+	modify_parser.add_argument('--remove-group',
+		action = 'append',
+		help = 'remove agroup from this bug',
+		dest = 'groups_remove')
+	modify_parser.add_argument('--set-keywords',
+		action = 'append',
+		help = 'set bug keywords',
+		dest = 'keywords_set')
 	modify_parser.add_argument('--priority',
 		help = 'change the priority for this bug')
+	modify_parser.add_argument('--product',
+		help = 'change the product for this bug')
 	modify_parser.add_argument('-r', '--resolution',
 		help = 'set new resolution (only if status = RESOLVED)')
-	modify_parser.add_argument('-s', '--status',
-		help = 'set new status of bug (eg. RESOLVED)')
+	modify_parser.add_argument('--add-see-also',
+		action = 'append',
+		help = 'add a "see also" URL to this bug',
+		dest = 'see_also_add')
+	modify_parser.add_argument('--remove-see-also',
+		action = 'append',
+		help = 'remove a"see also" URL from this bug',
+		dest = 'see_also_remove')
 	modify_parser.add_argument('-S', '--severity',
 		help = 'set severity for this bug')
+	modify_parser.add_argument('-s', '--status',
+		help = 'set new status of bug (eg. RESOLVED)')
 	modify_parser.add_argument('-t', '--title',
-		help = 'set title of bug')
+		help = 'set title of bug',
+		dest = 'summary')
 	modify_parser.add_argument('-U', '--url',
 		help = 'set URL field of bug')
+	modify_parser.add_argument('-v', '--version',
+		help = 'set the version for this bug'),
 	modify_parser.add_argument('-w', '--whiteboard',
 		help = 'set Status whiteboard'),
-	modify_parser.add_argument('--add-cc',
-		action = 'append',
-		help = 'add an email to the CC list')
-	modify_parser.add_argument('--remove-cc',
-		action = 'append',
-		help = 'remove an email from the CC list')
-	modify_parser.add_argument('--add-dependson',
-		action = 'append',
-		help = 'add a bug to the depends list')
-	modify_parser.add_argument('--remove-dependson',
-		action = 'append',
-		help = 'remove a bug from the depends list')
-	modify_parser.add_argument('--add-blocked',
-		action = 'append',
-		help = 'add a bug to the blocked list')
-	modify_parser.add_argument('--remove-blocked',
-		action = 'append',
-		help = 'remove a bug from the blocked list')
-	modify_parser.add_argument('--component',
-		help = 'change the component for this bug')
 	modify_parser.add_argument('--fixed',
 		action='store_true',
 		help = 'mark bug as RESOLVED, FIXED')
