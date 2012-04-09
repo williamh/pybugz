@@ -543,17 +543,21 @@ class PrettyBugz:
 		filename = args.filename
 		content_type = args.content_type
 		bugid = args.bugid
-		title = args.title
-		patch = args.patch
-		description = args.description
+		summary = args.summary
+		is_patch = args.is_patch
+		comment = args.comment
 
 		if not os.path.exists(filename):
 			raise BugzError('File not found: %s' % filename)
 
 		if content_type is None:
 			content_type = get_content_type(filename)
-		if title is None:
-			title = os.path.basename(filename)
+
+		if comment is None:
+			comment = block_edit('Enter optional long description of attachment')
+
+		if summary is None:
+			summary = os.path.basename(filename)
 
 		attach_dict = {}
 		attach_dict['ids'] = [bugid]
@@ -563,16 +567,14 @@ class PrettyBugz:
 		fd.close()
 
 		attach_dict['file_name'] = os.path.basename(filename)
-		attach_dict['summary'] = title
-		if not patch:
+		attach_dict['summary'] = summary
+		if not is_patch:
 			attach_dict['content_type'] = content_type;
-		if not description:
-			description = block_edit('Enter description (optional)')
-		attach_dict['comment'] = description
-		attach_dict['is_patch'] = patch
+		attach_dict['comment'] = comment
+		attach_dict['is_patch'] = is_patch
 		self.login()
 		result =  self.bz.Bug.add_attachment(attach_dict)
-		print result
+		self.log("'%s' has been attached to bug %s" % (filename, bugid))
 
 	def listbugs(self, buglist, show_status=False):
 		for bug in buglist:

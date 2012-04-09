@@ -17,15 +17,18 @@ def make_attach_parser(subparsers):
 		help = 'the ID of the bug where the file should be attached')
 	attach_parser.add_argument('filename',
 		help = 'the name of the file to attach')
-	attach_parser.add_argument('-t', '--title',
-		help = 'a short description of the attachment (default: filename).')
-	attach_parser.add_argument('-d', '--description',
-		help = 'a long description of the attachment.')
 	attach_parser.add_argument('-c', '--content-type',
 		help = 'mimetype of the file e.g. text/plain (default: auto-detect)')
+	attach_parser.add_argument('-d', '--description',
+		help = 'a long description of the attachment',
+		dest = 'comment')
 	attach_parser.add_argument('-p', '--patch',
 		action = 'store_true',
-		help = 'attachment is a patch')
+		help = 'attachment is a patch',
+		dest = 'is_patch')
+	attach_parser.add_argument('-t', '--title',
+		help = 'a short description of the attachment (default: filename).',
+		dest = 'summary')
 	attach_parser.set_defaults(func = PrettyBugz.attach)
 
 def make_attachment_parser(subparsers):
