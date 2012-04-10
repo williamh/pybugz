@@ -13,14 +13,38 @@
 # as listed below.
 #
 # [sectionname]
-# base: http://my.project.com/bugzilla/
-# user: xyz@zyx.org
+#
+# The base url of the bugzilla you wish to use.
+# This must point to the xmlrpc.cgi script on the bugzilla installation.
+#
+# base: http://my.project.com/bugzilla/xmlrpc.cgi
+#
+# It is also possible to encode a username and password into this URL
+# for basic http authentication as follows:
+#
+# base: http://myhttpname:myhttppasswd@my.project.com/bugzilla/xmlrpc.cgi
+#
+# Next are your username and password for this bugzilla.
+#
+# user: myname@my.project.com
 # password: secret2
-# httpuser: xyz
-# httppassword: secret2
+#
+# Delete the login cookie on exit. If this is not set, pybugz will
+# keep your login cookie until you remove it.
+#
 # forget: True
+#
+# The number of columns your terminal can display.
+# Most of the time you should not have to set this.
+#
 # columns: 80
+#
+# Set the output encoding for pybugz.
+#
 # encoding: utf-8
+#
+# Run in quiet mode.
+#
 # quiet: True
 #
 # The special section named 'default' may also be used. Other sections will
@@ -33,4 +57,3 @@
 # httpuser: xyz
 # httppassword: secret2
 # etc.
-
