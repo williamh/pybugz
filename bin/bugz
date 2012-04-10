@@ -160,29 +160,27 @@ def make_post_parser(subparsers):
 		help = 'product')
 	post_parser.add_argument('--component',
 		help = 'component')
-	post_parser.add_argument('--prodversion',
+	post_parser.add_argument('--version',
 		help = 'version of the product')
 	post_parser.add_argument('-t', '--title',
-		help = 'title of bug')
+		help = 'title of bug',
+		dest = 'summary')
 	post_parser.add_argument('-d', '--description',
 		help = 'description of the bug')
-	post_parser.add_argument('-F' , '--description-from',
-		help = 'description from contents of file')
-	post_parser.add_argument('--append-command',
-		help = 'append the output of a command to the description')
+	post_parser.add_argument('--priority',
+		help = 'set priority for the new bug')
+	post_parser.add_argument('-S', '--severity',
+		help = 'set the severity for the new bug')
+	post_parser.add_argument('--alias',
+		help = 'set the alias for this bug')
 	post_parser.add_argument('-a', '--assigned-to',
 		help = 'assign bug to someone other than the default assignee')
 	post_parser.add_argument('--cc',
 		help = 'add a list of emails to CC list')
-	post_parser.add_argument('-U', '--url',
-		help = 'URL associated with the bug')
-	post_parser.add_argument('--depends-on',
-		help = 'add a list of bug dependencies',
-		dest='dependson')
-	post_parser.add_argument('--blocked',
-		help = 'add a list of blocker bugs')
-	post_parser.add_argument('-k', '--keywords',
-		help = 'list of bugzilla keywords')
+	post_parser.add_argument('-F' , '--description-from',
+		help = 'description from contents of file')
+	post_parser.add_argument('--append-command',
+		help = 'append the output of a command to the description')
 	post_parser.add_argument('--batch',
 		action="store_true",
 		help = 'do not prompt for any values')
@@ -190,10 +188,6 @@ def make_post_parser(subparsers):
 		choices = ['y','Y','n','N'],
 		default = 'y',
 		help = 'default answer to confirmation question')
-	post_parser.add_argument('--priority',
-		help = 'set priority for the new bug')
-	post_parser.add_argument('-S', '--severity',
-		help = 'set the severity for the new bug')
 	post_parser.set_defaults(func = PrettyBugz.post)
 
 def make_search_parser(subparsers):

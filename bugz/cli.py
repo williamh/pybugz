@@ -286,8 +286,6 @@ class PrettyBugz:
 
 		# load description from file if possible
 		if args.description_from is not None:
-			print args.description_from
-			sys.exit(1)
 			try:
 					if args.description_from == '-':
 						args.description = sys.stdin.read()
@@ -322,148 +320,121 @@ class PrettyBugz:
 
 			# check for version
 			# FIXME: This default behaviour is not too nice.
-			if args.prodversion is None:
-				args.prodversion = self.get_input('Enter version (default: unspecified): ')
+			if not args.version:
+				line = self.get_input('Enter version (default: unspecified): ')
+				if len(line):
+					args.version = line
+				else:
+					args.version = 'unspecified'
 			else:
-				self.log('Enter version: %s' % args.prodversion)
+				self.log('Enter version: %s' % args.version)
 
-			# check for default severity
-			if args.severity is None:
-				severity_msg ='Enter severity (eg. normal) (optional): '
-				args.severity = self.get_input(severity_msg)
+			# check for title
+			if not args.summary:
+				while not args.summary or len(args.summary) < 1:
+					args.summary = self.get_input('Enter title: ')
 			else:
-				self.log('Enter severity (optional): %s' % severity)
+				self.log('Enter title: %s' % args.title)
+
+			# check for description
+			if not args.description:
+				line = block_edit('Enter bug description: ')
+				if len(line):
+					args.description = line
+			else:
+				self.log('Enter bug description: %s' % args.description)
 
 			# fixme: hw platform
 			# fixme: os
-			# fixme: milestone
 
 			# check for default priority
 			if args.priority is None:
 				priority_msg ='Enter priority (eg. Normal) (optional): '
-				args.priority = self.get_input(priority_msg)
+				line = self.get_input(priority_msg)
+				if len(line):
+					args.priority = line
 			else:
 				self.log('Enter priority (optional): %s' % args.priority)
 
-			# fixme: status
+			# check for default severity
+			if args.severity is None:
+				severity_msg ='Enter severity (eg. normal) (optional): '
+				line = self.get_input(severity_msg)
+				if len(line):
+					args.severity = line
+			else:
+				self.log('Enter severity (optional): %s' % args.severity)
+
+			# check for default alias
+			if args.alias is None:
+				alias_msg ='Enter an alias for this bug (optional): '
+				line = self.get_input(alias_msg)
+				if len(line):
+					args.alias = line
+			else:
+				self.log('Enter alias (optional): %s' % args.alias)
 
 			# check for default assignee
 			if args.assigned_to is None:
-				assigned_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
-				args.assigned_to = self.get_input(assigned_msg)
+				assign_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
+				line = self.get_input(assign_msg)
+				if len(line):
+					args.assigned_to = line
 			else:
 				self.log('Enter assignee (optional): %s' % args.assigned_to)
 
 			# check for CC list
 			if args.cc is None:
 				cc_msg = 'Enter a CC list (comma separated) (optional): '
-				args.cc = self.get_input(cc_msg)
+				line = self.get_input(cc_msg)
+				if len(line):
+					args.cc = line.split(', ')
 			else:
 				self.log('Enter a CC list (optional): %s' % args.cc)
 
-			# check for optional URL
-			if args.url is None:
-				args.url = self.get_input('Enter URL (optional): ')
-			else:
-				self.log('Enter URL (optional): %s' % args.url)
+		# fixme: groups
 
-			# check for title
-			if not args.title:
-				while not args.title or len(args.title) < 1:
-					args.title = self.get_input('Enter title: ')
-			else:
-				self.log('Enter title: %s' % args.title)
+			# fixme: status
 
-			# check for description
-			if not args.description:
-				args.description = block_edit('Enter bug description: ')
-			else:
-				self.log('Enter bug description: %s' % args.description)
+			# fixme: milestone
 
 			if args.append_command is None:
 				args.append_command = self.get_input('Append the output of the following command (leave blank for none): ')
 			else:
 				self.log('Append command (optional): %s' % args.append_command)
 
-			# check for Keywords list
-			if args.keywords is None:
-				kwd_msg = 'Enter a Keywords list (comma separated) (optional): '
-				args.keywords = self.get_input(kwd_msg)
-			else:
-				self.log('Enter a Keywords list (optional): %s' % args.keywords)
-
-			# check for bug dependencies
-			if args.dependson is None:
-				dependson_msg = 'Enter a list of bug dependencies (comma separated) (optional): '
-				args.dependson = self.get_input(dependson_msg)
-			else:
-				self.log('Enter a list of bug dependencies (optional): %s'
-					% args.dependson)
-
-			# check for blocker bugs
-			if args.blocked is None:
-				blocked_msg = 'Enter a list of blocker bugs (comma separated) (optional): '
-				args.blocked = self.get_input(blocked_msg)
-			else:
-				self.log('Enter a list of blocker bugs (optional): %s' %
-						args.blocked)
-
-		# fixme: groups
-		# append the output from append_command to the description
-		if args.append_command is not None and args.append_command != '':
-			append_command_output = commands.getoutput(args.append_command)
-			args.description = args.description + '\n\n' + '$ ' + args.append_command + '\n' +  append_command_output
-
 		# raise an exception if mandatory fields are not specified.
 		if args.product is None:
 			raise RuntimeError('Product not specified')
 		if args.component is None:
 			raise RuntimeError('Component not specified')
-		if args.title is None:
+		if args.summary is None:
 			raise RuntimeError('Title not specified')
 		if args.description is None:
 			raise RuntimeError('Description not specified')
 
-		# set optional fields to their defaults if they are not set.
-		if args.prodversion is None:
-			args.prodversion = ''
-		if args.priority is None:
-			args.priority = ''
-		if args.severity is None:
-			args.severity = ''
-		if args.assigned_to is None:
-			args.assigned_to = ''
-		if args.cc is None:
-			args.cc = ''
-		if args.url is None:
-			args.url = ''
-		if args.keywords is None:
-			args.keywords = ''
-		if args.dependson is None:
-			args.dependson = ''
-		if args.blocked is None:
-			args.blocked = ''
+		# append the output from append_command to the description
+		if args.append_command is not None and args.append_command != '':
+			append_command_output = commands.getoutput(args.append_command)
+			args.description = args.description + '\n\n' + '$ ' + args.append_command + '\n' +  append_command_output
 
 		# print submission confirmation
 		print '-' * (self.columns - 1)
-		print 'Product     : ' + args.product
-		print 'Component   : ' + args.component
-		print 'Version     : ' + args.prodversion
-		print 'severity    : ' + args.severity
-		# fixme: hardware
+		print '%-12s: %s' % ('Product', args.product)
+		print '%-12s: %s' %('Component', args.component)
+		print '%-12s: %s' % ('Title', args.summary)
+		print '%-12s: %s' % ('Version', args.version)
+		print '%-12s: %s' % ('Description', args.description)
 		# fixme: OS
-		# fixme: Milestone
-		print 'priority    : ' + args.priority
-		# fixme: status
-		print 'Assigned to : ' + args.assigned_to
-		print 'CC          : ' + args.cc
-		print 'URL         : ' + args.url
-		print 'Title       : ' + args.title
-		print 'Description : ' + args.description
-		print 'Keywords    : ' + args.keywords
-		print 'Depends on  : ' + args.dependson
-		print 'Blocks      : ' + args.blocked
+		# fixme: hardware
+		print '%-12s: %s' % ('priority', args.priority)
+		print '%-12s: %s' % ('severity', args.severity)
+		print '%-12s: %s' % ('alias', args.alias)
+		print '%-12s: %s' % ('Assigned to', args.assigned_to)
+		print '%-12s: %s' % ('CC', args.cc)
 		# fixme: groups
+		# fixme: status
+		# fixme: Milestone
 		print '-' * (self.columns - 1)
 
 		if not args.batch:
@@ -477,11 +448,27 @@ class PrettyBugz:
 				self.log('Submission aborted')
 				return
 
-		result = Bugz.post(self, args)
-		if result is not None and result != 0:
-			self.log('Bug %d submitted' % result)
-		else:
-			raise RuntimeError('Failed to submit bug')
+		params={}
+		params['product'] = args.product
+		params['component'] = args.component
+		params['version'] = args.version
+		params['summary'] = args.summary
+		if args.description is not None:
+			params['description'] = args.description
+		if args.priority is not None:
+			params['priority'] = args.priority
+		if args.severity is not None:
+			params['severity'] = args.severity
+		if args.alias is not None:
+			params['alias'] = args.alias
+		if args.assigned_to is not None:
+			params['assigned_to'] = args.assigned_to
+		if args.cc is not None:
+			params['cc'] = args.cc
+
+		self.login()
+		result = self.bz.Bug.create(params)
+		self.log('Bug %d submitted' % result['id'])
 
 	def modify(self, args):
 		"""Modify an existing bug (eg. adding a comment or changing resolution.)"""
