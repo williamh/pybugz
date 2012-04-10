@@ -10,8 +10,6 @@ _bugz() {
     '(-b --base)'{-b,--base}'[bugzilla base URL]:bugzilla url: '
     '(-u --user)'{-u,--user}'[user name (if required)]:user name:_users'
     '(-p --password)'{-p,--password}'[password (if required)]:password: '
-    '(-H --httpuser)'{-H,--httpuser}'[basic http auth user name (if required)]:user name:_users'
-    '(-P --httppassword)'{-P,--httppassword}'[basic http auth password (if required)]:password: '
     '(-f --forget)'{-f,--forget}'[do not remember authentication]'
     '--columns[number of columns to use when displaying output]:number: '
     '--skip-auth[do not authenticate]'

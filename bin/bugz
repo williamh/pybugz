@@ -249,10 +249,6 @@ def make_parser():
 		help = 'username for commands requiring authentication')
 	parser.add_argument('-p', '--password',
 		help = 'password for commands requiring authentication')
-	parser.add_argument('-H', '--httpuser',
-		help = 'username for basic http auth')
-	parser.add_argument('-P', '--httppassword',
-		help = 'password for basic http auth')
 	parser.add_argument('-f', '--forget',
 		action='store_true',
 		help = 'forget login after execution')
