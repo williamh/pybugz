@@ -413,6 +413,9 @@ class PrettyBugz:
 		if args.description is None:
 			raise RuntimeError('Description not specified')
 
+		if not args.version:
+			args.version = 'unspecified'
+
 		# append the output from append_command to the description
 		if args.append_command is not None and args.append_command != '':
 			append_command_output = commands.getoutput(args.append_command)
