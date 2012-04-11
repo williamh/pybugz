@@ -135,8 +135,6 @@ class PrettyBugz:
 		self.forget = args.forget
 		self.user = args.user
 		self.password = args.password
-		self.httpuser = args.httpuser
-		self.httppassword = args.httppassword
 		self.skip_auth = args.skip_auth
 
 		if not self.forget:

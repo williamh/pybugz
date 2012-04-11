@@ -297,8 +297,6 @@ def fill_config(bugz, parser, section):
 	fill_config_option(bugz, parser, parser.get, section, 'base')
 	fill_config_option(bugz, parser, parser.get, section, 'user')
 	fill_config_option(bugz, parser, parser.get, section, 'password')
-	fill_config_option(bugz, parser, parser.get, section, 'httpuser')
-	fill_config_option(bugz, parser, parser.get, section, 'httppassword')
 	fill_config_option(bugz, parser, parser.getboolean, section, 'forget')
 	fill_config_option(bugz, parser, parser.getint, section, 'columns')
 	fill_config_option(bugz, parser, parser.get, section, 'encoding')
