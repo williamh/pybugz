@@ -568,11 +568,14 @@ class PrettyBugz:
 		self.login()
 		result = self.bz.Bug.update(params)
 		for bug in result['bugs']:
-			self.log('Modified the following fields in bug %s' % bug['id'])
 			changes = bug['changes']
-			for key in changes.keys():
-				self.log('%-12s: removed %s' %(key, changes[key]['removed']))
-				self.log('%-12s: added %s' %(key, changes[key]['added']))
+			if not len(changes):
+				self.log('Added comment to bug %s' % bug['id'])
+			else:
+				self.log('Modified the following fields in bug %s' % bug['id'])
+				for key in changes.keys():
+					self.log('%-12s: removed %s' %(key, changes[key]['removed']))
+					self.log('%-12s: added %s' %(key, changes[key]['added']))
 
 	def attachment(self, args):
 		""" Download or view an attachment given the id."""
