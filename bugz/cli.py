@@ -565,6 +565,8 @@ class PrettyBugz:
 			params['status'] = 'RESOLVED'
 			params['resolution'] = 'INVALID'
 
+		if len(params) < 2:
+			raise BugzError('No changes were specified')
 		self.login()
 		result = self.bz.Bug.update(params)
 		for bug in result['bugs']:
