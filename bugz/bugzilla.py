@@ -5,14 +5,34 @@
 # http://www.bugzilla.org/docs/4.2/en/html/api/Bugzilla/WebService.html
 
 from cookielib import CookieJar
-from urllib2 import Request, build_opener, HTTPCookieProcessor
+from urllib import splittype, splithost, splituser, splitpasswd
+from urllib2 import (build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor,
+		HTTPPasswordMgrWithDefaultRealm, Request)
 from xmlrpclib import ProtocolError, ServerProxy, Transport
 
 class RequestTransport(Transport):
-	def __init__(self, uri, cookies, use_datetime=0):
+	def __init__(self, uri, cookies=None, use_datetime=0):
 		Transport.__init__(self, use_datetime=use_datetime)
-		self.uri = uri
-		self.opener = build_opener(HTTPCookieProcessor(cookies))
+
+		self.opener = build_opener()
+
+		# Parse auth (user:passwd) from the uri
+		urltype, rest = splittype(uri)
+		host, rest = splithost(rest)
+		auth, host = splituser(host)
+		self.uri = urltype + '://' + host + rest
+
+		# Handle HTTP Basic authentication
+		if auth is not None:
+			user, passwd = splitpasswd(auth)
+			passwdmgr = HTTPPasswordMgrWithDefaultRealm()
+			passwdmgr.add_password(realm=None, uri=self.uri, user=user, passwd=passwd)
+			authhandler = HTTPBasicAuthHandler(passwdmgr)
+			self.opener.add_handler(authhandler)
+
+		# Handle HTTP Cookies
+		if cookies is not None:
+			self.opener.add_handler(HTTPCookieProcessor(cookies))
 
 	def request(self, host, handler, request_body, verbose=0):
 		req = Request(self.uri)
