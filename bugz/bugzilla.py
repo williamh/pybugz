@@ -11,7 +11,7 @@ from urllib2 import (build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor,
 from xmlrpclib import ProtocolError, ServerProxy, Transport
 
 class RequestTransport(Transport):
-	def __init__(self, uri, cookies=None, use_datetime=0):
+	def __init__(self, uri, cookiejar=None, use_datetime=0):
 		Transport.__init__(self, use_datetime=use_datetime)
 
 		self.opener = build_opener()
@@ -31,8 +31,8 @@ class RequestTransport(Transport):
 			self.opener.add_handler(authhandler)
 
 		# Handle HTTP Cookies
-		if cookies is not None:
-			self.opener.add_handler(HTTPCookieProcessor(cookies))
+		if cookiejar is not None:
+			self.opener.add_handler(HTTPCookieProcessor(cookiejar))
 
 	def request(self, host, handler, request_body, verbose=0):
 		req = Request(self.uri)
@@ -59,13 +59,13 @@ class RequestTransport(Transport):
 
 class BugzillaProxy(ServerProxy):
 	def __init__(self, uri, encoding=None, verbose=0, allow_none=0,
-			use_datetime=0, cookies=None):
+			use_datetime=0, cookiejar=None):
 
-		if cookies is None:
-			cookies = CookieJar()
+		if cookiejar is None:
+			cookiejar = CookieJar()
 
 		transport = RequestTransport(use_datetime=use_datetime, uri=uri,
-				cookies=cookies)
+				cookiejar=cookiejar)
 		ServerProxy.__init__(self, uri=uri, transport=transport,
 				encoding=encoding, verbose=verbose, allow_none=allow_none,
 				use_datetime=use_datetime)

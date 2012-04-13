@@ -160,7 +160,7 @@ class PrettyBugz:
 				self.enc = 'utf-8'
 
 		self.log("Using %s " % args.base)
-		self.bz = BugzillaProxy(self.base, cookies=self.cookiejar)
+		self.bz = BugzillaProxy(self.base, cookiejar=self.cookiejar)
 
 	def log(self, status_msg, newline = True):
 		if not self.quiet:
