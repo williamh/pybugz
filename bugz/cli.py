@@ -131,29 +131,23 @@ class PrettyBugz:
 		self.quiet = args.quiet
 		self.columns = args.columns or terminal_width()
 		self.base = args.base
-		self.authenticated = False
 		self.forget = args.forget
 		self.user = args.user
 		self.password = args.password
 		self.skip_auth = args.skip_auth
 
-		if not self.forget:
-			try:
-				cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
-				self.cookiejar = LWPCookieJar(cookie_file)
-				if self.forget:
-					try:
-						self.cookiejar.load()
-						self.cookiejar.clear()
-						self.cookiejar.save()
-						os.chmod(self.cookiejar.filename, 0600)
-					except IOError:
-						pass
-			except KeyError:
-				self.warn('Unable to save session cookies in %s' % cookie_file)
-				self.cookiejar = CookieJar()
-		else:
-			self.cookiejar = CookieJar()
+		cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
+		self.cookiejar = LWPCookieJar(cookie_file)
+
+		try:
+			self.cookiejar.load()
+		except IOError:
+			pass
+
+		if self.forget:
+			self.cookiejar.clear()
+			self.cookiejar.save()
+			os.chmod(self.cookiejar.filename, 0600)
 
 		if getattr(args, 'encoding'):
 			self.enc = args.encoding
@@ -166,7 +160,7 @@ class PrettyBugz:
 				self.enc = 'utf-8'
 
 		self.log("Using %s " % args.base)
-		self.bz = BugzillaProxy(self.base ,cookies=self.cookiejar)
+		self.bz = BugzillaProxy(self.base, cookies=self.cookiejar)
 
 	def log(self, status_msg, newline = True):
 		if not self.quiet:
@@ -182,23 +176,21 @@ class PrettyBugz:
 	def get_input(self, prompt):
 		return raw_input(prompt)
 
+	def bzcall(self, method, *args):
+		"""Attempt to call method with args. Log in if authentication is required.
+		"""
+		try:
+			return method(*args)
+		except xmlrpclib.Fault, fault:
+			# Fault code 410 means login required
+			if fault.faultCode == 410 and not self.skip_auth:
+				self.login()
+				return method(*args)
+			raise
+
 	def login(self):
 		"""Authenticate a session.
 		"""
-		# check if we need to authenticate
-		if self.authenticated or self.skip_auth:
-			return
-
-		# try seeing if we really need to request login
-		if not self.forget:
-			try:
-				self.cookiejar.load()
-				self.log('Already logged in')
-				self.authenticated = True
-				return
-			except IOError:
-				pass
-
 		# prompt for username if we were not supplied with it
 		if not self.user:
 			self.log('No username given.')
@@ -217,7 +209,6 @@ class PrettyBugz:
 			qparams['remember'] = True
 		self.log('Logging in')
 		self.bz.User.login(qparams)
-		self.authenticated = True
 
 		if not self.forget:
 			self.cookiejar.save()
@@ -262,8 +253,7 @@ class PrettyBugz:
 		elif 'ALL' in search_dict['status']:
 			del search_dict['status']
 
-		self.login()
-		result = self.bz.Bug.search(search_dict)['bugs']
+		result = self.bzcall(self.bz.Bug.search, search_dict)['bugs']
 
 		if not len(result):
 			self.log('No bugs found.')
@@ -273,8 +263,7 @@ class PrettyBugz:
 	def get(self, args):
 		""" Fetch bug details given the bug id """
 		self.log('Getting bug %s ..' % args.bugid)
-		self.login()
-		result = self.bz.Bug.get({'ids':[args.bugid]})
+		result = self.bzcall(self.bz.Bug.get, {'ids':[args.bugid]})
 
 		for bug in result['bugs']:
 			self.showbuginfo(bug, args.attachments, args.comments)
@@ -467,8 +456,7 @@ class PrettyBugz:
 		if args.cc is not None:
 			params['cc'] = args.cc
 
-		self.login()
-		result = self.bz.Bug.create(params)
+		result = self.bzcall(self.bz.Bug.create, params)
 		self.log('Bug %d submitted' % result['id'])
 
 	def modify(self, args):
@@ -567,8 +555,7 @@ class PrettyBugz:
 
 		if len(params) < 2:
 			raise BugzError('No changes were specified')
-		self.login()
-		result = self.bz.Bug.update(params)
+		result = self.bzcall(self.bz.Bug.update, params)
 		for bug in result['bugs']:
 			changes = bug['changes']
 			if not len(changes):
@@ -583,8 +570,7 @@ class PrettyBugz:
 		""" Download or view an attachment given the id."""
 		self.log('Getting attachment %s' % args.attachid)
 
-		self.login()
-		result = self.bz.Bug.attachments({'attachment_ids':[args.attachid]})
+		result = self.bzcall(self.bz.Bug.attachments, {'attachment_ids':[args.attachid]})
 		result = result['attachments'][args.attachid]
 
 		action = {True:'Viewing', False:'Saving'}
@@ -637,8 +623,7 @@ class PrettyBugz:
 			attach_dict['content_type'] = content_type;
 		attach_dict['comment'] = comment
 		attach_dict['is_patch'] = is_patch
-		self.login()
-		result =  self.bz.Bug.add_attachment(attach_dict)
+		result =  self.bzcall(self.bz.Bug.add_attachment, attach_dict)
 		self.log("'%s' has been attached to bug %s" % (filename, bugid))
 
 	def listbugs(self, buglist, show_status=False):
@@ -707,11 +692,11 @@ class PrettyBugz:
 		if blocked:
 			print '%-12s: %s' % ('Blocked', blocked)
 
-		bug_comments = self.bz.Bug.comments({'ids':[bug['id']]})
+		bug_comments = self.bzcall(self.bz.Bug.comments, {'ids':[bug['id']]})
 		bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
 		print '%-12s: %d' % ('Comments', len(bug_comments))
 
-		bug_attachments = self.bz.Bug.attachments({'ids':[bug['id']]})
+		bug_attachments = self.bzcall(self.bz.Bug.attachments, {'ids':[bug['id']]})
 		bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 		print '%-12s: %d' % ('Attachments', len(bug_attachments))
 		print
