@@ -6,8 +6,8 @@
 
 from cookielib import CookieJar
 from urllib import splittype, splithost, splituser, splitpasswd
-from urllib2 import (build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor,
-		HTTPPasswordMgrWithDefaultRealm, Request)
+from urllib2 import build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor
+from urllib2 import HTTPPasswordMgrWithDefaultRealm, Request
 from xmlrpclib import ProtocolError, ServerProxy, Transport
 
 class RequestTransport(Transport):
