@@ -131,7 +131,6 @@ class PrettyBugz:
 		self.quiet = args.quiet
 		self.columns = args.columns or terminal_width()
 		self.base = args.base
-		self.forget = args.forget
 		self.user = args.user
 		self.password = args.password
 		self.skip_auth = args.skip_auth
@@ -143,11 +142,6 @@ class PrettyBugz:
 			self.cookiejar.load()
 		except IOError:
 			pass
-
-		if self.forget:
-			self.cookiejar.clear()
-			self.cookiejar.save()
-			os.chmod(self.cookiejar.filename, 0600)
 
 		if getattr(args, 'encoding'):
 			self.enc = args.encoding
@@ -205,12 +199,12 @@ class PrettyBugz:
 		qparams = {}
 		qparams['login'] = self.user
 		qparams['password'] = self.password
-		if not self.forget:
+		if args is not None:
 			qparams['remember'] = True
 		self.log('Logging in')
 		self.bz.User.login(qparams)
 
-		if not self.forget:
+		if args is not None:
 			self.cookiejar.save()
 			os.chmod(self.cookiejar.filename, 0600)
 

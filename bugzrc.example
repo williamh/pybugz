@@ -29,11 +29,6 @@
 # user: myname@my.project.com
 # password: secret2
 #
-# Delete the login cookie on exit. If this is not set, pybugz will
-# keep your login cookie until you remove it.
-#
-# forget: True
-#
 # The number of columns your terminal can display.
 # Most of the time you should not have to set this.
 #
