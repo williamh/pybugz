@@ -188,7 +188,7 @@ class PrettyBugz:
 				return method(*args)
 			raise
 
-	def login(self):
+	def login(self, args=None):
 		"""Authenticate a session.
 		"""
 		# prompt for username if we were not supplied with it
@@ -213,6 +213,10 @@ class PrettyBugz:
 		if not self.forget:
 			self.cookiejar.save()
 			os.chmod(self.cookiejar.filename, 0600)
+
+	def logout(self, args):
+		self.log('logging out')
+		self.bz.User.logout()
 
 	def search(self, args):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).

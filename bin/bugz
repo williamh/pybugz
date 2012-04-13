@@ -59,6 +59,16 @@ def make_get_parser(subparsers):
 		dest = 'comments')
 	get_parser.set_defaults(func = PrettyBugz.get)
 
+def make_login_parser(subparsers):
+	login_parser = subparsers.add_parser('login',
+		help = 'log into bugzilla')
+	login_parser.set_defaults(func = PrettyBugz.login)
+
+def make_logout_parser(subparsers):
+	logout_parser = subparsers.add_parser('logout',
+		help = 'log out of bugzilla')
+	logout_parser.set_defaults(func = PrettyBugz.logout)
+
 def make_modify_parser(subparsers):
 	modify_parser = subparsers.add_parser('modify',
 		help = 'modify a bug (eg. post a comment)')
@@ -271,6 +281,8 @@ def make_parser():
 	make_attach_parser(subparsers)
 	make_attachment_parser(subparsers)
 	make_get_parser(subparsers)
+	make_login_parser(subparsers)
+	make_logout_parser(subparsers)
 	make_modify_parser(subparsers)
 	make_post_parser(subparsers)
 	make_search_parser(subparsers)
