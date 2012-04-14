@@ -27,8 +27,7 @@ BUGZ: Any line beginning with 'BUGZ:' will be ignored.
 BUGZ: ---------------------------------------------------
 """
 
-COOKIE_FILE = '.bugz_cookie'
-
+DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_NUM_COLS = 80
 
 #
@@ -135,7 +134,7 @@ class PrettyBugz:
 		self.password = args.password
 		self.skip_auth = args.skip_auth
 
-		cookie_file = os.path.join(os.environ['HOME'], COOKIE_FILE)
+		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
 		self.cookiejar = LWPCookieJar(cookie_file)
 
 		try:
