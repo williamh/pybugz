@@ -10,6 +10,8 @@ import traceback
 from bugz import __version__
 from bugz.cli import BugzError, PrettyBugz
 
+DEFAULT_CONFIG_FILE = '~/.bugzrc'
+
 def make_attach_parser(subparsers):
 	attach_parser = subparsers.add_parser('attach',
 		help = 'attach file to a bug')
@@ -313,7 +315,7 @@ def fill_config(bugz, parser, section):
 def get_config(args):
 	config_file = getattr(args, 'config_file')
 	if config_file is None:
-			config_file = '~/.bugzrc'
+			config_file = DEFAULT_CONFIG_FILE
 	section = getattr(args, 'connection')
 	parser = ConfigParser.ConfigParser()
 	config_file_name = os.path.expanduser(config_file)
