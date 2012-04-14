@@ -195,13 +195,13 @@ class PrettyBugz:
 			self.password = getpass.getpass()
 
 		# perform login
-		qparams = {}
-		qparams['login'] = self.user
-		qparams['password'] = self.password
+		params = {}
+		params['login'] = self.user
+		params['password'] = self.password
 		if args is not None:
-			qparams['remember'] = True
+			params['remember'] = True
 		self.log('Logging in')
-		self.bz.User.login(qparams)
+		self.bz.User.login(params)
 
 		if args is not None:
 			self.cookiejar.save()
@@ -221,16 +221,16 @@ class PrettyBugz:
 		search_opts = sorted([(opt, val) for opt, val in args.__dict__.items()
 			if val is not None and opt in valid_keys])
 
-		search_dict = {}
+		params = {}
 		for key in args.__dict__.keys():
 			if key in valid_keys and getattr(args, key) is not None:
-				search_dict[key] = getattr(args, key)
+				params[key] = getattr(args, key)
 		if getattr(args, 'terms'):
-			search_dict['summary'] = args.terms
+			params['summary'] = args.terms
 
 		search_term = ' '.join(args.terms).strip()
 
-		if not (search_dict or search_term):
+		if not (params or search_term):
 			raise BugzError('Please give search terms or options.')
 
 		if search_term:
@@ -245,12 +245,12 @@ class PrettyBugz:
 		else:
 			self.log(log_msg)
 
-		if not 'status' in search_dict.keys():
-			search_dict['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
-		elif 'ALL' in search_dict['status']:
-			del search_dict['status']
+		if not 'status' in params.keys():
+			params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
+		elif 'ALL' in params['status']:
+			del params['status']
 
-		result = self.bzcall(self.bz.Bug.search, search_dict)['bugs']
+		result = self.bzcall(self.bz.Bug.search, params)['bugs']
 
 		if not len(result):
 			self.log('No bugs found.')
@@ -567,7 +567,9 @@ class PrettyBugz:
 		""" Download or view an attachment given the id."""
 		self.log('Getting attachment %s' % args.attachid)
 
-		result = self.bzcall(self.bz.Bug.attachments, {'attachment_ids':[args.attachid]})
+		params = {}
+		params['attachment_ids'] = [args.attachid]
+		result = self.bzcall(self.bz.Bug.attachments, params)
 		result = result['attachments'][args.attachid]
 
 		action = {True:'Viewing', False:'Saving'}
@@ -607,20 +609,20 @@ class PrettyBugz:
 		if summary is None:
 			summary = os.path.basename(filename)
 
-		attach_dict = {}
-		attach_dict['ids'] = [bugid]
+		params = {}
+		params['ids'] = [bugid]
 
 		fd = open(filename, 'rb')
-		attach_dict['data'] = xmlrpclib.Binary(fd.read())
+		params['data'] = xmlrpclib.Binary(fd.read())
 		fd.close()
 
-		attach_dict['file_name'] = os.path.basename(filename)
-		attach_dict['summary'] = summary
+		params['file_name'] = os.path.basename(filename)
+		params['summary'] = summary
 		if not is_patch:
-			attach_dict['content_type'] = content_type;
-		attach_dict['comment'] = comment
-		attach_dict['is_patch'] = is_patch
-		result =  self.bzcall(self.bz.Bug.add_attachment, attach_dict)
+			params['content_type'] = content_type;
+		params['comment'] = comment
+		params['is_patch'] = is_patch
+		result =  self.bzcall(self.bz.Bug.add_attachment, params)
 		self.log("'%s' has been attached to bug %s" % (filename, bugid))
 
 	def listbugs(self, buglist, show_status=False):
