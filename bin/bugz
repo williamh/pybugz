@@ -304,13 +304,13 @@ def fill_config_option(args, parser, get, section, option):
 	if value is not None:
 		setattr(args, option, value)
 
-def fill_config(bugz, parser, section):
-	fill_config_option(bugz, parser, parser.get, section, 'base')
-	fill_config_option(bugz, parser, parser.get, section, 'user')
-	fill_config_option(bugz, parser, parser.get, section, 'password')
-	fill_config_option(bugz, parser, parser.getint, section, 'columns')
-	fill_config_option(bugz, parser, parser.get, section, 'encoding')
-	fill_config_option(bugz, parser, parser.getboolean, section, 'quiet')
+def fill_config(args, parser, section):
+	fill_config_option(args, parser, parser.get, section, 'base')
+	fill_config_option(args, parser, parser.get, section, 'user')
+	fill_config_option(args, parser, parser.get, section, 'password')
+	fill_config_option(args, parser, parser.getint, section, 'columns')
+	fill_config_option(args, parser, parser.get, section, 'encoding')
+	fill_config_option(args, parser, parser.getboolean, section, 'quiet')
 
 def get_config(args):
 	config_file = getattr(args, 'config_file')
