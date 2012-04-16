@@ -261,6 +261,8 @@ def make_parser():
 		help = 'username for commands requiring authentication')
 	parser.add_argument('-p', '--password',
 		help = 'password for commands requiring authentication')
+	parser.add_argument('--passwordcmd',
+		help = 'password command to evaluate for commands requiring authentication')
 	parser.add_argument('-q', '--quiet',
 		action='store_true',
 		help = 'quiet mode')
@@ -308,6 +310,7 @@ def fill_config(args, parser, section):
 	fill_config_option(args, parser, parser.get, section, 'base')
 	fill_config_option(args, parser, parser.get, section, 'user')
 	fill_config_option(args, parser, parser.get, section, 'password')
+	fill_config_option(args, parser, parser.get, section, 'passwordcmd')
 	fill_config_option(args, parser, parser.getint, section, 'columns')
 	fill_config_option(args, parser, parser.get, section, 'encoding')
 	fill_config_option(args, parser, parser.getboolean, section, 'quiet')
