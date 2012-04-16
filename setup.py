@@ -5,7 +5,7 @@ try:
 	from distutils.command.build_scripts import build_scripts_2to3 as build_scripts
 except ImportError:
 	from distutils.command.build_py import build_py
-	from distutils.command.build_scripts import build_scripts as build_scripts
+	from distutils.command.build_scripts import build_scripts
 
 setup(
 	name = 'pybugz',
