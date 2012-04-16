@@ -6,8 +6,8 @@
 
 from cookielib import CookieJar
 from urllib import splittype, splithost, splituser, splitpasswd
-from urllib2 import (build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor,
-		HTTPPasswordMgrWithDefaultRealm, Request)
+from urllib2 import build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor
+from urllib2 import HTTPPasswordMgrWithDefaultRealm, Request
 from xmlrpclib import ProtocolError, ServerProxy, Transport
 
 class RequestTransport(Transport):
@@ -39,16 +39,17 @@ class RequestTransport(Transport):
 		req.add_header('User-Agent', self.user_agent)
 		req.add_header('Content-Type', 'text/xml')
 
-		if self.accept_gzip_encoding:
+		if hasattr(self, 'accept_gzip_encoding') and self.accept_gzip_encoding:
 			req.add_header('Accept-Encoding', 'gzip')
 
 		req.add_data(request_body)
 
 		resp = self.opener.open(req)
 
-		# resp is a urllib.addinfourl instance, which does not have the
-		# getheader method that parse_response expects.
-		resp.getheader = resp.headers.getheader
+		# In Python 2, resp is a urllib.addinfourl instance, which does not
+		# have the getheader method that parse_response expects.
+		if not hasattr(resp, 'getheader'):
+			resp.getheader = resp.headers.getheader
 
 		if resp.code == 200:
 			self.verbose = verbose
