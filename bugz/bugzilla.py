@@ -39,7 +39,7 @@ class RequestTransport(Transport):
 		req.add_header('User-Agent', self.user_agent)
 		req.add_header('Content-Type', 'text/xml')
 
-		if self.accept_gzip_encoding:
+		if hasattr(self, 'accept_gzip_encoding') and self.accept_gzip_encoding:
 			req.add_header('Accept-Encoding', 'gzip')
 
 		req.add_data(request_body)
