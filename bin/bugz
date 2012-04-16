@@ -295,7 +295,7 @@ def config_option(parser, get, section, option):
 			else:
 				print " ! Error: "+option+" is not set"
 				sys.exit(1)
-		except ValueError as e:
+		except ValueError, e:
 			print " ! Error: option "+option+" is not in the right format: "+str(e)
 			sys.exit(1)
 
@@ -334,7 +334,7 @@ def get_config(args):
 	try:
 		parser.readfp(file)
 		sections = parser.sections()
-	except ConfigParser.ParsingError as e:
+	except ConfigParser.ParsingError, e:
 		print " ! Error: Can't parse user configuration file: "+str(e)
 		sys.exit(1)
 
