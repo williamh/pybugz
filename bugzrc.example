@@ -29,6 +29,12 @@
 # user: myname@my.project.com
 # password: secret2
 #
+# As an alternative to keeping your password in this file you can provide a
+# password command. It is evaluated and pybugz expects this command to output
+# the password to standard out. E.g.:
+#
+# passwordcmd: gpg2 --decrypt /myhome/.my-encrypted-password.gpg
+#
 # The number of columns your terminal can display.
 # Most of the time you should not have to set this.
 #
