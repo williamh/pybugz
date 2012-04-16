@@ -129,7 +129,6 @@ class PrettyBugz:
 	def __init__(self, args):
 		self.quiet = args.quiet
 		self.columns = args.columns or terminal_width()
-		self.base = args.base
 		self.user = args.user
 		self.password = args.password
 		self.skip_auth = args.skip_auth
@@ -153,7 +152,7 @@ class PrettyBugz:
 				self.enc = 'utf-8'
 
 		self.log("Using %s " % args.base)
-		self.bz = BugzillaProxy(self.base, cookiejar=self.cookiejar)
+		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
 
 	def log(self, status_msg, newline = True):
 		if not self.quiet:
