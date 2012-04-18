@@ -6,6 +6,7 @@ from cookielib import CookieJar, LWPCookieJar
 import locale
 import mimetypes
 import os
+import subprocess
 import re
 import sys
 import tempfile
@@ -131,6 +132,7 @@ class PrettyBugz:
 		self.columns = args.columns or terminal_width()
 		self.user = args.user
 		self.password = args.password
+                self.passwordcmd = args.passwordcmd or None
 		self.skip_auth = args.skip_auth
 
 		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
@@ -190,8 +192,12 @@ class PrettyBugz:
 
 		# prompt for password if we were not supplied with it
 		if not self.password:
-			self.log('No password given.')
-			self.password = getpass.getpass()
+                        if not self.passwordcmd:
+                                self.log('No password given.')
+                                self.password = getpass.getpass()
+                        else:
+                                process = subprocess.Popen(self.passwordcmd.split(), shell=False, stdout=subprocess.PIPE)
+                                self.password, _ = process.communicate()
 
 		# perform login
 		params = {}
