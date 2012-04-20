@@ -715,7 +715,9 @@ class PrettyBugz:
 
 		if show_comments:
 			i = 0
-			wrapper = textwrap.TextWrapper(width = self.columns)
+			wrapper = textwrap.TextWrapper(width = self.columns,
+				break_long_words = False,
+				break_on_hyphens = False)
 			for comment in bug_comments:
 				who = comment['creator']
 				when = comment['time']
