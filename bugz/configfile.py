@@ -18,10 +18,12 @@ def config_option(parser, get, section, option):
 
 def fill_config_option(args, parser, get, section, option):
 	value = config_option(parser, get, section, option)
-	if value is not None:
+        if value is not None:
 		setattr(args, option, value)
 
 def fill_config(args, parser, section):
+	fill_config_option(args, parser, parser.get, section, 'os')
+	fill_config_option(args, parser, parser.get, section, 'platform')
 	fill_config_option(args, parser, parser.get, section, 'base')
 	fill_config_option(args, parser, parser.get, section, 'user')
 	fill_config_option(args, parser, parser.get, section, 'password')

@@ -184,6 +184,12 @@ def make_post_parser(subparsers):
 		help = 'description from contents of file')
 	post_parser.add_argument('--append-command',
 		help = 'append the output of a command to the description')
+	post_parser.add_argument('--os',
+		help = 'set the operating system',
+		dest = 'os')
+	post_parser.add_argument('--platform',
+		help = 'set the hardware platform',
+                dest = 'platform')
 	post_parser.add_argument('--batch',
 		action="store_true",
 		help = 'do not prompt for any values')
