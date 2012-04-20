@@ -1,5 +1,24 @@
 #!/usr/bin/python
 
+"""
+Python Bugzilla Interface
+
+Simple command-line interface to bugzilla to allow:
+ - searching
+ - getting bug info
+ - saving attachments
+
+Requirements
+------------
+ - Python 2.5 or later
+
+Classes
+-------
+ - BugzillaProxy - Server proxy for communication with Bugzilla
+ - PrettyBugz - Command line interface to Bugzilla
+
+"""
+
 import locale
 import os
 import sys
