@@ -48,6 +48,14 @@
 #
 # quiet: True
 #
+# Some bugzilla installations need to have the operating system and platform
+# specified explicitly when submitting new bugs, other don't. You can do so
+# via arguments or in the config file.
+#
+# os: All
+# platform: All
+#
+#
 # The special section named 'default' may also be used. Other sections will
 # override any values specified here. The optional special key 'connection' is
 # used to name the default connection, to use when no --connection parameter is

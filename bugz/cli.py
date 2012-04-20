@@ -446,6 +446,10 @@ class PrettyBugz:
 		params['component'] = args.component
 		params['version'] = args.version
 		params['summary'] = args.summary
+		if args.os is not None:
+			params['op_sys'] = args.os
+		if args.platform is not None:
+			params['platform'] = args.platform
 		if args.description is not None:
 			params['description'] = args.description
 		if args.priority is not None:
