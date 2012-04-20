@@ -221,7 +221,8 @@ class PrettyBugz:
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
 		valid_keys = ['alias', 'assigned_to', 'component', 'creator',
-			'limit', 'offset', 'priority', 'product', 'resolution',
+			'limit', 'offset', 'op_sys', 'platform',
+			'priority', 'product', 'resolution',
 			'severity', 'status', 'version', 'whiteboard']
 
 		search_opts = sorted([(opt, val) for opt, val in args.__dict__.items()
@@ -334,8 +335,23 @@ class PrettyBugz:
 			else:
 				self.log('Enter bug description: %s' % args.description)
 
-			# fixme: hw platform
-			# fixme: os
+			# check for operating system
+			if not args.op_sys:
+				op_sys_msg = 'Enter operating system where this bug occurs: '
+				line = self.get_input(op_sys_msg)
+				if len(line):
+					args.op_sys = line
+			else:
+				self.log('Enter operating system: %s' % args.op_sys)
+
+			# check for platform
+			if not args.platform:
+				platform_msg = 'Enter hardware platform where this bug occurs: '
+				line = self.get_input(platform_msg)
+				if len(line):
+					args.platform = line
+			else:
+				self.log('Enter hardware platform: %s' % args.platform)
 
 			# check for default priority
 			if args.priority is None:
@@ -418,8 +434,8 @@ class PrettyBugz:
 		print '%-12s: %s' % ('Title', args.summary)
 		print '%-12s: %s' % ('Version', args.version)
 		print '%-12s: %s' % ('Description', args.description)
-		# fixme: OS
-		# fixme: hardware
+		print '%-12s: %s' % ('Operating System', args.op_sys)
+		print '%-12s: %s' % ('Platform', args.platform)
 		print '%-12s: %s' % ('priority', args.priority)
 		print '%-12s: %s' % ('severity', args.severity)
 		print '%-12s: %s' % ('alias', args.alias)
@@ -448,6 +464,10 @@ class PrettyBugz:
 		params['summary'] = args.summary
 		if args.description is not None:
 			params['description'] = args.description
+		if args.op_sys is not None:
+			params['op_sys'] = args.op_sys
+		if args.platform is not None:
+			params['platform'] = args.platform
 		if args.priority is not None:
 			params['priority'] = args.priority
 		if args.severity is not None:
@@ -525,6 +545,10 @@ class PrettyBugz:
 			params['groups']['remove'] = args.groups_remove
 		if args.keywords_set is not None:
 			params['keywords']['set'] = args.keywords_set
+		if args.op_sys is not None:
+			params['op_sys'] = args.op_sys
+		if args.platform is not None:
+			params['platform'] = args.platform
 		if args.priority is not None:
 			params['priority'] = args.priority
 		if args.product is not None:

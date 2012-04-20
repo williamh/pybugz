@@ -121,6 +121,10 @@ def make_modify_parser(subparsers):
 		action = 'append',
 		help = 'set bug keywords',
 		dest = 'keywords_set')
+	modify_parser.add_argument('--op-sys',
+		help = 'change the operating system for this bug')
+	modify_parser.add_argument('--platform',
+		help = 'change the hardware platform for this bug')
 	modify_parser.add_argument('--priority',
 		help = 'change the priority for this bug')
 	modify_parser.add_argument('--product',
@@ -170,6 +174,10 @@ def make_post_parser(subparsers):
 		dest = 'summary')
 	post_parser.add_argument('-d', '--description',
 		help = 'description of the bug')
+	post_parser.add_argument('--op-sys',
+		help = 'set the operating system')
+	post_parser.add_argument('--platform',
+		help = 'set the hardware platform')
 	post_parser.add_argument('--priority',
 		help = 'set priority for the new bug')
 	post_parser.add_argument('-S', '--severity',
@@ -214,6 +222,12 @@ def make_search_parser(subparsers):
 	search_parser.add_argument('--offset',
 		type = int,
 		help='Set the start position for a search')
+	search_parser.add_argument('--op-sys',
+		action='append',
+		help = 'restrict by Operating System (one or more)')
+	search_parser.add_argument('--platform',
+		action='append',
+		help = 'restrict by platform (one or more)')
 	search_parser.add_argument('--priority',
 		action='append',
 		help = 'restrict by priority (one or more)')
