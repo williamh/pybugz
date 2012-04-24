@@ -18,15 +18,6 @@ Features
 * Posting bugs, comments, and making changes to an existing bug.
 * Adding attachments to a bug.
 
-Configuration File
-------------------
-
-pybugz supports a configuration file which allows you to define settings
-for multiple bugzilla connections then refer to them by name from the
-command line. The default is for this file to be named .bugzrc and
-stored in your home directory. An example of this file and the settings
-is included in this distribution as bugzrc.example.
-
 Usage/Workflow
 --------------
 
@@ -40,10 +31,10 @@ development.
 1) Searching bugzilla for bugs I can fix, I'll run the command:
 ---------------------------------------------------------------
 
-$ bugz search "version bump" --assigned liquidx@gentoo.org
+$ bugz search "version bump" --assigned-to liquidx@gentoo.org
 
- * Using http://bugs.gentoo.org/ ..
- * Searching for "version bump" ordered by "number"
+ * Using https://bugs.gentoo.org/xmlrpc.cgi
+ * Searching for "version bump"
  101968 liquidx              net-im/msnlib version bump
  125468 liquidx              version bump for dev-libs/g-wrap-1.9.6
  130608 liquidx              app-dicts/stardict version bump: 2.4.7
@@ -53,7 +44,7 @@ $ bugz search "version bump" --assigned liquidx@gentoo.org
 
 $ bugz get 101968
 
- * Using http://bugs.gentoo.org/ ..
+ * Using https://bugs.gentoo.org/xmlrpc.cgi
  * Getting bug 130608 ..
 Title       : app-dicts/stardict version bump: 2.4.7
 Assignee    : liquidx@gentoo.org
@@ -78,7 +69,7 @@ Attachments : 1
 
 $ bugz attachment 87844
 
- * Using http://bugs.gentoo.org/ ..
+ * Using https://bugs.gentoo.org/xmlrpc.cgi
  * Getting attachment 87844
  * Saving attachment: "stardict-2.4.7.ebuild"
 
@@ -96,12 +87,16 @@ $ bugz modify 130608 --invalid -c "Not reproducable"
 Other options
 -------------
 
-There is extensive help in `bugz --help` and `bugz <subcommand>
---help` for additional options. 
+bugz has an extensive help system for commands and options.
 
-bugz.py can be easily adapted for other bugzillas by changing
-BugzConfig to match the configuration of your target
-bugzilla. However, I haven't spent much time on using it with other
-bugzillas out there. If you do have changes that will make it easier,
-please let me know.
+bugz --help gives help for the global options and subcommands, and
+bugz <subcommand> --help gives help for that specific subcommand.
 
+Configuration File
+------------------
+
+pybugz supports a configuration file which allows you to define settings
+for multiple bugzilla connections then refer to them by name from the
+command line. The default is for this file to be named .bugzrc and
+stored in your home directory. An example of this file and the settings
+is included in this distribution as bugzrc.example.
