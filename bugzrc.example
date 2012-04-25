@@ -24,7 +24,8 @@
 #
 # base: http://myhttpname:myhttppasswd@my.project.com/bugzilla/xmlrpc.cgi
 #
-# Next are your username and password for this bugzilla.
+# Next are your username and password for this bugzilla. If you do not
+# provide these, you will be prompted for them.
 #
 # user: myname@my.project.com
 # password: secret2
@@ -55,6 +56,6 @@
 #
 # [default]
 # connection: sectionname
-# httpuser: xyz
-# httppassword: secret2
-# etc.
+#
+# All parameters listed above can be used in the default section if you
+# only use one bugzilla installation.
