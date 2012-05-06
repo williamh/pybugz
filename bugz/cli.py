@@ -325,7 +325,7 @@ class PrettyBugz:
 				while not args.summary or len(args.summary) < 1:
 					args.summary = self.get_input('Enter title: ')
 			else:
-				self.log('Enter title: %s' % args.title)
+				self.log('Enter title: %s' % args.summary)
 
 			# check for description
 			if not args.description:
