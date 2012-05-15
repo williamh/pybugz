@@ -36,7 +36,10 @@ DEFAULT_NUM_COLS = 80
 #
 
 def get_content_type(filename):
-	return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+	try:
+		return subprocess.check_output(["file", "-b", "--mime-type", filename]).strip()
+	except:
+		return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
 
 def raw_input_block():
 	""" Allows multiple line input until a Ctrl+D is detected.
