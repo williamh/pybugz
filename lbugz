@@ -15,19 +15,14 @@ import subprocess
 import sys
  
 args = sys.argv
-
 path = os.path.normpath(os.path.dirname(os.path.realpath(__file__)))
-# path = os.path.normpath(os.path.join(path, '.'))
-print path
-
 pkg = os.path.join(path, 'bugz')
 script = os.path.join(path, 'bin/bugz')
-if os.path.exists(pkg) and os.path.exists(script):
 
+if os.path.exists(pkg) and os.path.exists(script):
+	args[0] = script
 	if 'PYTHONPATH' in os.environ.keys():
 		os.environ['PYTHONPATH'] = path + ':' + os.environ['PYTHONPATH']
 	else:
 		os.environ['PYTHONPATH'] = path + ':'
-
-	args[0] = script
 	subprocess.call(args)
