@@ -4,38 +4,37 @@
 # following URL:
 # http://www.bugzilla.org/docs/4.2/en/html/api/Bugzilla/WebService.html
 
-from cookielib import CookieJar
-from urllib import splittype, splithost, splituser, splitpasswd
-from urllib2 import build_opener, HTTPBasicAuthHandler, HTTPCookieProcessor
-from urllib2 import HTTPPasswordMgrWithDefaultRealm, Request
-from xmlrpclib import ProtocolError, ServerProxy, Transport
+import cookielib
+import urllib
+import urllib2
+import xmlrpclib
 
-class RequestTransport(Transport):
+class RequestTransport(xmlrpclib.Transport):
 	def __init__(self, uri, cookiejar=None, use_datetime=0):
-		Transport.__init__(self, use_datetime=use_datetime)
+		xmlrpclib.Transport.__init__(self, use_datetime=use_datetime)
 
-		self.opener = build_opener()
+		self.opener = urllib2.build_opener()
 
 		# Parse auth (user:passwd) from the uri
-		urltype, rest = splittype(uri)
-		host, rest = splithost(rest)
-		auth, host = splituser(host)
+		urltype, rest = urllib.splittype(uri)
+		host, rest = urllib.splithost(rest)
+		auth, host = urllib.splituser(host)
 		self.uri = urltype + '://' + host + rest
 
 		# Handle HTTP Basic authentication
 		if auth is not None:
-			user, passwd = splitpasswd(auth)
-			passwdmgr = HTTPPasswordMgrWithDefaultRealm()
+			user, passwd = urllib.splitpasswd(auth)
+			passwdmgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
 			passwdmgr.add_password(realm=None, uri=self.uri, user=user, passwd=passwd)
-			authhandler = HTTPBasicAuthHandler(passwdmgr)
+			authhandler = urllib2.HTTPBasicAuthHandler(passwdmgr)
 			self.opener.add_handler(authhandler)
 
 		# Handle HTTP Cookies
 		if cookiejar is not None:
-			self.opener.add_handler(HTTPCookieProcessor(cookiejar))
+			self.opener.add_handler(urllib2.HTTPCookieProcessor(cookiejar))
 
 	def request(self, host, handler, request_body, verbose=0):
-		req = Request(self.uri)
+		req = urllib2.Request(self.uri)
 		req.add_header('User-Agent', self.user_agent)
 		req.add_header('Content-Type', 'text/xml')
 
@@ -56,17 +55,17 @@ class RequestTransport(Transport):
 			return self.parse_response(resp)
 
 		resp.close()
-		raise ProtocolError(self.uri, resp.status, resp.reason, resp.msg)
+		raise xmlrpclib.ProtocolError(self.uri, resp.status, resp.reason, resp.msg)
 
-class BugzillaProxy(ServerProxy):
+class BugzillaProxy(xmlrpclib.ServerProxy):
 	def __init__(self, uri, encoding=None, verbose=0, allow_none=0,
 			use_datetime=0, cookiejar=None):
 
 		if cookiejar is None:
-			cookiejar = CookieJar()
+			cookiejar = cookielib.CookieJar()
 
 		transport = RequestTransport(use_datetime=use_datetime, uri=uri,
 				cookiejar=cookiejar)
-		ServerProxy.__init__(self, uri=uri, transport=transport,
+		xmlrpclib.ServerProxy.__init__(self, uri=uri, transport=transport,
 				encoding=encoding, verbose=verbose, allow_none=allow_none,
 				use_datetime=use_datetime)
