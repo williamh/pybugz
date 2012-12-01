@@ -188,6 +188,8 @@ def make_post_parser(subparsers):
 		help = 'assign bug to someone other than the default assignee')
 	post_parser.add_argument('--cc',
 		help = 'add a list of emails to CC list')
+	post_parser.add_argument('-U', '--url',
+		help = 'set URL field of bug')
 	post_parser.add_argument('-F' , '--description-from',
 		help = 'description from contents of file')
 	post_parser.add_argument('--append-command',
@@ -271,7 +273,7 @@ def make_parser():
 	parser.add_argument('-q', '--quiet',
 		action='store_true',
 		help = 'quiet mode')
-	parser.add_argument('--columns', 
+	parser.add_argument('--columns',
 		type = int,
 		help = 'maximum number of columns output should use')
 	parser.add_argument('--encoding',

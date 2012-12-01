@@ -398,7 +398,16 @@ class PrettyBugz:
 			else:
 				self.log('Enter a CC list (optional): %s' % args.cc)
 
-		# fixme: groups
+			# check for URL
+			if args.url is None:
+				url_msg = 'Enter a URL (optional): '
+				line = self.get_input(url_msg)
+				if len(line):
+					args.url = line
+			else:
+				self.log('Enter a URL (optional): %s' % args.url)
+
+			# fixme: groups
 
 			# fixme: status
 
@@ -436,11 +445,12 @@ class PrettyBugz:
 		print '%-12s: %s' % ('Description', args.description)
 		print '%-12s: %s' % ('Operating System', args.op_sys)
 		print '%-12s: %s' % ('Platform', args.platform)
-		print '%-12s: %s' % ('priority', args.priority)
-		print '%-12s: %s' % ('severity', args.severity)
-		print '%-12s: %s' % ('alias', args.alias)
+		print '%-12s: %s' % ('Priority', args.priority)
+		print '%-12s: %s' % ('Severity', args.severity)
+		print '%-12s: %s' % ('Alias', args.alias)
 		print '%-12s: %s' % ('Assigned to', args.assigned_to)
 		print '%-12s: %s' % ('CC', args.cc)
+		print '%-12s: %s' % ('URL', args.url)
 		# fixme: groups
 		# fixme: status
 		# fixme: Milestone
@@ -478,6 +488,8 @@ class PrettyBugz:
 			params['assigned_to'] = args.assigned_to
 		if args.cc is not None:
 			params['cc'] = args.cc
+		if args.url is not None:
+			params['url'] = args.url
 
 		result = self.bzcall(self.bz.Bug.create, params)
 		self.log('Bug %d submitted' % result['id'])
