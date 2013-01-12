@@ -25,4 +25,4 @@ if os.path.exists(pkg) and os.path.exists(script):
 		os.environ['PYTHONPATH'] = path + ':' + os.environ['PYTHONPATH']
 	else:
 		os.environ['PYTHONPATH'] = path + ':'
-	subprocess.call(args)
+	sys.exit(subprocess.call(args))
