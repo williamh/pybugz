@@ -207,7 +207,10 @@ class PrettyBugz:
 		if args is not None:
 			params['remember'] = True
 		self.log('Logging in')
-		self.bz.User.login(params)
+		try:
+			self.bz.User.login(params)
+		except xmlrpclib.Fault as fault:
+			raise BugzError("Can't login: " + fault.faultString)
 
 		if args is not None:
 			self.cookiejar.save()
@@ -215,7 +218,10 @@ class PrettyBugz:
 
 	def logout(self, args):
 		self.log('logging out')
-		self.bz.User.logout()
+		try:
+			self.bz.User.logout()
+		except xmlrpclib.Fault as fault:
+			raise BugzError("Failed to logout: " + fault.faultString)
 
 	def search(self, args):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
