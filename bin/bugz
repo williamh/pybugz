@@ -40,28 +40,29 @@ def main():
 	try:
 		bugz = PrettyBugz(args)
 		args.func(bugz, args)
+		return 0
 
 	except BugzError, e:
 		print ' ! Error: %s' % e
-		sys.exit(-1)
+		return 1
 
 	except TypeError, e:
 		print ' ! Error: Incorrect number of arguments supplied'
 		print
 		traceback.print_exc()
-		sys.exit(-1)
+		return 1
 
 	except RuntimeError, e:
 		print ' ! Error: %s' % e
-		sys.exit(-1)
+		return 1
 
 	except KeyboardInterrupt:
 		print
 		print 'Stopped.'
-		sys.exit(-1)
+		return 1
 
 	except:
 		raise
 
 if __name__ == "__main__":
-	main()
+	sys.exit(main())
