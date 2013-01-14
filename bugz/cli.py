@@ -14,7 +14,7 @@ import textwrap
 import xmlrpclib
 import pdb
 
-from bugz.configfile import get_config
+from bugz.configfile import discover_configs
 
 try:
 	import readline
@@ -33,6 +33,7 @@ BUGZ: ---------------------------------------------------
 
 DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_NUM_COLS = 80
+DEFAULT_CONFIG_FILE = '/etc/pybugz/pybugz.conf'
 
 #
 # Auxiliary functions
@@ -124,8 +125,7 @@ def block_edit(comment, comment_from = ''):
 
 class PrettyBugz:
 	def __init__(self, args):
-		# refine arguments based on configuration files
-		get_config(args)
+		settings = discover_configs(DEFAULT_CONFIG_FILE)
 
 		if getattr(args, 'columns') is None:
 			setattr(args, 'columns', 0)

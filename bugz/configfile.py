@@ -6,7 +6,6 @@ import pdb
 from bugz.errhandling import BugzError
 from bugz.log import *
 
-DEFAULT_CONFIG_FILE = '~/.bugzrc'
 
 def config_option(parser, get, section, option):
 	if parser.has_option(section, option):
@@ -137,7 +136,7 @@ def parse_file(settings, context, stack):
 		if sectype == "connection":
 			handle_connection(settings, context, stack, cp, sec)
 
-def parse_configs(file):
+def discover_configs(file):
 	settings = {
 		# where to look for user's configuration
 		'homeconf' : '~/.bugzrc',
@@ -164,11 +163,7 @@ def parse_configs(file):
 
 	return settings
 
-def get_config(userRedefined):
-	settings = parse_configs(DEFAULT_CONFIG_FILE)
-	sys.exit(1)
-	return
-
+def placeholder():
 	if config_file is None:
 			config_file = DEFAULT_CONFIG_FILE
 	section = getattr(args, 'connection')
