@@ -6,39 +6,14 @@ import pdb
 from bugz.errhandling import BugzError
 from bugz.log import *
 
-
-def config_option(parser, get, section, option):
-	if parser.has_option(section, option):
-		try:
-			if get(section, option) != '':
-				return get(section, option)
-			else:
-				print " ! Error: "+option+" is not set"
-				sys.exit(1)
-		except ValueError, e:
-			print " ! Error: option "+option+" is not in the right format: "+str(e)
-			sys.exit(1)
-
-def fill_config_option(args, parser, get, section, option):
-	value = config_option(parser, get, section, option)
-	if value is not None:
-		setattr(args, option, value)
-
-def fill_config(args, parser, section):
-	fill_config_option(args, parser, parser.get, section, 'base')
-	fill_config_option(args, parser, parser.get, section, 'user')
-	fill_config_option(args, parser, parser.get, section, 'password')
-	fill_config_option(args, parser, parser.get, section, 'passwordcmd')
-	fill_config_option(args, parser, parser.getint, section, 'columns')
-	fill_config_option(args, parser, parser.get, section, 'encoding')
-	fill_config_option(args, parser, parser.getboolean, section, 'quiet')
-
 class Connection:
 	name = "default"
 	base = 'https://bugs.gentoo.org/xmlrpc.cgi'
 	columns = 0
 	user = None
 	password = None
+	quiet = None
+	encoding = "utf-8"
 
 def handle_default(settings, context, stack, cp):
 	log_debug("handling the [default] section")
@@ -90,14 +65,12 @@ def handle_connection(settings, context, stack, parser, name):
 			log_debug("has {0}".format(id), 3)
 			tgt = parser.get(name, id)
 
-	if parser.has_option(name, "base"):
-		connection.url = parser.get(name, "base")
-
-	if parser.has_option(name, "columns"):
-		connection.columns = parser.getint(name, "columns")
-
+	fill(connection.base, "base")
 	fill(connection.user, "user")
 	fill(connection.password, "password")
+	fill(connection.encoding, "encoding")
+	fill(connection.columns, "columns")
+	fill(connection.quiet, "quiet")
 
 	settings['connections'][name] = connection
 
@@ -162,41 +135,3 @@ def discover_configs(file):
 		parse_file(settings, context, stack)
 
 	return settings
-
-def placeholder():
-	if config_file is None:
-			config_file = DEFAULT_CONFIG_FILE
-	section = getattr(args, 'connection')
-	parser = ConfigParser.ConfigParser()
-	config_file_name = os.path.expanduser(config_file)
-
-	# try to open config file
-	try:
-		file = open(config_file_name)
-	except IOError:
-		if getattr(args, 'config_file') is not None:
-			print " ! Error: Can't find user configuration file: "+config_file_name
-			sys.exit(1)
-		else:
-			return
-
-	# try to parse config file
-	try:
-		parser.readfp(file)
-		sections = parser.sections()
-	except ConfigParser.ParsingError, e:
-		print " ! Error: Can't parse user configuration file: "+str(e)
-		sys.exit(1)
-
-	# parse the default section first
-	if "default" in sections:
-		fill_config(args, parser, "default")
-	if section is None:
-		section = config_option(parser, parser.get, "default", "connection")
-
-	# parse a specific section
-	if section in sections:
-		fill_config(args, parser, section)
-	elif section is not None:
-		print " ! Error: Can't find section ["+section+"] in configuration file"
-		sys.exit(1)
