@@ -44,6 +44,6 @@ def log_info(string):
 	formatOut(string, 'I')
 	return
 
-def log_debug(string):
+def log_debug(string, debugLevel=0):
 	formatOut(string, 'D')
 	return
