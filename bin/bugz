@@ -25,17 +25,26 @@ import sys
 import traceback
 
 from bugz.argparsers import make_parser
-from bugz.cli import BugzError, PrettyBugz
-from bugz.configfile import get_config
+from bugz.cli import PrettyBugz
+from bugz.errhandling import BugzError
+
+def formatError(msg):
+	lines = str(msg).split('\n')
+	start = True
+	for line in lines:
+		tmpl = ' !        %s'
+		if start:
+			start = False
+			tmpl= ' ! Error: %s'
+
+		print tmpl % line
 
 def main():
-	parser = make_parser()
 
 	# parse options
+	args = None
+	parser = make_parser()
 	args = parser.parse_args()
-	get_config(args)
-	if getattr(args, 'columns') is None:
-		setattr(args, 'columns', 0)
 
 	try:
 		bugz = PrettyBugz(args)
@@ -43,17 +52,17 @@ def main():
 		return 0
 
 	except BugzError, e:
-		print ' ! Error: %s' % e
+		formatError(e)
 		return 1
 
 	except TypeError, e:
-		print ' ! Error: Incorrect number of arguments supplied'
-		print
+		# where this comes from?
+		formatError('Incorrect number of arguments supplied')
 		traceback.print_exc()
 		return 1
 
 	except RuntimeError, e:
-		print ' ! Error: %s' % e
+		formatError(e)
 		return 1
 
 	except KeyboardInterrupt:

@@ -12,6 +12,9 @@ import sys
 import tempfile
 import textwrap
 import xmlrpclib
+import pdb
+
+from bugz.configfile import get_config
 
 try:
 	import readline
@@ -119,15 +122,14 @@ def block_edit(comment, comment_from = ''):
 	else:
 		return ''
 
-#
-# Bugz specific exceptions
-#
-
-class BugzError(Exception):
-	pass
-
 class PrettyBugz:
 	def __init__(self, args):
+		# refine arguments based on configuration files
+		get_config(args)
+
+		if getattr(args, 'columns') is None:
+			setattr(args, 'columns', 0)
+
 		self.quiet = args.quiet
 		self.columns = args.columns or terminal_width()
 		self.user = args.user
