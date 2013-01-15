@@ -13,6 +13,10 @@ LogSettins = {
 		'symb' : '~',
 		'word' : 'Dbg',
 	},
+	'I' : {
+		'symb' : '*',
+		'word' : 'Info',
+	},
 	'!' : {
 		'symb' : '!',
 		'word' : 'UNKNWN',
