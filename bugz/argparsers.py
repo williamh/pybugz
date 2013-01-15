@@ -256,11 +256,12 @@ def make_parser():
 	parser = argparse.ArgumentParser(
 		epilog = 'use -h after a sub-command for sub-command specific help')
 	parser.add_argument('--config-file',
+		default = None,
 		help = 'read an alternate configuration file')
 	parser.add_argument('--connection',
 		help = 'use [connection] section of your configuration file')
 	parser.add_argument('-b', '--base',
-				default = 'https://bugs.gentoo.org/xmlrpc.cgi',
+		default = None,
 		help = 'base URL of Bugzilla')
 	parser.add_argument('-u', '--user',
 		help = 'username for commands requiring authentication')
@@ -270,10 +271,11 @@ def make_parser():
 		help = 'password command to evaluate for commands requiring authentication')
 	parser.add_argument('-q', '--quiet',
 		action='store_true',
+		default=None,
 		help = 'quiet mode')
-	parser.add_argument('--columns', 
+	parser.add_argument('--columns',
 		type = int,
-		help = 'maximum number of columns output should use')
+		help = 'maximum number of columns output should use (0 = unlimited)')
 	parser.add_argument('--encoding',
 		help = 'output encoding (default: utf-8).')
 	parser.add_argument('--skip-auth',
