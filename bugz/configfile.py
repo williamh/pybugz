@@ -15,28 +15,25 @@ class Connection:
 	quiet = None
 	encoding = "utf-8"
 
-def handle_default(settings, context, stack, cp):
-	log_debug("handling the [default] section")
+def handle_default(settings, newDef):
+	oldDef = str(settings['default'])
+	if oldDef != newDef:
+		log_debug("redefining default connection from '{0}' to '{1}'". \
+				format(oldDef, newDef))
+		settings['default'] = newDef
 
-	if cp.has_option('default', 'connection'):
-		oldDef = str(settings['default'])
-		newDef = cp.get('default', 'connection')
-		if oldDef != newDef:
-			log_debug("redefining default connection from '{0}' to '{1}'". \
-					format(oldDef, newDef))
-			settings['default'] = newDef
+def handle_settings(settings, context, stack, cp, sec_name):
+	log_debug("contains SETTINGS section named [{0}]".format(sec_name))
 
-	cp.remove_section("default")
+	if cp.has_option(sec_name, 'homeconf'):
+		settings['homeconf'] = cp.get(sec_name, 'homeconf')
 
-def handle_settings(settings, context, stack, cp):
-	log_debug("contains [settings]")
-
-	if cp.has_option('settings', 'homeconf'):
-		settings['homeconf'] = cp.get('settings', 'homeconf')
+	if cp.has_option(sec_name, 'default'):
+		handle_default(settings, cp.get(sec_name, 'default'))
 
 	# handle 'confdir' ~> explore and push target files into the stack
-	if cp.has_option('settings', 'confdir'):
-		confdir = cp.get('settings', 'confdir')
+	if cp.has_option(sec_name, 'confdir'):
+		confdir = cp.get(sec_name, 'confdir')
 		full_confdir = os.path.expanduser(confdir)
 		wildcard = os.path.join(full_confdir, '*.conf')
 		log_debug("adding wildcard " + wildcard)
@@ -46,8 +43,6 @@ def handle_settings(settings, context, stack, cp):
 				log_debug("skipping (already included)")
 				break
 			stack.append(cnffile)
-
-	cp.remove_section('settings')
 
 def handle_connection(settings, context, stack, parser, name):
 	log_debug("reading connection '{0}'".format(name))
@@ -94,17 +89,14 @@ def parse_file(settings, context, stack):
 
 	# successfully parsed file
 
-	if "settings" in cp.sections():
-		handle_settings(settings, context, stack, cp)
-
-	if "default" in cp.sections():
-		handle_default(settings, context, stack, cp)
-
 	for sec in cp.sections():
 		sectype = "connection"
 
 		if cp.has_option(sec, 'type'):
 			sectype = cp.get(sec, 'type')
+
+		if sectype == "settings":
+			handle_settings(settings, context, stack, cp, sec)
 
 		if sectype == "connection":
 			handle_connection(settings, context, stack, cp, sec)
