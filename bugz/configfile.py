@@ -12,8 +12,20 @@ class Connection:
 	columns = 0
 	user = None
 	password = None
+	password_cmd = None
+	dbglvl = 0
 	quiet = None
+	skip_auth = None
 	encoding = "utf-8"
+	cookie_file = "~/.bugz_cookie"
+	option_change = False
+
+	def dump(self):
+		log_info("Using [{0}] ({1})".format(self.name, self.base))
+		log_debug("User: '{0}'".format(self.user), 3)
+		# loglvl == 4, only for developers (&& only by hardcoding)
+		log_debug("Pass: '{0}'".format(self.password), 10)
+		log_debug("Columns: {0}".format(self.columns), 3)
 
 def handle_default(settings, newDef):
 	oldDef = str(settings['default'])
@@ -55,17 +67,18 @@ def handle_connection(settings, context, stack, parser, name):
 		connection = Connection()
 		connection.name = name
 
-	def fill(tgt, id):
+	def fill(conn, id):
 		if parser.has_option(name, id):
-			log_debug("has {0}".format(id), 3)
-			tgt = parser.get(name, id)
+			val = parser.get(name, id)
+			setattr(conn, id, val)
+			log_debug("has {0} - {1}".format(id, val), 3)
 
-	fill(connection.base, "base")
-	fill(connection.user, "user")
-	fill(connection.password, "password")
-	fill(connection.encoding, "encoding")
-	fill(connection.columns, "columns")
-	fill(connection.quiet, "quiet")
+	fill(connection, "base")
+	fill(connection, "user")
+	fill(connection, "password")
+	fill(connection, "encoding")
+	fill(connection, "columns")
+	fill(connection, "quiet")
 
 	settings['connections'][name] = connection
 
@@ -101,10 +114,10 @@ def parse_file(settings, context, stack):
 		if sectype == "connection":
 			handle_connection(settings, context, stack, cp, sec)
 
-def discover_configs(file):
+def discover_configs(file, homeConf=None):
 	settings = {
 		# where to look for user's configuration
-		'homeconf' : '~/.bugzrc',
+		'homeconf' : '~/.bugzrc' if homeConf == None else homeConf,
 		# list of objects of Connection
 		'connections' : {},
 		# the default Connection name

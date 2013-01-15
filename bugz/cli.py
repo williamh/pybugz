@@ -15,6 +15,7 @@ import xmlrpclib
 import pdb
 
 from bugz.configfile import discover_configs
+from bugz.log import *
 
 try:
 	import readline
@@ -31,7 +32,6 @@ BUGZ: Any line beginning with 'BUGZ:' will be ignored.
 BUGZ: ---------------------------------------------------
 """
 
-DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_NUM_COLS = 80
 DEFAULT_CONFIG_FILE = '/etc/pybugz/pybugz.conf'
 
@@ -124,20 +124,60 @@ def block_edit(comment, comment_from = ''):
 		return ''
 
 class PrettyBugz:
+	enc = "utf-8"
+	columns = 0
+	quiet = None
+	skip_auth = None
+
+	# TODO:
+	# * make this class more library-like (allow user to script on the python
+	#   level using this PrettyBugz class)
+	# * get the "__init__" phase into main() and change parameters to accept
+	#   only 'settings' structure
 	def __init__(self, args):
-		settings = discover_configs(DEFAULT_CONFIG_FILE)
 
-		if getattr(args, 'columns') is None:
-			setattr(args, 'columns', 0)
+		sys_config = DEFAULT_CONFIG_FILE
+		home_config = getattr(args, 'config_file')
+		settings = discover_configs(sys_config, home_config)
 
-		self.quiet = args.quiet
-		self.columns = args.columns or terminal_width()
-		self.user = args.user
-		self.password = args.password
-		self.passwordcmd = args.passwordcmd
-		self.skip_auth = args.skip_auth
+		# use the default connection name
+		conn_name = settings['default']
 
-		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
+		# check for redefinition by --connection
+		opt_conn = getattr(args, 'connection')
+		if opt_conn != None:
+			conn_name = opt_conn
+
+		if not conn_name in settings['connections']:
+			raise BugzError("can't find connection '{0}'".format(conn_name))
+
+		# get proper 'Connection' instance
+		connection = settings['connections'][conn_name]
+
+		def fix_con(con, name,opt):
+			if opt != None:
+				setattr(con, name, opt)
+				con.option_change = True
+
+		fix_con(connection, "base", args.base)
+		fix_con(connection, "quiet", args.quiet)
+		fix_con(connection, "columns", args.columns)
+		connection.columns = int(connection.columns) or terminal_width()
+		fix_con(connection, "user", args.user)
+		fix_con(connection, "password", args.password)
+		fix_con(connection, "password_cmd", args.passwordcmd)
+		fix_con(connection, "skip_auth", args.skip_auth)
+		fix_con(connection, "encoding", args.encoding)
+
+		# now must the "connection" be complete
+
+		# propagate layout settings to 'self'
+		self.enc = connection.encoding
+		self.quiet = connection.quiet
+		self.skip_auth = connection.skip_auth
+		self.columns = connection.columns
+
+		cookie_file = os.path.expanduser(connection.cookie_file)
 		self.cookiejar = LWPCookieJar(cookie_file)
 
 		try:
@@ -145,9 +185,7 @@ class PrettyBugz:
 		except IOError:
 			pass
 
-		if getattr(args, 'encoding'):
-			self.enc = args.encoding
-		else:
+		if not self.enc:
 			try:
 				self.enc = locale.getdefaultlocale()[1]
 			except:
@@ -155,8 +193,9 @@ class PrettyBugz:
 			if not self.enc:
 				self.enc = 'utf-8'
 
-		self.log("Using %s " % args.base)
-		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
+		self.bz = BugzillaProxy(connection.base, cookiejar=self.cookiejar)
+		connection.dump()
+		self.connection = connection
 
 	def log(self, status_msg, newline = True):
 		if not self.quiet:
@@ -188,24 +227,25 @@ class PrettyBugz:
 		"""Authenticate a session.
 		"""
 		# prompt for username if we were not supplied with it
-		if not self.user:
+		if not self.connection.user:
 			self.log('No username given.')
-			self.user = self.get_input('Username: ')
+			self.connection.user = self.get_input('Username: ')
 
 		# prompt for password if we were not supplied with it
-		if not self.password:
+		if not self.connection.password:
 			if not self.passwordcmd:
 				self.log('No password given.')
-				self.password = getpass.getpass()
+				self.connection.password = getpass.getpass()
 			else:
 				process = subprocess.Popen(self.passwordcmd.split(), shell=False,
 					stdout=subprocess.PIPE)
 				self.password, _ = process.communicate()
+				self.connection.password, _ = process.communicate()
 
 		# perform login
 		params = {}
-		params['login'] = self.user
-		params['password'] = self.password
+		params['login'] = self.connection.user
+		params['password'] = self.connection.password
 		if args is not None:
 			params['remember'] = True
 		self.log('Logging in')
