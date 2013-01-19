@@ -32,11 +32,11 @@ def handle_default(settings, newDef):
 	oldDef = str(settings['default'])
 	if oldDef != newDef:
 		log_debug("redefining default connection from '{0}' to '{1}'". \
-				format(oldDef, newDef))
+				format(oldDef, newDef), 2)
 		settings['default'] = newDef
 
 def handle_settings(settings, context, stack, cp, sec_name):
-	log_debug("contains SETTINGS section named [{0}]".format(sec_name))
+	log_debug("contains SETTINGS section named [{0}]".format(sec_name), 3)
 
 	if cp.has_option(sec_name, 'homeconf'):
 		settings['homeconf'] = cp.get(sec_name, 'homeconf')
@@ -49,20 +49,20 @@ def handle_settings(settings, context, stack, cp, sec_name):
 		confdir = cp.get(sec_name, 'confdir')
 		full_confdir = os.path.expanduser(confdir)
 		wildcard = os.path.join(full_confdir, '*.conf')
-		log_debug("adding wildcard " + wildcard)
+		log_debug("adding wildcard " + wildcard, 3)
 		for cnffile in glob.glob(wildcard):
-			log_debug(" ++ " + cnffile)
+			log_debug(" ++ " + cnffile, 3)
 			if cnffile in context['included']:
 				log_debug("skipping (already included)")
 				break
 			stack.append(cnffile)
 
 def handle_connection(settings, context, stack, parser, name):
-	log_debug("reading connection '{0}'".format(name))
+	log_debug("reading connection '{0}'".format(name), 2)
 	connection = None
 
 	if name in settings['connections']:
-		log_warn("redefining connection '{0}'".format(name))
+		log_debug("redefining connection '{0}'".format(name), 2)
 		connection = settings['connections'][name]
 	else:
 		connection = Connection()
@@ -94,7 +94,7 @@ def parse_file(settings, context, stack):
 
 	context['included'][full_name] = None
 
-	log_debug("parsing '" + file_name + "'")
+	log_debug("parsing '" + file_name + "'", 1)
 
 	cp = ConfigParser.ConfigParser()
 	parsed = None
@@ -123,7 +123,7 @@ def parse_file(settings, context, stack):
 def discover_configs(file, homeConf=None):
 	settings = {
 		# where to look for user's configuration
-		'homeconf' : '~/.bugzrc' if homeConf == None else homeConf,
+		'homeconf' : '~/.bugzrc',
 		# list of objects of Connection
 		'connections' : {},
 		# the default Connection name
@@ -139,6 +139,10 @@ def discover_configs(file, homeConf=None):
 	# parse sys configs
 	while len(stack) > 0:
 		parse_file(settings, context, stack)
+
+	if homeConf:
+		# the command-line option must win
+		settings['homeconf'] = homeConf
 
 	# parse home configs
 	stack = [ settings['homeconf'] ]

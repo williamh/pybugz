@@ -139,6 +139,7 @@ class PrettyBugz:
 
 		sys_config = DEFAULT_CONFIG_FILE
 		home_config = getattr(args, 'config_file')
+		setDebugLvl(getattr(args, 'debug'))
 		settings = discover_configs(sys_config, home_config)
 
 		# use the default connection name
@@ -174,9 +175,10 @@ class PrettyBugz:
 
 		# propagate layout settings to 'self'
 		self.enc = connection.encoding
-		self.quiet = connection.quiet
 		self.skip_auth = connection.skip_auth
 		self.columns = connection.columns
+
+		setQuiet(connection.quiet)
 
 		cookie_file = os.path.expanduser(connection.cookie_file)
 		self.cookiejar = LWPCookieJar(cookie_file)
@@ -199,15 +201,10 @@ class PrettyBugz:
 		self.connection = connection
 
 	def log(self, status_msg, newline = True):
-		if not self.quiet:
-			if newline:
-				print ' * %s' % status_msg
-			else:
-				print ' * %s' % status_msg,
+		log_info(status_msg)
 
 	def warn(self, warn_msg):
-		if not self.quiet:
-			print ' ! Warning: %s' % warn_msg
+		log_warn(warn_msg)
 
 	def get_input(self, prompt):
 		return raw_input(prompt)

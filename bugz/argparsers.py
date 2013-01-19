@@ -273,6 +273,10 @@ def make_parser():
 		action='store_true',
 		default=None,
 		help = 'quiet mode')
+	parser.add_argument('-d', '--debug',
+		type=int,
+		default=None,
+		help = 'debug level (from 0 to 3)')
 	parser.add_argument('--columns',
 		type = int,
 		help = 'maximum number of columns output should use (0 = unlimited)')
