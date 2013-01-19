@@ -200,12 +200,6 @@ class PrettyBugz:
 		connection.dump()
 		self.connection = connection
 
-	def log(self, status_msg, newline = True):
-		log_info(status_msg)
-
-	def warn(self, warn_msg):
-		log_warn(warn_msg)
-
 	def get_input(self, prompt):
 		return raw_input(prompt)
 
@@ -226,13 +220,13 @@ class PrettyBugz:
 		"""
 		# prompt for username if we were not supplied with it
 		if not self.connection.user:
-			self.log('No username given.')
+			log_info('No username given.')
 			self.connection.user = self.get_input('Username: ')
 
 		# prompt for password if we were not supplied with it
 		if not self.connection.password:
 			if not self.passwordcmd:
-				self.log('No password given.')
+				log_info('No password given.')
 				self.connection.password = getpass.getpass()
 			else:
 				process = subprocess.Popen(self.passwordcmd.split(), shell=False,
@@ -246,7 +240,7 @@ class PrettyBugz:
 		params['password'] = self.connection.password
 		if args is not None:
 			params['remember'] = True
-		self.log('Logging in')
+		log_info('Logging in')
 		try:
 			self.bz.User.login(params)
 		except xmlrpclib.Fault as fault:
@@ -257,7 +251,7 @@ class PrettyBugz:
 			os.chmod(self.cookiejar.filename, 0600)
 
 	def logout(self, args):
-		self.log('logging out')
+		log_info('logging out')
 		try:
 			self.bz.User.logout()
 		except xmlrpclib.Fault as fault:
@@ -303,22 +297,22 @@ class PrettyBugz:
 			del params['status']
 
 		if len(params):
-			self.log(log_msg + 'with the following options:')
+			log_info(log_msg + 'with the following options:')
 			for opt, val in params.items():
-				self.log('   %-20s = %s' % (opt, str(val)))
+				log_info('   %-20s = %s' % (opt, str(val)))
 		else:
-			self.log(log_msg)
+			log_info(log_msg)
 
 		result = self.bzcall(self.bz.Bug.search, params)['bugs']
 
 		if not len(result):
-			self.log('No bugs found.')
+			log_info('No bugs found.')
 		else:
 			self.listbugs(result, args.show_status)
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
-		self.log('Getting bug %s ..' % args.bugid)
+		log_info('Getting bug %s ..' % args.bugid)
 		result = self.bzcall(self.bz.Bug.get, {'ids':[args.bugid]})
 
 		for bug in result['bugs']:
@@ -339,7 +333,7 @@ class PrettyBugz:
 					(args.description_from, e))
 
 		if not args.batch:
-			self.log('Press Ctrl+C at any time to abort.')
+			log_info('Press Ctrl+C at any time to abort.')
 
 			#
 			#  Check all bug fields.
@@ -352,14 +346,14 @@ class PrettyBugz:
 				while not args.product or len(args.product) < 1:
 					args.product = self.get_input('Enter product: ')
 			else:
-				self.log('Enter product: %s' % args.product)
+				log_info('Enter product: %s' % args.product)
 
 			# check for component
 			if not args.component:
 				while not args.component or len(args.component) < 1:
 					args.component = self.get_input('Enter component: ')
 			else:
-				self.log('Enter component: %s' % args.component)
+				log_info('Enter component: %s' % args.component)
 
 			# check for version
 			# FIXME: This default behaviour is not too nice.
@@ -370,14 +364,14 @@ class PrettyBugz:
 				else:
 					args.version = 'unspecified'
 			else:
-				self.log('Enter version: %s' % args.version)
+				log_info('Enter version: %s' % args.version)
 
 			# check for title
 			if not args.summary:
 				while not args.summary or len(args.summary) < 1:
 					args.summary = self.get_input('Enter title: ')
 			else:
-				self.log('Enter title: %s' % args.summary)
+				log_info('Enter title: %s' % args.summary)
 
 			# check for description
 			if not args.description:
@@ -385,7 +379,7 @@ class PrettyBugz:
 				if len(line):
 					args.description = line
 			else:
-				self.log('Enter bug description: %s' % args.description)
+				log_info('Enter bug description: %s' % args.description)
 
 			# check for operating system
 			if not args.op_sys:
@@ -394,7 +388,7 @@ class PrettyBugz:
 				if len(line):
 					args.op_sys = line
 			else:
-				self.log('Enter operating system: %s' % args.op_sys)
+				log_info('Enter operating system: %s' % args.op_sys)
 
 			# check for platform
 			if not args.platform:
@@ -403,7 +397,7 @@ class PrettyBugz:
 				if len(line):
 					args.platform = line
 			else:
-				self.log('Enter hardware platform: %s' % args.platform)
+				log_info('Enter hardware platform: %s' % args.platform)
 
 			# check for default priority
 			if args.priority is None:
@@ -412,7 +406,7 @@ class PrettyBugz:
 				if len(line):
 					args.priority = line
 			else:
-				self.log('Enter priority (optional): %s' % args.priority)
+				log_info('Enter priority (optional): %s' % args.priority)
 
 			# check for default severity
 			if args.severity is None:
@@ -421,7 +415,7 @@ class PrettyBugz:
 				if len(line):
 					args.severity = line
 			else:
-				self.log('Enter severity (optional): %s' % args.severity)
+				log_info('Enter severity (optional): %s' % args.severity)
 
 			# check for default alias
 			if args.alias is None:
@@ -430,7 +424,7 @@ class PrettyBugz:
 				if len(line):
 					args.alias = line
 			else:
-				self.log('Enter alias (optional): %s' % args.alias)
+				log_info('Enter alias (optional): %s' % args.alias)
 
 			# check for default assignee
 			if args.assigned_to is None:
@@ -439,7 +433,7 @@ class PrettyBugz:
 				if len(line):
 					args.assigned_to = line
 			else:
-				self.log('Enter assignee (optional): %s' % args.assigned_to)
+				log_info('Enter assignee (optional): %s' % args.assigned_to)
 
 			# check for CC list
 			if args.cc is None:
@@ -448,7 +442,7 @@ class PrettyBugz:
 				if len(line):
 					args.cc = line.split(', ')
 			else:
-				self.log('Enter a CC list (optional): %s' % args.cc)
+				log_info('Enter a CC list (optional): %s' % args.cc)
 
 		# fixme: groups
 
@@ -459,7 +453,7 @@ class PrettyBugz:
 			if args.append_command is None:
 				args.append_command = self.get_input('Append the output of the following command (leave blank for none): ')
 			else:
-				self.log('Append command (optional): %s' % args.append_command)
+				log_info('Append command (optional): %s' % args.append_command)
 
 		# raise an exception if mandatory fields are not specified.
 		if args.product is None:
@@ -506,7 +500,7 @@ class PrettyBugz:
 			if len(confirm) < 1:
 				confirm = args.default_confirm
 			if confirm[0] not in ('y', 'Y'):
-				self.log('Submission aborted')
+				log_info('Submission aborted')
 				return
 
 		params={}
@@ -532,7 +526,7 @@ class PrettyBugz:
 			params['cc'] = args.cc
 
 		result = self.bzcall(self.bz.Bug.create, params)
-		self.log('Bug %d submitted' % result['id'])
+		log_info('Bug %d submitted' % result['id'])
 
 	def modify(self, args):
 		"""Modify an existing bug (eg. adding a comment or changing resolution.)"""
@@ -638,16 +632,16 @@ class PrettyBugz:
 		for bug in result['bugs']:
 			changes = bug['changes']
 			if not len(changes):
-				self.log('Added comment to bug %s' % bug['id'])
+				log_info('Added comment to bug %s' % bug['id'])
 			else:
-				self.log('Modified the following fields in bug %s' % bug['id'])
+				log_info('Modified the following fields in bug %s' % bug['id'])
 				for key in changes.keys():
-					self.log('%-12s: removed %s' %(key, changes[key]['removed']))
-					self.log('%-12s: added %s' %(key, changes[key]['added']))
+					log_info('%-12s: removed %s' %(key, changes[key]['removed']))
+					log_info('%-12s: added %s' %(key, changes[key]['added']))
 
 	def attachment(self, args):
 		""" Download or view an attachment given the id."""
-		self.log('Getting attachment %s' % args.attachid)
+		log_info('Getting attachment %s' % args.attachid)
 
 		params = {}
 		params['attachment_ids'] = [args.attachid]
@@ -655,7 +649,7 @@ class PrettyBugz:
 		result = result['attachments'][args.attachid]
 
 		action = {True:'Viewing', False:'Saving'}
-		self.log('%s attachment: "%s"' %
+		log_info('%s attachment: "%s"' %
 			(action[args.view], result['file_name']))
 		safe_filename = os.path.basename(re.sub(r'\.\.', '',
 												result['file_name']))
@@ -705,7 +699,7 @@ class PrettyBugz:
 		params['comment'] = comment
 		params['is_patch'] = is_patch
 		result =  self.bzcall(self.bz.Bug.add_attachment, params)
-		self.log("'%s' has been attached to bug %s" % (filename, bugid))
+		log_info("'%s' has been attached to bug %s" % (filename, bugid))
 
 	def listbugs(self, buglist, show_status=False):
 		for bug in buglist:
@@ -724,7 +718,7 @@ class PrettyBugz:
 			except UnicodeDecodeError:
 				print line[:self.columns]
 
-		self.log("%i bug(s) found." % len(buglist))
+		log_info("%i bug(s) found." % len(buglist))
 
 	def showbuginfo(self, bug, show_attachments, show_comments):
 		FIELDS = (
