@@ -294,13 +294,6 @@ class PrettyBugz:
 		else:
 			log_msg = 'Searching for bugs '
 
-		if search_opts:
-			self.log(log_msg + 'with the following options:')
-			for opt, val in search_opts:
-				self.log('   %-20s = %s' % (opt, val))
-		else:
-			self.log(log_msg)
-
 		if not 'status' in params.keys():
 			if self.connection.query_statuses:
 				params['status'] = self.connection.query_statuses
@@ -311,6 +304,13 @@ class PrettyBugz:
 
 		if 'ALL' in params['status']:
 			del params['status']
+
+		if len(params):
+			self.log(log_msg + 'with the following options:')
+			for opt, val in params.items():
+				self.log('   %-20s = %s' % (opt, str(val)))
+		else:
+			self.log(log_msg)
 
 		result = self.bzcall(self.bz.Bug.search, params)['bugs']
 
