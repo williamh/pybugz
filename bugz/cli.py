@@ -16,6 +16,7 @@ import pdb
 
 from bugz.configfile import discover_configs
 from bugz.log import *
+from bugz.errhandling import BugzError
 
 try:
 	import readline
