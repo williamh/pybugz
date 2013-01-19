@@ -19,6 +19,7 @@ class Connection:
 	encoding = "utf-8"
 	cookie_file = "~/.bugz_cookie"
 	option_change = False
+	query_statuses = []
 
 	def dump(self):
 		log_info("Using [{0}] ({1})".format(self.name, self.base))
@@ -79,6 +80,11 @@ def handle_connection(settings, context, stack, parser, name):
 	fill(connection, "encoding")
 	fill(connection, "columns")
 	fill(connection, "quiet")
+
+	if parser.has_option(name, 'query_statuses'):
+		line = parser.get(name, 'query_statuses')
+		lines = line.split()
+		connection.query_statuses = lines
 
 	settings['connections'][name] = connection
 

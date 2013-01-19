@@ -302,8 +302,14 @@ class PrettyBugz:
 			self.log(log_msg)
 
 		if not 'status' in params.keys():
-			params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
-		elif 'ALL' in params['status']:
+			if self.connection.query_statuses:
+				params['status'] = self.connection.query_statuses
+			else:
+				# this seems to be most portable among bugzillas as each
+				# bugzilla may have its own set of statuses.
+				params['status'] = ['ALL']
+
+		if 'ALL' in params['status']:
 			del params['status']
 
 		result = self.bzcall(self.bz.Bug.search, params)['bugs']
