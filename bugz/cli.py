@@ -223,12 +223,13 @@ class PrettyBugz:
 
 		# prompt for password if we were not supplied with it
 		if not self.connection.password:
-			if not self.passwordcmd:
+			if not self.connection.password_cmd:
 				log_info('No password given.')
 				self.connection.password = getpass.getpass()
 			else:
-				process = subprocess.Popen(self.passwordcmd.split(), shell=False,
-					stdout=subprocess.PIPE)
+				cmd = self.connection.password_cmd.split()
+				stdout = stdout=subprocess.PIPE
+				process = subprocess.Popen(cmd, shell=False, stdout=stdout)
 				self.password, _ = process.communicate()
 				self.connection.password, _ = process.communicate()
 
