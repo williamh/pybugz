@@ -19,6 +19,7 @@ except ImportError:
 	readline = None
 
 from bugz.bugzilla import BugzillaProxy
+from bugz.errhandling import BugzError
 
 BUGZ_COMMENT_TEMPLATE = \
 """
@@ -118,13 +119,6 @@ def block_edit(comment, comment_from = ''):
 		return new_text
 	else:
 		return ''
-
-#
-# Bugz specific exceptions
-#
-
-class BugzError(Exception):
-	pass
 
 class PrettyBugz:
 	def __init__(self, args):

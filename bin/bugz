@@ -25,7 +25,8 @@ import sys
 import traceback
 
 from bugz.argparsers import make_parser
-from bugz.cli import BugzError, PrettyBugz
+from bugz.cli import PrettyBugz
+from bugz.errhandling import BugzError
 from bugz.configfile import get_config
 
 def main():
