@@ -140,12 +140,15 @@ def discover_configs(file, homeConf=None):
 	while len(stack) > 0:
 		parse_file(settings, context, stack)
 
-	if homeConf:
+	if not homeConf:
 		# the command-line option must win
-		settings['homeconf'] = homeConf
+		homeConf = settings['homeconf']
+
+	if not os.path.isfile(os.path.expanduser(homeConf)):
+		return settings
 
 	# parse home configs
-	stack = [ settings['homeconf'] ]
+	stack = [ homeConf ]
 	while len(stack) > 0:
 		parse_file(settings, context, stack)
 
