@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import commands
 import getpass
 from cookielib import CookieJar, LWPCookieJar
