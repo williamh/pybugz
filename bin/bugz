@@ -25,43 +25,43 @@ import sys
 import traceback
 
 from bugz.argparsers import make_parser
-from bugz.cli import BugzError, PrettyBugz
-from bugz.configfile import get_config
+from bugz.cli import PrettyBugz
+from bugz.errhandling import BugzError
+from bugz.log import *
 
 def main():
-	parser = make_parser()
 
 	# parse options
+	args = None
+	parser = make_parser()
 	args = parser.parse_args()
-	get_config(args)
-	if getattr(args, 'columns') is None:
-		setattr(args, 'columns', 0)
 
 	try:
 		bugz = PrettyBugz(args)
 		args.func(bugz, args)
+		return 0
 
 	except BugzError, e:
-		print ' ! Error: %s' % e
-		sys.exit(-1)
+		log_error(e)
+		return 1
 
 	except TypeError, e:
-		print ' ! Error: Incorrect number of arguments supplied'
-		print
+		# where this comes from?
+		log_error('Incorrect number of arguments supplied')
 		traceback.print_exc()
-		sys.exit(-1)
+		return 1
 
 	except RuntimeError, e:
-		print ' ! Error: %s' % e
-		sys.exit(-1)
+		log_error(e)
+		return 1
 
 	except KeyboardInterrupt:
 		print
 		print 'Stopped.'
-		sys.exit(-1)
+		return 1
 
 	except:
 		raise
 
 if __name__ == "__main__":
-	main()
+	sys.exit(main())
