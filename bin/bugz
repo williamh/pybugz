@@ -28,12 +28,15 @@ from bugz.argparsers import make_parser
 from bugz.cli import BugzError, PrettyBugz
 from bugz.configfile import get_config
 
+def program_name():
+    return os.path.basename(sys.argv[0])
+
 def main():
 	parser = make_parser()
 
 	# parse options
 	args = parser.parse_args()
-	get_config(args)
+	get_config(program_name(), args)
 	if getattr(args, 'columns') is None:
 		setattr(args, 'columns', 0)
 

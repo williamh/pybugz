@@ -30,7 +30,7 @@ def fill_config(args, parser, section):
 	fill_config_option(args, parser, parser.get, section, 'encoding')
 	fill_config_option(args, parser, parser.getboolean, section, 'quiet')
 
-def get_config(args):
+def get_config(exe_name, args):
 	config_file = getattr(args, 'config_file')
 	if config_file is None:
 			config_file = DEFAULT_CONFIG_FILE
@@ -60,7 +60,14 @@ def get_config(args):
 	if "default" in sections:
 		fill_config(args, parser, "default")
 	if section is None:
-		section = config_option(parser, parser.get, "default", "connection")
+		# 'bugz-alias' handling
+		for i in sections:
+			bugz_alias = config_option(parser, parser.get, i, "bugz-alias")
+			if exe_name == bugz_alias:
+				section = i
+				break
+		else:
+			section = config_option(parser, parser.get, "default", "connection")
 
 	# parse a specific section
 	if section in sections:
