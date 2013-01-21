@@ -1,6 +1,10 @@
 #This module contains a set of common routines for logging messages.
 
 LogSettings = {
+	'I' : {
+		'sym' : '*',
+		'word' : 'Info',
+	},
 	'W' : {
 		'sym' : '!',
 		'word' : 'Warn',
