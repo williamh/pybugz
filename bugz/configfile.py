@@ -2,6 +2,8 @@ import ConfigParser
 import os
 import sys
 
+from bugz.log import log_error
+
 DEFAULT_CONFIG_FILE = '~/.bugzrc'
 
 def config_option(parser, get, section, option):
@@ -10,10 +12,11 @@ def config_option(parser, get, section, option):
 			if get(section, option) != '':
 				return get(section, option)
 			else:
-				print " ! Error: "+option+" is not set"
+				log_error("Error: "+option+" is not set")
 				sys.exit(1)
 		except ValueError, e:
-			print " ! Error: option "+option+" is not in the right format: "+str(e)
+			log_error("Error: option "+option+
+					" is not in the right format: "+str(e))
 			sys.exit(1)
 
 def fill_config_option(args, parser, get, section, option):
@@ -43,7 +46,8 @@ def get_config(args):
 		file = open(config_file_name)
 	except IOError:
 		if getattr(args, 'config_file') is not None:
-			print " ! Error: Can't find user configuration file: "+config_file_name
+			log_error("Error: Can't find user configuration file: "
+					+config_file_name)
 			sys.exit(1)
 		else:
 			return
@@ -53,7 +57,7 @@ def get_config(args):
 		parser.readfp(file)
 		sections = parser.sections()
 	except ConfigParser.ParsingError, e:
-		print " ! Error: Can't parse user configuration file: "+str(e)
+		log_error("Error: Can't parse user configuration file: "+str(e))
 		sys.exit(1)
 
 	# parse the default section first
@@ -66,5 +70,6 @@ def get_config(args):
 	if section in sections:
 		fill_config(args, parser, section)
 	elif section is not None:
-		print " ! Error: Can't find section ["+section+"] in configuration file"
+		log_error("Error: Can't find section ["+section
+			+"] in configuration file")
 		sys.exit(1)
