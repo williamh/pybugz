@@ -27,18 +27,8 @@ import traceback
 from bugz.argparsers import make_parser
 from bugz.cli import PrettyBugz
 from bugz.errhandling import BugzError
+from bugz.log import log_error, log_info
 from bugz.configfile import get_config
-
-def formatError(msg):
-	lines = str(msg).split('\n')
-	start = True
-	for line in lines:
-		tmpl = ' !        %s'
-		if start:
-			start = False
-			tmpl= ' ! Error: %s'
-
-		print tmpl % line
 
 def main():
 	parser = make_parser()
@@ -55,22 +45,21 @@ def main():
 		return 0
 
 	except BugzError, e:
-		formatError(e)
+		log_error(e)
 		return 1
 
 	except TypeError, e:
 		# where this comes from?
-		formatError('Incorrect number of arguments supplied')
+		log_error('Incorrect number of arguments supplied')
 		traceback.print_exc()
 		return 1
 
 	except RuntimeError, e:
-		formatError(e)
+		log_error(e)
 		return 1
 
 	except KeyboardInterrupt:
-		print
-		print 'Stopped.'
+		log_info('Stopped due to keyboard interrupt')
 		return 1
 
 	except:
