@@ -18,7 +18,7 @@ LogSettings = {
 		'word' : 'Dbg',
 	},
 	'I' : {
-		'symb' : '*',
+		'sym' : '*',
 		'word' : 'Info',
 	},
 	'!' : {
