@@ -254,7 +254,11 @@ class PrettyBugz:
 	def get(self, args):
 		""" Fetch bug details given the bug id """
 		log_info('Getting bug %s ..' % args.bugid)
-		result = self.bzcall(self.bz.Bug.get, {'ids':[args.bugid]})
+		try:
+			result = self.bzcall(self.bz.Bug.get, {'ids':[args.bugid]})
+		except xmlrpclib.Fault as fault:
+			raise BugzError("Can't get bug #" + str(args.bugid) + ": " \
+					+ fault.faultString)
 
 		for bug in result['bugs']:
 			self.showbuginfo(bug, args.attachments, args.comments)
