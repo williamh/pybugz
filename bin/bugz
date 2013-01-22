@@ -28,19 +28,13 @@ from bugz.argparsers import make_parser
 from bugz.cli import PrettyBugz
 from bugz.errhandling import BugzError
 from bugz.log import log_error, log_info
-from bugz.log import log_setDebugLevel, log_setQuiet
-from bugz.configfile import get_config
 
 def main():
-	parser = make_parser()
 
 	# parse options
+	args = None
+	parser = make_parser()
 	args = parser.parse_args()
-	get_config(args)
-	if getattr(args, 'columns') is None:
-		setattr(args, 'columns', 0)
-	log_setDebugLevel(args.debug)
-	log_setQuiet(args.quiet)
 
 	try:
 		bugz = PrettyBugz(args)
