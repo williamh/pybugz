@@ -1,8 +1,11 @@
-#
-# bugzrc.example - an example configuration file for pybugz
+# ======================================================================
+#  bugzrc.example - an example of user's configuration file for pybugz
+# ======================================================================
 #
 # This file consists of sections which define parameters for each
 # bugzilla you plan to use.
+# Usually, this file should reside on ~/.bugzrc path.  For more info how to
+# configure PyBugz see the distributed pybugz.conf file.
 #
 # Each section begins with a name in square brackets. This is also the
 # name that should be used with the --connection  parameter to the bugz
@@ -12,7 +15,10 @@
 # key: value
 # as listed below.
 #
-# [sectionname]
+# ----------------------------------------------------------------------
+# Here follows simple example of ~/.bugzrc file
+#
+# [MyBugzilla]
 #
 # The base url of the bugzilla you wish to use.
 # This must point to the xmlrpc.cgi script on the bugzilla installation.
@@ -49,13 +55,28 @@
 #
 # quiet: True
 #
-# The special section named 'default' may also be used. Other sections will
-# override any values specified here. The optional special key 'connection' is
-# used to name the default connection, to use when no --connection parameter is
-# specified to the bugz command.
+# ----------------------------------------------------------------------
+# The special section of type 'settings' may also be used.  This contains
+# more general settings like default connection, include directory, etc.
+# (again, for more info see pybugz.conf).
 #
-# [default]
-# connection: sectionname
+# [MySettings]
+#
+# type = settings
+#
+# default connection to be used (without specifying --connection)
+#
+# connection = Gentoo
 #
 # All parameters listed above can be used in the default section if you
 # only use one bugzilla installation.
+#
+# ----------------------------------------------------------------------
+# There is also possible to redefine (refine) system defined connection.
+# System configuration knows nothing about your credentials, so keep the
+# basics from system [Gentoo] and specify yours credentials here.
+#
+# [Gentoo]
+# user = myusername@gentoo.org
+# password = my-nice-password
+# columns = 80
