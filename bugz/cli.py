@@ -29,7 +29,6 @@ BUGZ: Any line beginning with 'BUGZ:' will be ignored.
 BUGZ: ---------------------------------------------------
 """
 
-DEFAULT_CONFIG_FILE = '/etc/pybugz/pybugz.conf'
 DEFAULT_NUM_COLS = 80
 
 #
@@ -126,75 +125,30 @@ class PrettyBugz:
 	quiet = None
 	skip_auth = None
 
-	# TODO:
-	# * make this class more library-like (allow user to script on the python
-	#   level using this PrettyBugz class)
-	# * get the "__init__" phase into main() and change parameters to accept
-	#   only 'settings' structure
+	# no magic here, strictly follow 'args'
 	def __init__(self, args):
 
-		sys_config = DEFAULT_CONFIG_FILE
-		home_config = getattr(args, 'config_file')
-		log_setDebugLevel(args.debug)
-		settings = discover_configs(sys_config, home_config)
+		# propagate subset of arguments to 'self' object - remaining arguments
+		# are left for following call of method (e.g. search/get/...)
+		def propagate(target, args, key):
+			setattr(target, key, getattr(args, key))
 
-		# use the default connection name
-		conn_name = settings['default']
+		for key in ["skip_auth", "columns", "user", "password", "passwordcmd"]:
+			propagate(self, args, key)
 
-		# check for redefinition by --connection
-		opt_conn = getattr(args, 'connection')
-		if opt_conn != None:
-			conn_name = opt_conn
+		# TODO: ~~> s/self.enc/self.encoding/
+		self.enc = args.encoding
 
-		if not conn_name in settings['connections']:
-			raise BugzError("can't find connection '{0}'".format(conn_name))
-
-		# get proper 'Connection' instance
-		connection = settings['connections'][conn_name]
-
-		def fix_con(con, name,opt):
-			if opt != None:
-				setattr(con, name, opt)
-				con.option_change = True
-
-		fix_con(connection, "base", args.base)
-		fix_con(connection, "quiet", args.quiet)
-		fix_con(connection, "columns", args.columns)
-		connection.columns = int(connection.columns) or terminal_width()
-		fix_con(connection, "user", args.user)
-		fix_con(connection, "password", args.password)
-		fix_con(connection, "password_cmd", args.passwordcmd)
-		fix_con(connection, "skip_auth", args.skip_auth)
-		fix_con(connection, "encoding", args.encoding)
-
-		# now must the "connection" be complete
-
-		# propagate layout settings to 'self'
-		self.enc = connection.encoding
-		self.skip_auth = connection.skip_auth
-		self.columns = connection.columns
-
-		log_setQuiet(connection.quiet)
-
-		cookie_file = os.path.expanduser(connection.cookie_file)
+		# handle cookie file
+		cookie_file = os.path.expanduser(args.cookie_file)
 		self.cookiejar = LWPCookieJar(cookie_file)
-
 		try:
 			self.cookiejar.load()
 		except IOError:
 			pass
 
-		if not self.enc:
-			try:
-				self.enc = locale.getdefaultlocale()[1]
-			except:
-				self.enc = 'utf-8'
-			if not self.enc:
-				self.enc = 'utf-8'
-
-		self.bz = BugzillaProxy(connection.base, cookiejar=self.cookiejar)
-		connection.dump()
-		self.connection = connection
+		# finally, load bugzila-proxy instance
+		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
 
 	def get_input(self, prompt):
 		return raw_input(prompt)
@@ -215,25 +169,25 @@ class PrettyBugz:
 		"""Authenticate a session.
 		"""
 		# prompt for username if we were not supplied with it
-		if not self.connection.user:
+		if not self.user:
 			log_info('No username given.')
-			self.connection.user = self.get_input('Username: ')
+			self.user = self.get_input('Username: ')
 
 		# prompt for password if we were not supplied with it
-		if not self.connection.password:
-			if not self.connection.password_cmd:
+		if not self.password:
+			if not self.passwordcmd:
 				log_info('No password given.')
-				self.connection.password = getpass.getpass()
+				self.password = getpass.getpass()
 			else:
-				cmd = self.connection.password_cmd.split()
+				cmd = self.passwordcmd.split()
 				stdout = stdout=subprocess.PIPE
 				process = subprocess.Popen(cmd, shell=False, stdout=stdout)
-				self.connection.password, _ = process.communicate()
+				self.password, _ = process.communicate()
 
 		# perform login
 		params = {}
-		params['login'] = self.connection.user
-		params['password'] = self.connection.password
+		params['login'] = self.user
+		params['password'] = self.password
 		if args is not None:
 			params['remember'] = True
 		log_info('Logging in')
@@ -280,14 +234,6 @@ class PrettyBugz:
 			log_msg = 'Searching for \'%s\' ' % search_term
 		else:
 			log_msg = 'Searching for bugs '
-
-		if not 'status' in params.keys():
-			if self.connection.query_statuses:
-				params['status'] = self.connection.query_statuses
-			else:
-				# this seems to be most portable among bugzillas as each
-				# bugzilla may have its own set of statuses.
-				params['status'] = ['ALL']
 
 		if 'ALL' in params['status']:
 			del params['status']

@@ -11,14 +11,14 @@ class Connection:
 	columns = 0
 	user = None
 	password = None
-	password_cmd = None
+	passwordcmd = None
 	dbglvl = 0
 	quiet = None
 	skip_auth = None
 	encoding = "utf-8"
 	cookie_file = "~/.bugz_cookie"
 	option_change = False
-	query_statuses = []
+	status = [] # set of statuses to be queried
 
 	def dump(self):
 		log_info("Using [{0}] ({1})".format(self.name, self.base))
@@ -78,6 +78,7 @@ def handle_connection(settings, context, stack, parser, name):
 	fill(connection, "base")
 	fill(connection, "user")
 	fill(connection, "password")
+	fill(connection, "passwordcmd")
 	fill(connection, "encoding")
 	fill(connection, "columns")
 	fill(connection, "quiet")
@@ -85,7 +86,7 @@ def handle_connection(settings, context, stack, parser, name):
 	if parser.has_option(name, 'query_statuses'):
 		line = parser.get(name, 'query_statuses')
 		lines = line.split()
-		connection.query_statuses = lines
+		connection.status = lines
 
 	settings['connections'][name] = connection
 
@@ -130,8 +131,6 @@ def discover_configs(file, homeConf=None):
 		'default' : None,
 	}
 	context = {
-		'where' : 'sys',
-		'homeparsed' : False,
 		'included' : {},
 	}
 	stack = [ file ]
