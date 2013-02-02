@@ -7,26 +7,17 @@ from bugz.log import *
 
 class Connection:
 	name = "default"
-	base = 'https://bugs.gentoo.org/xmlrpc.cgi'
+	base = None
 	columns = 0
 	user = None
 	password = None
 	passwordcmd = None
-	dbglvl = 0
 	quiet = None
 	skip_auth = None
 	encoding = None
 	cookie_file = "~/.bugz_cookie"
-	option_change = False
 	status = None # set of statuses to be queried
 	inherit = None
-
-	def dump(self):
-		log_info("Using [{0}] ({1})".format(self.name, self.base))
-		log_debug("User: '{0}'".format(self.user), 3)
-		# loglvl == 4, only for developers (&& only by hardcoding)
-		log_debug("Pass: '{0}'".format(self.password), 10)
-		log_debug("Columns: {0}".format(self.columns), 3)
 
 def handle_settings_connection(settings, newDef):
 	oldDef = str(settings['default_connection'])
@@ -82,7 +73,10 @@ def handle_connection(settings, context, stack, parser, name):
 	fill(connection, "passwordcmd")
 	fill(connection, "encoding")
 	fill(connection, "columns")
-	fill(connection, "quiet")
+	fill(connection, "inherit")
+
+	if parser.has_option(name, "quiet"):
+		connection.quiet = parser.getboolean(name, "quiet")
 
 	if parser.has_option(name, 'query_statuses'):
 		line = parser.get(name, 'query_statuses')
@@ -146,13 +140,27 @@ def discover_configs(file, homeConf=None):
 	while len(stack) > 0:
 		parse_file(settings, context, stack)
 
-	# force the connections inherit the [default] section (if exists)
+	# calculate inherit hierarchy
+	defConn = None
 	if "default" in settings['connections']:
 		defConn = settings['connections']['default']
-		for name,conn in settings['connections'].items():
-			if name != "default":
-				# does not inherit something explicitly?
-				if conn.inherit == None:
-					conn.inherit = defConn
+	for name,conn in settings['connections'].items():
+		if name == "default":
+			# the [default] section does not inherit from anybody
+			conn.inherit = None
+			continue
+
+		if not conn.inherit:
+			conn.inherit = defConn
+
+		elif isinstance(conn.inherit, str):
+			parent = conn.inherit
+			if parent in settings['connections']:
+				conn.inherit = settings['connections'][parent]
+			else:
+				raise BugzError("Bad inherit option in section {0}".format(name))
+
+		else:
+			raise BugzError("Bad inherit option in section {0}".format(name))
 
 	return settings

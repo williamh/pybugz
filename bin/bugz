@@ -19,6 +19,8 @@ Classes
 
 """
 
+import pdb
+
 import locale
 import os
 import sys
@@ -95,7 +97,7 @@ def handle_settings():
 			args.encoding = locale.getdefaultlocale()[1]
 		except:
 			args.encoding = 'utf-8'
-		if not self.encoding :
+		if not args.encoding:
 			args.encoding = 'utf-8'
 
 	log_debug("=> using <=", 2)

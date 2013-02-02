@@ -18,7 +18,7 @@ except ImportError:
 
 from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError
-from bugz.log import log_info, log_setDebugLevel, log_setQuiet
+from bugz.log import log_info
 from bugz.configfile import discover_configs
 
 BUGZ_COMMENT_TEMPLATE = \
