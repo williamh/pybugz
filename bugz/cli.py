@@ -19,6 +19,7 @@ except ImportError:
 from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError
 from bugz.log import log_info
+from bugz.configfile import discover_configs
 
 BUGZ_COMMENT_TEMPLATE = \
 """
@@ -28,7 +29,6 @@ BUGZ: Any line beginning with 'BUGZ:' will be ignored.
 BUGZ: ---------------------------------------------------
 """
 
-DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_NUM_COLS = 80
 
 #
@@ -120,32 +120,34 @@ def block_edit(comment, comment_from = ''):
 		return ''
 
 class PrettyBugz:
+	enc = "utf-8"
+	columns = 0
+	quiet = None
+	skip_auth = None
+
+	# no magic here, strictly follow 'args'
 	def __init__(self, args):
-		self.columns = args.columns or terminal_width()
-		self.user = args.user
-		self.password = args.password
-		self.passwordcmd = args.passwordcmd
-		self.skip_auth = args.skip_auth
 
-		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
+		# propagate subset of arguments to 'self' object - remaining arguments
+		# are left for following call of method (e.g. search/get/...)
+		def propagate(target, args, key):
+			setattr(target, key, getattr(args, key))
+
+		for key in ["skip_auth", "columns", "user", "password", "passwordcmd"]:
+			propagate(self, args, key)
+
+		# TODO: ~~> s/self.enc/self.encoding/
+		self.enc = args.encoding
+
+		# handle cookie file
+		cookie_file = os.path.expanduser(args.cookie_file)
 		self.cookiejar = LWPCookieJar(cookie_file)
-
 		try:
 			self.cookiejar.load()
 		except IOError:
 			pass
 
-		if getattr(args, 'encoding'):
-			self.enc = args.encoding
-		else:
-			try:
-				self.enc = locale.getdefaultlocale()[1]
-			except:
-				self.enc = 'utf-8'
-			if not self.enc:
-				self.enc = 'utf-8'
-
-		log_info("Using %s " % args.base)
+		# finally, load bugzila-proxy instance
 		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
 
 	def get_input(self, prompt):
@@ -177,8 +179,9 @@ class PrettyBugz:
 				log_info('No password given.')
 				self.password = getpass.getpass()
 			else:
-				process = subprocess.Popen(self.passwordcmd.split(), shell=False,
-					stdout=subprocess.PIPE)
+				cmd = self.passwordcmd.split()
+				stdout = stdout=subprocess.PIPE
+				process = subprocess.Popen(cmd, shell=False, stdout=stdout)
 				self.password, _ = process.communicate()
 
 		# perform login
@@ -232,17 +235,15 @@ class PrettyBugz:
 		else:
 			log_msg = 'Searching for bugs '
 
-		if search_opts:
+		if 'ALL' in params['status']:
+			del params['status']
+
+		if len(params):
 			log_info(log_msg + 'with the following options:')
-			for opt, val in search_opts:
-				log_info('   %-20s = %s' % (opt, val))
+			for opt, val in params.items():
+				log_info('   %-20s = %s' % (opt, str(val)))
 		else:
 			log_info(log_msg)
-
-		if not 'status' in params.keys():
-			params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
-		elif 'ALL' in params['status']:
-			del params['status']
 
 		result = self.bzcall(self.bz.Bug.search, params)['bugs']
 

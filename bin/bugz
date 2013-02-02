@@ -19,30 +19,96 @@ Classes
 
 """
 
+import pdb
+
 import locale
 import os
 import sys
 import traceback
+from cookielib import LWPCookieJar
 
 from bugz.argparsers import make_parser
-from bugz.cli import PrettyBugz
+from bugz.cli import PrettyBugz, terminal_width
 from bugz.errhandling import BugzError
-from bugz.log import log_error, log_info
-from bugz.log import log_setDebugLevel, log_setQuiet
-from bugz.configfile import get_config
+from bugz.configfile import discover_configs
+from bugz.log import log_error, log_debug, log_info, log_setDebugLevel, log_setQuiet
 
-def main():
-	parser = make_parser()
+DEFAULT_CONFIG_FILE = '/etc/pybugz/pybugz.conf'
 
+def fix_opt(args, conf, name, opt=None):
+	# if certain option is not set by program arguments, try to fill it
+	# by value from configuration file
+	if opt == None:
+		opt = name
+
+	# force the 'opt' exists as at least None
+	if not hasattr(args, opt):
+		setattr(args, opt, None)
+
+	if getattr(args, opt) == None:
+		while conf:
+			val = getattr(conf, opt)
+			if val == None:
+				conf = conf.inherit
+			else:
+				val = getattr(conf, opt)
+				setattr(args, name, val)
+				return
+
+def handle_settings():
 	# parse options
+	parser = make_parser()
 	args = parser.parse_args()
-	get_config(args)
-	if getattr(args, 'columns') is None:
-		setattr(args, 'columns', 0)
+
+	sys_config = DEFAULT_CONFIG_FILE
+	home_config = getattr(args, 'config_file')
 	log_setDebugLevel(args.debug)
+	settings = discover_configs(sys_config, home_config)
+
+	# use the default connection name
+	conn_name = settings['default_connection']
+
+	# check for redefinition by --connection
+	opt_conn = getattr(args, 'connection')
+	if opt_conn != None:
+		conn_name = opt_conn
+
+	if not conn_name in settings['connections']:
+		raise BugzError("can't find connection '{0}'".format(conn_name))
+
+	# get proper 'Connection' instance
+	connection = settings['connections'][conn_name]
+
+	for opt in ["base", "quiet", "columns", "user", "password", "passwordcmd",
+			"skip_auth", "encoding", "cookie_file", "status"]:
+		fix_opt(args, connection, opt)
+
+	# necessary retyping
+	args.columns = int(args.columns)
+
+	# the column width is set neither by option, nor by conf -> detect
+	if not int(args.columns):
+		args.columns = terminal_width()
+
 	log_setQuiet(args.quiet)
 
+	if not args.encoding:
+		try:
+			args.encoding = locale.getdefaultlocale()[1]
+		except:
+			args.encoding = 'utf-8'
+		if not args.encoding:
+			args.encoding = 'utf-8'
+
+	log_debug("=> using <=", 2)
+	for item in ["base", "columns", "user", "passwordcmd", "encoding"]:
+		log_debug("[" + item + "]: " + str(getattr(args, item)), 2)
+
+	return args
+
+def main():
 	try:
+		args = handle_settings()
 		bugz = PrettyBugz(args)
 		args.func(bugz, args)
 		return 0
