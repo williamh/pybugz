@@ -39,14 +39,19 @@ def fix_opt(args, conf, name, opt=None):
 	if opt == None:
 		opt = name
 
+	# force the 'opt' exists as at least None
 	if not hasattr(args, opt):
 		setattr(args, opt, None)
 
 	if getattr(args, opt) == None:
-		val = getattr(conf, opt)
-		if val == None:
-			return
-		setattr(args, name, val)
+		while conf:
+			val = getattr(conf, opt)
+			if val == None:
+				conf = conf.inherit
+			else:
+				val = getattr(conf, opt)
+				setattr(args, name, val)
+				return
 
 def handle_settings():
 	# parse options
@@ -59,7 +64,7 @@ def handle_settings():
 	settings = discover_configs(sys_config, home_config)
 
 	# use the default connection name
-	conn_name = settings['default']
+	conn_name = settings['default_connection']
 
 	# check for redefinition by --connection
 	opt_conn = getattr(args, 'connection')

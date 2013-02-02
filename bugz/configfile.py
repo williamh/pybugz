@@ -15,10 +15,11 @@ class Connection:
 	dbglvl = 0
 	quiet = None
 	skip_auth = None
-	encoding = "utf-8"
+	encoding = None
 	cookie_file = "~/.bugz_cookie"
 	option_change = False
-	status = [] # set of statuses to be queried
+	status = None # set of statuses to be queried
+	inherit = None
 
 	def dump(self):
 		log_info("Using [{0}] ({1})".format(self.name, self.base))
@@ -28,11 +29,11 @@ class Connection:
 		log_debug("Columns: {0}".format(self.columns), 3)
 
 def handle_settings_connection(settings, newDef):
-	oldDef = str(settings['default'])
+	oldDef = str(settings['default_connection'])
 	if oldDef != newDef:
 		log_debug("redefining default connection from '{0}' to '{1}'". \
 				format(oldDef, newDef), 2)
-		settings['default'] = newDef
+		settings['default_connection'] = newDef
 
 def handle_settings(settings, context, stack, cp, sec_name):
 	log_debug("contains SETTINGS section named [{0}]".format(sec_name), 3)
@@ -111,14 +112,9 @@ def parse_file(settings, context, stack):
 	# successfully parsed file
 
 	for sec in cp.sections():
-		sectype = "connection"
-		if cp.has_option(sec, 'type'):
-			sectype = cp.get(sec, 'type')
-
-		if sectype == "settings":
+		if sec == "settings":
 			handle_settings(settings, context, stack, cp, sec)
-
-		if sectype == "connection":
+		else:
 			handle_connection(settings, context, stack, cp, sec)
 
 def discover_configs(file, homeConf=None):
@@ -127,8 +123,7 @@ def discover_configs(file, homeConf=None):
 		'homeconf' : '~/.bugzrc',
 		# list of objects of Connection
 		'connections' : {},
-		# the default Connection name
-		'default' : None,
+		'default_connection' : None,
 	}
 	context = {
 		'included' : {},
@@ -150,5 +145,14 @@ def discover_configs(file, homeConf=None):
 	stack = [ homeConf ]
 	while len(stack) > 0:
 		parse_file(settings, context, stack)
+
+	# force the connections inherit the [default] section (if exists)
+	if "default" in settings['connections']:
+		defConn = settings['connections']['default']
+		for name,conn in settings['connections'].items():
+			if name != "default":
+				# does not inherit something explicitly?
+				if conn.inherit == None:
+					conn.inherit = defConn
 
 	return settings
