@@ -18,5 +18,8 @@ setup(
 	platforms = ['any'],
 	packages = ['bugz'],
 	scripts = ['bin/bugz'],
+	data_files = [
+		('/usr/share/man/man1', ['man/bugz.1']),
+	],
 	cmdclass = {'build_py': build_py, 'build_scripts': build_scripts},
 )
