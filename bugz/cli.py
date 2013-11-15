@@ -666,7 +666,7 @@ class PrettyBugz:
 			desc = bug['summary']
 			line = '%s' % (bugid)
 			if show_status:
-				line = '%s %s' % (line, status)
+				line = '%s %-12s' % (line, status)
 			line = '%s %-20s' % (line, assignee)
 			line = '%s %s' % (line, desc)
 
