@@ -13,7 +13,7 @@ setup(
 	description = 'python interface to bugzilla',
 	author = 'Alastair Tse',
 	author_email = 'alastair@liquidx.net',
-	url = 'http://www.liquidx.net/pybuggz',
+	url = 'http://www.liquidx.net/pybugz',
 	license = "GPL-2",
 	platforms = ['any'],
 	packages = ['bugz'],
