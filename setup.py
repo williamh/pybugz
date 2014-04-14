@@ -1,6 +1,13 @@
 from bugz import __version__
 from distutils.core import setup
 
+# when using virtualenv; trust that man will find the nearby directory
+import os
+man_pages = '/usr/share/man/man1'
+if 'VIRTUAL_ENV' in os.environ:
+	# if relative, then interpreted as relative to installation prefix
+	man_pages = 'man/man1'
+
 setup(
 	name = 'pybugz',
 	version = __version__,
@@ -13,6 +20,6 @@ setup(
 	packages = ['bugz'],
 	scripts = ['bin/bugz'],
 	data_files = [
-		('/usr/share/man/man1', ['man/bugz.1']),
+		(man_pages, ['man/bugz.1']),
 	],
 )
