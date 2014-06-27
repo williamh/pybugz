@@ -49,6 +49,15 @@
 #
 # quiet: True
 #
+# A "bugz alias" that allows the name of the 'bugz' binary to determine
+# which connection to use.
+# E.g. suppose you have a [gnome] section for http://bugzilla.gnome.org,
+# Create a symblink to the 'bugz' binary named 'gnomebz'.
+# Add "bugz-alias: gnomebz" to the [gnome] section then
+# invoking "gnomebz" would work like "bugz --connection gnome".
+# 
+# bugz-alias: gnomebz
+#
 # The special section named 'default' may also be used. Other sections will
 # override any values specified here. The optional special key 'connection' is
 # used to name the default connection, to use when no --connection parameter is
