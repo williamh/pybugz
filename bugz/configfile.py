@@ -30,7 +30,6 @@ def fill_config(args, parser, section):
 	fill_config_option(args, parser, parser.get, section, 'password')
 	fill_config_option(args, parser, parser.get, section, 'passwordcmd')
 	fill_config_option(args, parser, parser.getint, section, 'columns')
-	fill_config_option(args, parser, parser.get, section, 'encoding')
 	fill_config_option(args, parser, parser.getboolean, section, 'quiet')
 
 def get_config(args):

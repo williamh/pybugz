@@ -143,14 +143,7 @@ class PrettyBugz:
 			self.token = None
 
 		if getattr(args, 'encoding'):
-			self.enc = args.encoding
-		else:
-			try:
-				self.enc = locale.getdefaultlocale()[1]
-			except:
-				self.enc = 'utf-8'
-			if not self.enc:
-				self.enc = 'utf-8'
+			log_info("The --encoding option is deprecated.");
 
 		log_info("Using %s " % args.base)
 		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
@@ -692,11 +685,7 @@ class PrettyBugz:
 				line = '%s %-12s' % (line, status)
 			line = '%s %-20s' % (line, assignee)
 			line = '%s %s' % (line, desc)
-
-			try:
-				print line.encode(self.enc)[:self.columns]
-			except UnicodeDecodeError:
-				print line[:self.columns]
+			print line[:self.columns]
 
 		log_info("%i bug(s) found." % len(buglist))
 
@@ -761,7 +750,7 @@ class PrettyBugz:
 				aid = attachment['id']
 				desc = attachment['summary']
 				when = attachment['creation_time']
-				print '[Attachment] [%s] [%s]' % (aid, desc.encode(self.enc))
+				print '[Attachment] [%s] [%s]' % (aid, desc)
 
 		if show_comments:
 			i = 0
@@ -781,9 +770,9 @@ class PrettyBugz:
 				# print wrapped version
 				for line in what.split('\n'):
 					if len(line) < self.columns:
-						print line.encode(self.enc)
+						print line
 					else:
 						for shortline in wrapper.wrap(line):
-							print shortline.encode(self.enc)
+							print shortline
 				i += 1
 			print

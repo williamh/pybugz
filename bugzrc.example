@@ -41,10 +41,6 @@
 #
 # columns: 80
 #
-# Set the output encoding for pybugz.
-#
-# encoding: utf-8
-#
 # Run in quiet mode.
 #
 # quiet: True

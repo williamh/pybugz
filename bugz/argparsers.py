@@ -280,7 +280,7 @@ def make_parser():
 		type = int,
 		help = 'maximum number of columns output should use')
 	parser.add_argument('--encoding',
-		help = 'output encoding (default: utf-8).')
+		help = 'output encoding (default: utf-8) (deprecated)')
 	parser.add_argument('--skip-auth',
 		action='store_true',
 		help = 'skip Authentication.')
