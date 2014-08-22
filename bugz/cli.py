@@ -691,7 +691,7 @@ class PrettyBugz:
 		log_info("%i bug(s) found." % len(buglist))
 
 	def showbuginfo(self, bug, show_attachments, show_comments):
-		FIELDS = (
+		fieldmap = (
 			('summary', 'Title'),
 			('assigned_to', 'Assignee'),
 			('creation_time', 'Reported'),
@@ -702,22 +702,22 @@ class PrettyBugz:
 			('severity', 'Severity'),
 			('priority', 'Priority'),
 			('creator', 'Reporter'),
-		)
-
-		MORE_FIELDS = (
 			('product', 'Product'),
 			('component', 'Component'),
 			('whiteboard', 'Whiteboard'),
 		)
 
-		for field, name in FIELDS + MORE_FIELDS:
-			try:
-				value = bug[field]
-				if value is None or value == '':
-						continue
-			except AttributeError:
+		for field, longdesc in fieldmap:
+			if not field in bug.keys():
 				continue
-			print '%-12s: %s' % (name, value)
+			value = bug[field]
+			if value is None or value == '':
+				continue
+			if longdesc is not None:
+				desc = longdesc
+			else:
+				desc = field
+			print '%-12s: %s' % (desc, value)
 
 		# print keywords
 		k = ', '.join(bug['keywords'])
