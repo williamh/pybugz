@@ -719,6 +719,15 @@ class PrettyBugz:
 				desc = field
 			print '%-12s: %s' % (desc, value)
 
+                # Other fields handled manually here are:
+                extra_fields = {
+                        'keywords',
+                        'cc',
+                        'depends_on',
+                        'blocks',
+                        'id',
+               }
+
 		# print keywords
 		k = ', '.join(bug['keywords'])
 		if k:
@@ -744,6 +753,17 @@ class PrettyBugz:
 		bug_attachments = self.bzcall(self.bz.Bug.attachments, {'ids':[bug['id']]})
 		bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 		print '%-12s: %d' % ('Attachments', len(bug_attachments))
+
+                # print all rest fields with prefix @.
+                for field in set(bug.keys()) - set((f for f in FIELDS + MORE_FIELDS)) - extra_fields:
+                        try:
+                                value = bug[field]
+                                if value is None or value == '':
+						continue
+                        except AttributeError:
+                                continue
+                        print '@%-11s: %s' % (field, value)
+
 		print
 
 		if show_attachments:
