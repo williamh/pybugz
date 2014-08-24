@@ -691,62 +691,58 @@ class PrettyBugz:
 		log_info("%i bug(s) found." % len(buglist))
 
 	def showbuginfo(self, bug, show_attachments, show_comments):
-		FieldMap = (
-			('summary', 'Title'),
-			('assigned_to', 'Assignee'),
-			('creation_time', 'Reported'),
-			('last_change_time', 'Updated'),
-			('status', 'Status'),
-			('resolution', 'Resolution'),
-			('url', 'URL'),
-			('severity', 'Severity'),
-			('priority', 'Priority'),
-			('creator', 'Reporter'),
-			('product', 'Product'),
-			('component', 'Component'),
-			('whiteboard', 'Whiteboard'),
-		)
+		FieldMap = {
+			'alias': 'Alias',
+			'summary': 'Title',
+			'status': 'Status',
+			'resolution': 'Resolution',
+			'product': 'Product',
+			'component': 'Component',
+			'version': 'Version',
+			'platform': 'Hardware',
+			'op_sys': 'OpSystem',
+			'priority': 'Priority',
+			'severity': 'Severity',
+			'target_milestone': 'TargetMilestone',
+			'assigned_to': 'AssignedTo',
+			'url': 'URL',
+			'whiteboard': 'Whiteboard',
+			'keywords': 'Keywords',
+			'depends_on': 'dependsOn',
+			'blocks': 'Blocks',
+			'creation_time': 'Reported',
+			'creator': 'Reporter',
+			'last_change_time': 'Updated',
+			'cc': 'CC',
+			'see_also': 'See Also',
+		}
+		SkipFields = ['is_open', 'id', 'is_confirmed',
+				'is_creator_accessible', 'is_cc_accessible',
+				'update_token']
 
-		for field, LongDesc in FieldMap:
-			if not field in bug.keys():
+		for field in bug.keys():
+			if field in SkipFields:
 				continue
-			value = bug[field]
-			if value is None or value == '':
-				continue
-			if LongDesc is not None:
-				desc = LongDesc
+			if field in FieldMap.keys():
+				desc = FieldMap[field]
 			else:
 				desc = field
-			print '%-12s: %s' % (desc, value)
-
-		# print keywords
-		k = ', '.join(bug['keywords'])
-		if k:
-			print '%-12s: %s' % ('Keywords', k)
-
-		# Print out the cc'ed people
-		cced = bug['cc']
-		for cc in cced:
-			print '%-12s: %s' %  ('CC', cc)
-
-		# print out depends
-		dependson = ', '.join(["%s" % x for x in bug['depends_on']])
-		if dependson:
-			print '%-12s: %s' % ('DependsOn', dependson)
-		blocked = ', '.join(["%s" % x for x in bug['blocks']])
-		if blocked:
-			print '%-12s: %s' % ('Blocked', blocked)
-
-		bug_comments = self.bzcall(self.bz.Bug.comments, {'ids':[bug['id']]})
-		bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-		print '%-12s: %d' % ('Comments', len(bug_comments))
-
-		bug_attachments = self.bzcall(self.bz.Bug.attachments, {'ids':[bug['id']]})
-		bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
-		print '%-12s: %d' % ('Attachments', len(bug_attachments))
-		print
+			value = bug[field]
+			if field in ['cc', 'see_also']:
+				for x in value:
+					print '%-12s: %s' %  (desc, x)
+			elif isinstance(value, list):
+				s = ', '.join(["%s" % x for x in value])
+				if s:
+					print '%-12s: %s' % (desc, s)
+			elif value is not None and value != '':
+				print '%-12s: %s' % (desc, value)
 
 		if show_attachments:
+			bug_attachments = self.bzcall(self.bz.Bug.attachments, {'ids':[bug['id']]})
+			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
+			print '%-12s: %d' % ('Attachments', len(bug_attachments))
+			print
 			for attachment in bug_attachments:
 				aid = attachment['id']
 				desc = attachment['summary']
@@ -754,6 +750,11 @@ class PrettyBugz:
 				print '[Attachment] [%s] [%s]' % (aid, desc)
 
 		if show_comments:
+			bug_comments = self.bzcall(self.bz.Bug.comments, {'ids':[bug['id']]})
+			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
+			print
+			print '%-12s: %d' % ('Comments', len(bug_comments))
+			print
 			i = 0
 			wrapper = textwrap.TextWrapper(width = self.columns,
 				break_long_words = False,
@@ -762,7 +763,7 @@ class PrettyBugz:
 				who = comment['creator']
 				when = comment['time']
 				what = comment['text']
-				print '\n[Comment #%d] %s : %s' % (i, who, when)
+				print '[Comment #%d] %s : %s' % (i, who, when)
 				print '-' * (self.columns - 1)
 
 				if what is None:
@@ -775,5 +776,5 @@ class PrettyBugz:
 					else:
 						for shortline in wrapper.wrap(line):
 							print shortline
+				print
 				i += 1
-			print
