@@ -691,7 +691,7 @@ class PrettyBugz:
 		log_info("%i bug(s) found." % len(buglist))
 
 	def showbuginfo(self, bug, show_attachments, show_comments):
-		fieldmap = (
+		FieldMap = (
 			('summary', 'Title'),
 			('assigned_to', 'Assignee'),
 			('creation_time', 'Reported'),
@@ -707,14 +707,14 @@ class PrettyBugz:
 			('whiteboard', 'Whiteboard'),
 		)
 
-		for field, longdesc in fieldmap:
+		for field, LongDesc in FieldMap:
 			if not field in bug.keys():
 				continue
 			value = bug[field]
 			if value is None or value == '':
 				continue
-			if longdesc is not None:
-				desc = longdesc
+			if LongDesc is not None:
+				desc = LongDesc
 			else:
 				desc = field
 			print '%-12s: %s' % (desc, value)
