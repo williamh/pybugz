@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import os
 import sys
 
@@ -14,7 +14,7 @@ def config_option(parser, get, section, option):
 			else:
 				log_error("Error: "+option+" is not set")
 				sys.exit(1)
-		except ValueError, e:
+		except ValueError as e:
 			log_error("Error: option "+option+
 					" is not in the right format: "+str(e))
 			sys.exit(1)
@@ -37,7 +37,7 @@ def get_config(args):
 	if config_file is None:
 			config_file = DEFAULT_CONFIG_FILE
 	section = getattr(args, 'connection')
-	parser = ConfigParser.ConfigParser()
+	parser = configparser.ConfigParser()
 	config_file_name = os.path.expanduser(config_file)
 
 	# try to open config file
@@ -55,7 +55,7 @@ def get_config(args):
 	try:
 		parser.readfp(file)
 		sections = parser.sections()
-	except ConfigParser.ParsingError, e:
+	except configparser.ParsingError as e:
 		log_error("Error: Can't parse user configuration file: "+str(e))
 		sys.exit(1)
 

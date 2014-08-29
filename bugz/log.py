@@ -48,7 +48,7 @@ def formatOut(msg, id='!'):
 	word=LogSettings[id]['word'] + ":"
 
 	for line in lines:
-		print ' ' + sym + ' ' + line
+		print(' ' + sym + ' ' + line)
 
 def log_error(string):
 	formatOut(string, 'E')

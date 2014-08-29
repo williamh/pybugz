@@ -1,6 +1,6 @@
-import commands
+import subprocess
 import getpass
-from cookielib import CookieJar, LWPCookieJar
+from http.cookiejar import CookieJar, LWPCookieJar
 import locale
 import mimetypes
 import os
@@ -9,7 +9,7 @@ import re
 import sys
 import tempfile
 import textwrap
-import xmlrpclib
+import xmlrpc.client
 
 try:
 	import readline
@@ -47,7 +47,7 @@ def raw_input_block():
 	target = ''
 	while True:
 		try:
-			line = raw_input()
+			line = input()
 			target += line + '\n'
 		except EOFError:
 			return target
@@ -108,7 +108,7 @@ def block_edit(comment, comment_from = ''):
 			os.environ.get('EDITOR'))
 
 	if not editor:
-		print comment + ': (Press Ctrl+D to end)'
+		print(comment + ': (Press Ctrl+D to end)')
 		new_text = raw_input_block()
 		return new_text
 
@@ -149,7 +149,7 @@ class PrettyBugz:
 		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
 
 	def get_input(self, prompt):
-		return raw_input(prompt)
+		return input(prompt)
 
 	def set_token(self, *args):
 		if args and self.token:
@@ -161,7 +161,7 @@ class PrettyBugz:
 		"""
 		try:
 			return method(*self.set_token(*args))
-		except xmlrpclib.Fault, fault:
+		except xmlrpc.client.Fault as fault:
 			# Fault code 410 means login required
 			if fault.faultCode == 410 and not self.skip_auth:
 				self.login()
@@ -196,7 +196,7 @@ class PrettyBugz:
 		log_info('Logging in')
 		try:
 			self.bz.User.login(params)
-		except xmlrpclib.Fault as fault:
+		except xmlrpc.client.Fault as fault:
 			raise BugzError("Can't login: " + fault.faultString)
 		log_info('Logging in')
 		result = self.bz.User.login(params)
@@ -209,16 +209,16 @@ class PrettyBugz:
 				fd.write(self.token)
 				fd.write('\n')
 				fd.close()
-				os.chmod(self.token_file, 0600)
+				os.chmod(self.token_file, 0o600)
 			else:
 				self.cookiejar.save()
-				os.chmod(self.cookiejar.filename, 0600)
+				os.chmod(self.cookiejar.filename, 0o600)
 
 	def logout(self, args):
 		log_info('logging out')
 		try:
 			self.bz.User.logout()
-		except xmlrpclib.Fault as fault:
+		except xmlrpc.client.Fault as fault:
 			raise BugzError("Failed to logout: " + fault.faultString)
 
 	def search(self, args):
@@ -229,7 +229,7 @@ class PrettyBugz:
 			'priority', 'product', 'resolution',
 			'severity', 'status', 'version', 'whiteboard']
 
-		search_opts = sorted([(opt, val) for opt, val in args.__dict__.items()
+		search_opts = sorted([(opt, val) for opt, val in list(args.__dict__.items())
 			if val is not None and opt in valid_keys])
 
 		params = {}
@@ -256,7 +256,7 @@ class PrettyBugz:
 		else:
 			log_info(log_msg)
 
-		if not 'status' in params.keys():
+		if 'status' not in params:
 			params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
 		elif 'ALL' in params['status']:
 			del params['status']
@@ -273,7 +273,7 @@ class PrettyBugz:
 		log_info('Getting bug %s ..' % args.bugid)
 		try:
 			result = self.bzcall(self.bz.Bug.get, {'ids':[args.bugid]})
-		except xmlrpclib.Fault as fault:
+		except xmlrpc.client.Fault as fault:
 			raise BugzError("Can't get bug #" + str(args.bugid) + ": " \
 					+ fault.faultString)
 
@@ -290,7 +290,7 @@ class PrettyBugz:
 						args.description = sys.stdin.read()
 					else:
 						args.description = open( args.description_from, 'r').read()
-			except IOError, e:
+			except IOError as e:
 				raise BugzError('Unable to read from file: %s: %s' %
 					(args.description_from, e))
 
@@ -441,34 +441,34 @@ class PrettyBugz:
 
 		# append the output from append_command to the description
 		if args.append_command is not None and args.append_command != '':
-			append_command_output = commands.getoutput(args.append_command)
+			append_command_output = subprocess.getoutput(args.append_command)
 			args.description = args.description + '\n\n' + '$ ' + args.append_command + '\n' +  append_command_output
 
 		# print submission confirmation
-		print '-' * (self.columns - 1)
-		print '%-12s: %s' % ('Product', args.product)
-		print '%-12s: %s' %('Component', args.component)
-		print '%-12s: %s' % ('Title', args.summary)
-		print '%-12s: %s' % ('Version', args.version)
-		print '%-12s: %s' % ('Description', args.description)
-		print '%-12s: %s' % ('Operating System', args.op_sys)
-		print '%-12s: %s' % ('Platform', args.platform)
-		print '%-12s: %s' % ('Priority', args.priority)
-		print '%-12s: %s' % ('Severity', args.severity)
-		print '%-12s: %s' % ('Alias', args.alias)
-		print '%-12s: %s' % ('Assigned to', args.assigned_to)
-		print '%-12s: %s' % ('CC', args.cc)
-		print '%-12s: %s' % ('URL', args.url)
+		print('-' * (self.columns - 1))
+		print('%-12s: %s' % ('Product', args.product))
+		print('%-12s: %s' %('Component', args.component))
+		print('%-12s: %s' % ('Title', args.summary))
+		print('%-12s: %s' % ('Version', args.version))
+		print('%-12s: %s' % ('Description', args.description))
+		print('%-12s: %s' % ('Operating System', args.op_sys))
+		print('%-12s: %s' % ('Platform', args.platform))
+		print('%-12s: %s' % ('Priority', args.priority))
+		print('%-12s: %s' % ('Severity', args.severity))
+		print('%-12s: %s' % ('Alias', args.alias))
+		print('%-12s: %s' % ('Assigned to', args.assigned_to))
+		print('%-12s: %s' % ('CC', args.cc))
+		print('%-12s: %s' % ('URL', args.url))
 		# fixme: groups
 		# fixme: status
 		# fixme: Milestone
-		print '-' * (self.columns - 1)
+		print('-' * (self.columns - 1))
 
 		if not args.batch:
 			if args.default_confirm in ['Y','y']:
-				confirm = raw_input('Confirm bug submission (Y/n)? ')
+				confirm = input('Confirm bug submission (Y/n)? ')
 			else:
-				confirm = raw_input('Confirm bug submission (y/N)? ')
+				confirm = input('Confirm bug submission (y/N)? ')
 			if len(confirm) < 1:
 				confirm = args.default_confirm
 			if confirm[0] not in ('y', 'Y'):
@@ -510,7 +510,7 @@ class PrettyBugz:
 					args.comment = sys.stdin.read()
 				else:
 					args.comment = open(args.comment_from, 'r').read()
-			except IOError, e:
+			except IOError as e:
 				raise BugzError('unable to read file: %s: %s' % \
 					(args.comment_from, e))
 
@@ -629,7 +629,7 @@ class PrettyBugz:
 												result['file_name']))
 
 		if args.view:
-			print result['data'].data
+			print(result['data'].data)
 		else:
 			if os.path.exists(result['file_name']):
 				raise RuntimeError('Filename already exists')
@@ -663,7 +663,7 @@ class PrettyBugz:
 		params['ids'] = [bugid]
 
 		fd = open(filename, 'rb')
-		params['data'] = xmlrpclib.Binary(fd.read())
+		params['data'] = xmlrpc.client.Binary(fd.read())
 		fd.close()
 
 		params['file_name'] = os.path.basename(filename)
@@ -686,7 +686,7 @@ class PrettyBugz:
 				line = '%s %-12s' % (line, status)
 			line = '%s %-20s' % (line, assignee)
 			line = '%s %s' % (line, desc)
-			print line[:self.columns]
+			print(line[:self.columns])
 
 		log_info("%i bug(s) found." % len(buglist))
 
@@ -723,38 +723,38 @@ class PrettyBugz:
 		for field in bug.keys():
 			if field in SkipFields:
 				continue
-			if field in FieldMap.keys():
+			if field in FieldMap:
 				desc = FieldMap[field]
 			else:
 				desc = field
 			value = bug[field]
 			if field in ['cc', 'see_also']:
 				for x in value:
-					print '%-12s: %s' %  (desc, x)
+					print('%-12s: %s' %  (desc, x))
 			elif isinstance(value, list):
 				s = ', '.join(["%s" % x for x in value])
 				if s:
-					print '%-12s: %s' % (desc, s)
+					print('%-12s: %s' % (desc, s))
 			elif value is not None and value != '':
-				print '%-12s: %s' % (desc, value)
+				print('%-12s: %s' % (desc, value))
 
 		if show_attachments:
 			bug_attachments = self.bzcall(self.bz.Bug.attachments, {'ids':[bug['id']]})
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
-			print '%-12s: %d' % ('Attachments', len(bug_attachments))
-			print
+			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
+			print()
 			for attachment in bug_attachments:
 				aid = attachment['id']
 				desc = attachment['summary']
 				when = attachment['creation_time']
-				print '[Attachment] [%s] [%s]' % (aid, desc)
+				print('[Attachment] [%s] [%s]' % (aid, desc))
 
 		if show_comments:
 			bug_comments = self.bzcall(self.bz.Bug.comments, {'ids':[bug['id']]})
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-			print
-			print '%-12s: %d' % ('Comments', len(bug_comments))
-			print
+			print()
+			print('%-12s: %d' % ('Comments', len(bug_comments)))
+			print()
 			i = 0
 			wrapper = textwrap.TextWrapper(width = self.columns,
 				break_long_words = False,
@@ -763,8 +763,8 @@ class PrettyBugz:
 				who = comment['creator']
 				when = comment['time']
 				what = comment['text']
-				print '[Comment #%d] %s : %s' % (i, who, when)
-				print '-' * (self.columns - 1)
+				print('[Comment #%d] %s : %s' % (i, who, when))
+				print('-' * (self.columns - 1))
 
 				if what is None:
 					what = ''
@@ -772,9 +772,9 @@ class PrettyBugz:
 				# print wrapped version
 				for line in what.split('\n'):
 					if len(line) < self.columns:
-						print line
+						print(line)
 					else:
 						for shortline in wrapper.wrap(line):
-							print shortline
-				print
+							print(shortline)
+				print()
 				i += 1
