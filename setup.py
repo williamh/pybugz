@@ -8,6 +8,13 @@ if 'VIRTUAL_ENV' in os.environ:
 else:
 	man_pages = '/usr/share/man/man1'
 
+# when using virtualenv; trust that man will find the nearby directory
+import os
+man_pages = '/usr/share/man/man1'
+if 'VIRTUAL_ENV' in os.environ:
+	# if relative, then interpreted as relative to installation prefix
+	man_pages = 'man/man1'
+
 setup(
 	name = 'pybugz',
 	version = __version__,
