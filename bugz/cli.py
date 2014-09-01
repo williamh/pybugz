@@ -1,11 +1,10 @@
-import subprocess
 import getpass
 from http.cookiejar import CookieJar, LWPCookieJar
 import locale
 import mimetypes
 import os
-import subprocess
 import re
+import subprocess
 import sys
 import tempfile
 import textwrap
@@ -156,7 +155,7 @@ class PrettyBugz:
 			args[0]['Bugzilla_token'] = self.token
 		return args
 
-	def bzcall(self, method, *args):
+	def call_bz(self, method, *args):
 		"""Attempt to call method with args. Log in if authentication is required.
 		"""
 		try:
@@ -261,24 +260,24 @@ class PrettyBugz:
 		elif 'ALL' in params['status']:
 			del params['status']
 
-		result = self.bzcall(self.bz.Bug.search, params)['bugs']
+		result = self.call_bz(self.bz.Bug.search, params)['bugs']
 
 		if not len(result):
 			log_info('No bugs found.')
 		else:
-			self.listbugs(result, args.show_status)
+			self.list_bugs(result, args.show_status)
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
 		log_info('Getting bug %s ..' % args.bugid)
 		try:
-			result = self.bzcall(self.bz.Bug.get, {'ids':[args.bugid]})
+			result = self.call_bz(self.bz.Bug.get, {'ids':[args.bugid]})
 		except xmlrpc.client.Fault as fault:
 			raise BugzError("Can't get bug #" + str(args.bugid) + ": " \
 					+ fault.faultString)
 
 		for bug in result['bugs']:
-			self.showbuginfo(bug, args.attachments, args.comments)
+			self.show_bug_info(bug, args.attachments, args.comments)
 
 	def post(self, args):
 		"""Post a new bug"""
@@ -499,7 +498,7 @@ class PrettyBugz:
 		if args.url is not None:
 			params['url'] = args.url
 
-		result = self.bzcall(self.bz.Bug.create, params)
+		result = self.call_bz(self.bz.Bug.create, params)
 		log_info('Bug %d submitted' % result['id'])
 
 	def modify(self, args):
@@ -602,7 +601,7 @@ class PrettyBugz:
 
 		if len(params) < 2:
 			raise BugzError('No changes were specified')
-		result = self.bzcall(self.bz.Bug.update, params)
+		result = self.call_bz(self.bz.Bug.update, params)
 		for bug in result['bugs']:
 			changes = bug['changes']
 			if not len(changes):
@@ -619,7 +618,7 @@ class PrettyBugz:
 
 		params = {}
 		params['attachment_ids'] = [args.attachid]
-		result = self.bzcall(self.bz.Bug.attachments, params)
+		result = self.call_bz(self.bz.Bug.attachments, params)
 		result = result['attachments'][args.attachid]
 
 		action = {True:'Viewing', False:'Saving'}
@@ -672,10 +671,10 @@ class PrettyBugz:
 			params['content_type'] = content_type;
 		params['comment'] = comment
 		params['is_patch'] = is_patch
-		result =  self.bzcall(self.bz.Bug.add_attachment, params)
+		result =  self.call_bz(self.bz.Bug.add_attachment, params)
 		log_info("'%s' has been attached to bug %s" % (filename, bugid))
 
-	def listbugs(self, buglist, show_status=False):
+	def list_bugs(self, buglist, show_status=False):
 		for bug in buglist:
 			bugid = bug['id']
 			status = bug['status']
@@ -690,7 +689,7 @@ class PrettyBugz:
 
 		log_info("%i bug(s) found." % len(buglist))
 
-	def showbuginfo(self, bug, show_attachments, show_comments):
+	def show_bug_info(self, bug, show_attachments, show_comments):
 		FieldMap = {
 			'alias': 'Alias',
 			'summary': 'Title',
@@ -739,7 +738,7 @@ class PrettyBugz:
 				print('%-12s: %s' % (desc, value))
 
 		if show_attachments:
-			bug_attachments = self.bzcall(self.bz.Bug.attachments, {'ids':[bug['id']]})
+			bug_attachments = self.call_bz(self.bz.Bug.attachments, {'ids':[bug['id']]})
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
 			print()
@@ -750,7 +749,7 @@ class PrettyBugz:
 				print('[Attachment] [%s] [%s]' % (aid, desc))
 
 		if show_comments:
-			bug_comments = self.bzcall(self.bz.Bug.comments, {'ids':[bug['id']]})
+			bug_comments = self.call_bz(self.bz.Bug.comments, {'ids':[bug['id']]})
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
 			print()
 			print('%-12s: %d' % ('Comments', len(bug_comments)))
