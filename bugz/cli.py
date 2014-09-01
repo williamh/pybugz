@@ -265,7 +265,7 @@ class PrettyBugz:
 		if not len(result):
 			log_info('No bugs found.')
 		else:
-			self.list_bugs(result, args.show_status)
+			self.list_bugs(result, args)
 
 	def get(self, args):
 		""" Fetch bug details given the bug id """
@@ -674,15 +674,21 @@ class PrettyBugz:
 		result =  self.call_bz(self.bz.Bug.add_attachment, params)
 		log_info("'%s' has been attached to bug %s" % (filename, bugid))
 
-	def list_bugs(self, buglist, show_status=False):
+	def list_bugs(self, buglist, args):
 		for bug in buglist:
 			bugid = bug['id']
 			status = bug['status']
+			priority = bug['priority']
+			severity = bug['severity']
 			assignee = bug['assigned_to'].split('@')[0]
 			desc = bug['summary']
 			line = '%s' % (bugid)
-			if show_status:
+			if args.show_status:
 				line = '%s %-12s' % (line, status)
+			if args.show_priority:
+				line = '%s %-12s' % (line, priority)
+			if args.show_severity:
+				line = '%s %-12s' % (line, severity)
 			line = '%s %-20s' % (line, assignee)
 			line = '%s %s' % (line, desc)
 			print(line[:self.columns])

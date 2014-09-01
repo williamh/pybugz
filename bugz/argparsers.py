@@ -252,6 +252,12 @@ def make_search_parser(subparsers):
 	search_parser.add_argument('--show-status',
 		action = 'store_true',
 		help='show status of bugs')
+	search_parser.add_argument('--show-priority',
+		action = 'store_true',
+		help='show priority of bugs')
+	search_parser.add_argument('--show-severity',
+		action = 'store_true',
+		help='show severity of bugs')
 	search_parser.set_defaults(func = PrettyBugz.search)
 
 def make_parser():
