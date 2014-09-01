@@ -232,7 +232,7 @@ class PrettyBugz:
 			if val is not None and opt in valid_keys])
 
 		params = {}
-		for key in args.__dict__.keys():
+		for key in args.__dict__:
 			if key in valid_keys and getattr(args, key) is not None:
 				params[key] = getattr(args, key)
 		if getattr(args, 'terms'):
@@ -608,7 +608,7 @@ class PrettyBugz:
 				log_info('Added comment to bug %s' % bug['id'])
 			else:
 				log_info('Modified the following fields in bug %s' % bug['id'])
-				for key in changes.keys():
+				for key in changes:
 					log_info('%-12s: removed %s' %(key, changes[key]['removed']))
 					log_info('%-12s: added %s' %(key, changes[key]['added']))
 
@@ -725,7 +725,7 @@ class PrettyBugz:
 				'is_creator_accessible', 'is_cc_accessible',
 				'update_token']
 
-		for field in bug.keys():
+		for field in bug:
 			if field in SkipFields:
 				continue
 			if field in FieldMap:
