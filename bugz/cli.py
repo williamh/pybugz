@@ -257,8 +257,10 @@ class PrettyBugz:
 
 		if 'status' not in params:
 			params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
-		elif 'ALL' in params['status']:
-			del params['status']
+		else:
+			for x in params['status'][:]:
+				if x in ['all', 'ALL']:
+					del params['status']
 
 		result = self.call_bz(self.bz.Bug.search, params)['bugs']
 
