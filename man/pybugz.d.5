@@ -1,0 +1,111 @@
+.\" Hey, Emacs!  This is an -*- nroff -*- source file.
+.\" Copyright (c) 2014 William Hubbs
+.\" This is free software; see the GNU General Public Licence version 2
+.\" or later for copying conditions.  There is NO warranty.
+.TH pybugz.d 5 "20 Jan 2013" "0.12"
+.nh
+.SH NAME
+pybugz.d - configuration files for pybugz
+.SH SYNOPSIS
+.B /usr/share/pybugz.d/*.conf
+.PP
+.B /etc/pybugz.d/*.conf
+.PP
+.B ~/.bugzrc
+.\" .SH OPTIONS
+.\" .TP
+.\" .B \-o value, \-\^\-long=value
+.\" Describe the option.
+.SH DESCRIPTION
+When started, bugz reads configuration files from all of the locations
+listed above, in the order listed. In the directories, it reads the
+files in lexical order.
+.PP
+Files located in /usr/share/pybugz.d/*.conf are provided by pybugz
+and should not be modified.
+.PP
+Files located in /etc/pybugz.d/*.conf, if it exists, are provided by the
+system administrator.
+.PP
+The final file that is read, if it exists, is ~/.bugzrc by default. This
+is the user-specific configuration file. This file name can be
+overridden on the command line by using the --config-file option.
+.SH CONFIGURATION FILE FORMAT
+A configuration file consists of sections which define parameters for
+the Bugzillas you intend to use. Each section starts with a
+case-sensitive section name in square brackets and is followed by the
+settings, in the form "key = value" or "key : value", which define the
+parameters for this bugzilla instance.
+.PP
+The section name is  also the name that should be
+used with the --connection option of the bugz command or the
+"connection" setting in the default section of the configuration file.
+.PP
+The section named [default] is special. Any settings defined in this
+section will have the value they are given here in all other sections
+unless they are overridden. So, for example, if you want to use the
+same username for most of your bugzillas, define user in the default
+section.
+.PP
+Comments are also allowed. A comment must begin with "#" or ";" and be
+on a line of its own.
+.SH CONFIGURATION SETTINGS
+This is a list of the current settings supported by pybugz.
+.PP
+connection = sectionname
+.PP
+This is used in the default section to define the bugzilla you connect
+with most of the time. It is not an error to put it in another section,
+but it does not make much sense to do so.
+.PP
+base = http://my.project.com/bugzilla/xmlrpc.cgi
+.PP
+base = http://myhttpname:myhttppasswd@my.project.com/bugzilla/xmlrpc.cgi
+.PP
+This is the base URL of the bugzilla. It must point to the xmlrpc.cgi
+script on the bugzilla installation. The second form is used if you need
+to encode a username and password into the URL for basic http
+authentication.
+.PP
+user = myname@my.project.com
+.PP
+password = secret2
+.PP
+These set your username and password for this bugzilla. If you do not
+provide these, you will be prompted for them.
+.PP
+passwordcmd = gpg --decrypt ~/.my-encrypted-password.gpg
+.PP
+As another alternative for storing your password, you can provide a
+password command. This command will be run, and pybugz expects it to
+output the password to stdout. The example above uses gpg to decrypt an
+encrypted password stored in a file. The default setting is undefined,
+so it will not be used unless you define it.
+.PP
+columns = 80
+.PP
+This is the number of columns your terminal can display. Most of the
+time, pybugz should be able to determine this value. If it cannot, the
+default value is 80, so more than likely you will never have to change
+this setting.
+.PP
+debug = 0
+.PP
+This sets the level of debug logging. This is mostly used for
+development purposes. It causes PyBugz to print out debugging information
+as it runs.
+.PP
+quiet = False
+.PP
+If set to true, this requests that pybugz run in quiet mode. This means
+only output returned from the Bugzilla will be displayed; several more
+verbose log messages will not be displayed.
+.SH BUGS
+.PP
+The home page of this project is http://www.github.com/williamh/pybugz.
+Bugs should be reported to the bug tracker there.
+.\" .SH SEE ALSO
+.\" .PP
+.SH AUTHOR
+.PP
+William Hubbs <w.d.hubbs@gmail.com>

@@ -18,22 +18,13 @@ from http.cookiejar import CookieJar, LWPCookieJar
 from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError
 from bugz.log import log_info
-from bugz.utils import block_edit, get_content_type, terminal_width
+from bugz.utils import block_edit, get_content_type
 
 DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_TOKEN_FILE = '.bugz_token'
 
 class PrettyBugz:
-	def __init__(self, args):
-		if args.columns is not None:
-			self.columns = args.columns
-		else:
-			self.columns = terminal_width()
-		self.user = args.user
-		self.password = args.password
-		self.passwordcmd = args.passwordcmd
-		self.skip_auth = args.skip_auth
-
+	def __init__(self, conn):
 		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
 		self.cookiejar = LWPCookieJar(cookie_file)
 
@@ -48,11 +39,7 @@ class PrettyBugz:
 		except IOError:
 			self.token = None
 
-		if getattr(args, 'encoding'):
-			log_info("The --encoding option is deprecated.");
-
-		log_info("Using %s " % args.base)
-		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
+		self.bz = BugzillaProxy(conn.base, cookiejar=self.cookiejar)
 
 	def set_token(self, *args):
 		if args and self.token:
@@ -66,34 +53,34 @@ class PrettyBugz:
 			return method(*self.set_token(*args))
 		except xmlrpc.client.Fault as fault:
 			# Fault code 410 means login required
-			if fault.faultCode == 410 and not self.skip_auth:
+			if fault.faultCode == 410 and not conn.skip_auth:
 				self.login()
 				return method(*self.set_token(*args))
 			raise
 
-	def login(self, args=None):
+	def login(self, conn):
 		"""Authenticate a session.
 		"""
 		# prompt for username if we were not supplied with it
-		if not self.user:
+		if getattr(conn, 'user', None) is None:
 			log_info('No username given.')
-			self.user = input('Username: ')
+			conn.user = input('Username: ')
 
 		# prompt for password if we were not supplied with it
-		if not self.password:
-			if not self.passwordcmd:
+		if getattr(conn, 'password', None) is None:
+			if getattr(conn, 'passwordcmd', None) is None:
 				log_info('No password given.')
-				self.password = getpass.getpass()
+				conn.password = getpass.getpass()
 			else:
-				process = subprocess.Popen(self.passwordcmd, shell=True,
+				process = subprocess.Popen(conn.passwordcmd, shell=True,
 					stdout=subprocess.PIPE)
-				self.password, _ = process.communicate()
-				self.password = self.password.splitlines()[0]
+				conn.password, _ = process.communicate()
+				conn.password = conn.password.splitlines()[0]
 
 		# perform login
 		params = {}
-		params['login'] = self.user
-		params['password'] = self.password
+		params['login'] = conn.user
+		params['password'] = conn.password
 		if args is not None:
 			params['remember'] = True
 		log_info('Logging in')
@@ -106,7 +93,7 @@ class PrettyBugz:
 		if 'token' in result:
 			self.token = result['token']
 
-		if args is not None:
+		if conn is not None:
 			if self.token:
 				fd = open(self.token_file, 'w')
 				fd.write(self.token)
@@ -117,14 +104,14 @@ class PrettyBugz:
 				self.cookiejar.save()
 				os.chmod(self.cookiejar.filename, 0o600)
 
-	def logout(self, args):
+	def logout(self, conn):
 		log_info('logging out')
 		try:
 			self.bz.User.logout()
 		except xmlrpc.client.Fault as fault:
 			raise BugzError("Failed to logout: " + fault.faultString)
 
-	def search(self, args):
+	def search(self, conn):
 		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
 		"""
 		valid_keys = ['alias', 'assigned_to', 'component', 'creator',
@@ -132,17 +119,17 @@ class PrettyBugz:
 			'priority', 'product', 'resolution',
 			'severity', 'status', 'version', 'whiteboard']
 
-		search_opts = sorted([(opt, val) for opt, val in list(args.__dict__.items())
+		search_opts = sorted([(opt, val) for opt, val in list(conn.__dict__.items())
 			if val is not None and opt in valid_keys])
 
 		params = {}
-		for key in args.__dict__:
-			if key in valid_keys and getattr(args, key) is not None:
-				params[key] = getattr(args, key)
-		if getattr(args, 'terms'):
-			params['summary'] = args.terms
+		for key in conn.__dict__:
+			if key in valid_keys and getattr(conn, key) is not None:
+				params[key] = getattr(conn, key)
+		if getattr(conn, 'terms'):
+			params['summary'] = conn.terms
 
-		search_term = ' '.join(args.terms).strip()
+		search_term = ' '.join(conn.terms).strip()
 
 		if not (params or search_term):
 			raise BugzError('Please give search terms or options.')
@@ -171,154 +158,155 @@ class PrettyBugz:
 		if not len(result):
 			log_info('No bugs found.')
 		else:
-			self.list_bugs(result, args)
+			self.list_bugs(result, conn)
 
-	def get(self, args):
+	def get(self, conn):
 		""" Fetch bug details given the bug id """
-		log_info('Getting bug %s ..' % args.bugid)
+		log_info('Getting bug %s ..' % conn.bugid)
 		try:
-			result = self.call_bz(self.bz.Bug.get, {'ids':[args.bugid]})
+			result = self.call_bz(self.bz.Bug.get, {'ids':[conn.bugid]})
 		except xmlrpc.client.Fault as fault:
-			raise BugzError("Can't get bug #" + str(args.bugid) + ": " \
+			raise BugzError("Can't get bug #" + str(conn.bugid) + ": " \
 					+ fault.faultString)
 
 		for bug in result['bugs']:
-			self.show_bug_info(bug, args)
+			self.show_bug_info(bug, conn)
 
-	def post(self, args):
+	def post(self, conn):
 		"""Post a new bug"""
 
 		# load description from file if possible
-		if args.description_from is not None:
+		if getattr(conn, 'description_from', None) is not None:
 			try:
-					if args.description_from == '-':
-						args.description = sys.stdin.read()
+					if conn.description_from == '-':
+						conn.description = sys.stdin.read()
 					else:
-						args.description = open( args.description_from, 'r').read()
+						conn.description = open( conn.description_from, 'r').read()
 			except IOError as e:
 				raise BugzError('Unable to read from file: %s: %s' %
-					(args.description_from, e))
+					(conn.description_from, e))
 
-		if not args.batch:
+		if not conn.batch:
 			log_info('Press Ctrl+C at any time to abort.')
 
-			#
 			#  Check all bug fields.
-			#  XXX: We use "if not <field>" for mandatory fields
-			#       and "if <field> is None" for optional ones.
 			#
 
 			# check for product
-			if not args.product:
-				while not args.product or len(args.product) < 1:
-					args.product = input('Enter product: ')
+			if not hasattr(conn, 'product'):
+				product = None
+				while not product or len(product) < 1:
+					product = input('Enter product: ')
+				conn.product = product
 			else:
-				log_info('Enter product: %s' % args.product)
+				log_info('Enter product: %s' % conn.product)
 
 			# check for component
-			if not args.component:
-				while not args.component or len(args.component) < 1:
-					args.component = input('Enter component: ')
+			if not hasattr(conn, 'component'):
+				component = None
+				while not component or len(component) < 1:
+					component = input('Enter component: ')
+				conn.component = component
 			else:
-				log_info('Enter component: %s' % args.component)
+				log_info('Enter component: %s' % conn.component)
 
 			# check for version
-			# FIXME: This default behaviour is not too nice.
-			if not args.version:
+			if not hasattr(conn, 'version'):
 				line = input('Enter version (default: unspecified): ')
 				if len(line):
-					args.version = line
+					conn.version = line
 				else:
-					args.version = 'unspecified'
+					conn.version = 'unspecified'
 			else:
-				log_info('Enter version: %s' % args.version)
+				log_info('Enter version: %s' % conn.version)
 
 			# check for title
-			if not args.summary:
-				while not args.summary or len(args.summary) < 1:
-					args.summary = input('Enter title: ')
+			if not hasattr(conn, 'summary'):
+				summary = None
+				while not summary or len(summary) < 1:
+					summary = input('Enter title: ')
 			else:
-				log_info('Enter title: %s' % args.summary)
+				log_info('Enter title: %s' % conn.summary)
 
 			# check for description
-			if not args.description:
+			if not hasattr(conn, 'description'):
 				line = block_edit('Enter bug description: ')
 				if len(line):
-					args.description = line
+					conn.description = line
 			else:
-				log_info('Enter bug description: %s' % args.description)
+				log_info('Enter bug description: %s' % conn.description)
 
 			# check for operating system
-			if not args.op_sys:
+			if not hasattr(conn, 'op_sys'):
 				op_sys_msg = 'Enter operating system where this bug occurs: '
 				line = input(op_sys_msg)
 				if len(line):
-					args.op_sys = line
+					conn.op_sys = line
 			else:
-				log_info('Enter operating system: %s' % args.op_sys)
+				log_info('Enter operating system: %s' % conn.op_sys)
 
 			# check for platform
-			if not args.platform:
+			if not hasattr(conn, 'platform'):
 				platform_msg = 'Enter hardware platform where this bug occurs: '
 				line = input(platform_msg)
 				if len(line):
-					args.platform = line
+					conn.platform = line
 			else:
-				log_info('Enter hardware platform: %s' % args.platform)
+				log_info('Enter hardware platform: %s' % conn.platform)
 
 			# check for default priority
-			if args.priority is None:
+			if not hasattr(conn, 'priority'):
 				priority_msg ='Enter priority (eg. Normal) (optional): '
 				line = input(priority_msg)
 				if len(line):
-					args.priority = line
+					conn.priority = line
 			else:
-				log_info('Enter priority (optional): %s' % args.priority)
+				log_info('Enter priority (optional): %s' % conn.priority)
 
 			# check for default severity
-			if args.severity is None:
+			if not hasattr(conn, 'severity'):
 				severity_msg ='Enter severity (eg. normal) (optional): '
 				line = input(severity_msg)
 				if len(line):
-					args.severity = line
+					conn.severity = line
 			else:
-				log_info('Enter severity (optional): %s' % args.severity)
+				log_info('Enter severity (optional): %s' % conn.severity)
 
 			# check for default alias
-			if args.alias is None:
+			if not hasattr(conn, 'alias'):
 				alias_msg ='Enter an alias for this bug (optional): '
 				line = input(alias_msg)
 				if len(line):
-					args.alias = line
+					conn.alias = line
 			else:
-				log_info('Enter alias (optional): %s' % args.alias)
+				log_info('Enter alias (optional): %s' % conn.alias)
 
 			# check for default assignee
-			if args.assigned_to is None:
+			if not hasattr(conn, 'assigned_to'):
 				assign_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
 				line = input(assign_msg)
 				if len(line):
-					args.assigned_to = line
+					conn.assigned_to = line
 			else:
-				log_info('Enter assignee (optional): %s' % args.assigned_to)
+				log_info('Enter assignee (optional): %s' % conn.assigned_to)
 
 			# check for CC list
-			if args.cc is None:
+			if not hasattr(conn, 'cc'):
 				cc_msg = 'Enter a CC list (comma separated) (optional): '
 				line = input(cc_msg)
 				if len(line):
-					args.cc = line.split(', ')
+					conn.cc = line.split(', ')
 			else:
-				log_info('Enter a CC list (optional): %s' % args.cc)
+				log_info('Enter a CC list (optional): %s' % conn.cc)
 
 			# check for URL
-			if args.url is None:
+			if not hasattr(conn, 'url'):
 				url_msg = 'Enter a URL (optional): '
 				line = input(url_msg)
 				if len(line):
-					args.url = line
+					conn.url = line
 			else:
-				log_info('Enter a URL (optional): %s' % args.url)
+				log_info('Enter a URL (optional): %s' % conn.url)
 
 			# fixme: groups
 
@@ -326,182 +314,200 @@ class PrettyBugz:
 
 			# fixme: milestone
 
-			if args.append_command is None:
-				args.append_command = input('Append the output of the following command (leave blank for none): ')
+			if not hasattr(conn, 'append_command'):
+				line = input('Append the output of the following command (leave blank for none): ')
+				if len(line):
+					conn.append_command = line
 			else:
-				log_info('Append command (optional): %s' % args.append_command)
+				log_info('Append command (optional): %s' % conn.append_command)
 
 		# raise an exception if mandatory fields are not specified.
-		if args.product is None:
+		if getattr(conn, 'product', None) is None:
 			raise RuntimeError('Product not specified')
-		if args.component is None:
+		if getattr(conn, 'component', None) is None:
 			raise RuntimeError('Component not specified')
-		if args.summary is None:
+		if getattr(conn, 'summary', None) is None:
 			raise RuntimeError('Title not specified')
-		if args.description is None:
+		if getattr(conn, 'description', None) is None:
 			raise RuntimeError('Description not specified')
 
-		if not args.version:
-			args.version = 'unspecified'
-
 		# append the output from append_command to the description
-		if args.append_command is not None and args.append_command != '':
-			append_command_output = subprocess.getoutput(args.append_command)
-			args.description = args.description + '\n\n' + '$ ' + args.append_command + '\n' +  append_command_output
+		append_command = getattr(conn, 'append_command', None)
+		if append_command is not None and append_command != '':
+			append_command_output = subprocess.getoutput(append_command)
+			conn.description = conn.description + '\n\n' + \
+				'$ ' + append_command + '\n' + \
+				append_command_output
 
 		# print submission confirmation
-		print('-' * (self.columns - 1))
-		print('%-12s: %s' % ('Product', args.product))
-		print('%-12s: %s' %('Component', args.component))
-		print('%-12s: %s' % ('Title', args.summary))
-		print('%-12s: %s' % ('Version', args.version))
-		print('%-12s: %s' % ('Description', args.description))
-		print('%-12s: %s' % ('Operating System', args.op_sys))
-		print('%-12s: %s' % ('Platform', args.platform))
-		print('%-12s: %s' % ('Priority', args.priority))
-		print('%-12s: %s' % ('Severity', args.severity))
-		print('%-12s: %s' % ('Alias', args.alias))
-		print('%-12s: %s' % ('Assigned to', args.assigned_to))
-		print('%-12s: %s' % ('CC', args.cc))
-		print('%-12s: %s' % ('URL', args.url))
+		print('-' * (conn.columns - 1))
+		print('%-12s: %s' % ('Product', conn.product))
+		print('%-12s: %s' %('Component', conn.component))
+		print('%-12s: %s' % ('Title', conn.summary))
+		print('%-12s: %s' % ('Version', conn.version))
+		print('%-12s: %s' % ('Description', conn.description))
+		if hasattr(conn, 'op_sys'):
+			print('%-12s: %s' % ('Operating System', conn.op_sys))
+		if hasattr(conn, 'platform'):
+			print('%-12s: %s' % ('Platform', conn.platform))
+		if hasattr(conn, 'priority'):
+			print('%-12s: %s' % ('Priority', conn.priority))
+		if hasattr(conn, 'severity'):
+			print('%-12s: %s' % ('Severity', conn.severity))
+		if hasattr(conn, 'alias'):
+			print('%-12s: %s' % ('Alias', conn.alias))
+		if hasattr(conn, 'assigned_to'):
+			print('%-12s: %s' % ('Assigned to', conn.assigned_to))
+		if hasattr(conn, 'cc'):
+			print('%-12s: %s' % ('CC', conn.cc))
+		if hasattr(conn, 'url'):
+			print('%-12s: %s' % ('URL', conn.url))
 		# fixme: groups
 		# fixme: status
 		# fixme: Milestone
-		print('-' * (self.columns - 1))
+		print('-' * (conn.columns - 1))
 
-		if not args.batch:
-			if args.default_confirm in ['Y','y']:
+		if not getattr(conn, 'batch', None):
+			if conn.default_confirm in ['Y','y']:
 				confirm = input('Confirm bug submission (Y/n)? ')
 			else:
 				confirm = input('Confirm bug submission (y/N)? ')
 			if len(confirm) < 1:
-				confirm = args.default_confirm
+				confirm = conn.default_confirm
 			if confirm[0] not in ('y', 'Y'):
 				log_info('Submission aborted')
 				return
 
 		params={}
-		params['product'] = args.product
-		params['component'] = args.component
-		params['version'] = args.version
-		params['summary'] = args.summary
-		if args.description is not None:
-			params['description'] = args.description
-		if args.op_sys is not None:
-			params['op_sys'] = args.op_sys
-		if args.platform is not None:
-			params['platform'] = args.platform
-		if args.priority is not None:
-			params['priority'] = args.priority
-		if args.severity is not None:
-			params['severity'] = args.severity
-		if args.alias is not None:
-			params['alias'] = args.alias
-		if args.assigned_to is not None:
-			params['assigned_to'] = args.assigned_to
-		if args.cc is not None:
-			params['cc'] = args.cc
-		if args.url is not None:
-			params['url'] = args.url
+		params['product'] = conn.product
+		params['component'] = conn.component
+		params['version'] = conn.version
+		params['summary'] = conn.summary
+		if getattr(conn, 'description', None) is not None:
+			params['description'] = conn.description
+		if getattr(conn, 'op_sys', None) is not None:
+			params['op_sys'] = conn.op_sys
+		if getattr(conn, 'platform', None) is not None:
+			params['platform'] = conn.platform
+		if getattr(conn, 'priority', None) is not None:
+			params['priority'] = conn.priority
+		if getattr(conn, 'severity', None) is not None:
+			params['severity'] = conn.severity
+		if getattr(conn, 'alias', None) is not None:
+			params['alias'] = conn.alias
+		if getattr(conn, 'assigned_to', None) is not None:
+			params['assigned_to'] = conn.assigned_to
+		if getattr(conn, 'cc', None) is not None:
+			params['cc'] = conn.cc
+		if getattr(conn, 'url', None) is not None:
+			params['url'] = conn.url
 
 		result = self.call_bz(self.bz.Bug.create, params)
 		log_info('Bug %d submitted' % result['id'])
 
-	def modify(self, args):
+	def modify(self, conn):
 		"""Modify an existing bug (eg. adding a comment or changing resolution.)"""
-		if args.comment_from:
+		if getattr(conn, 'comment_from', None) is not None:
 			try:
-				if args.comment_from == '-':
-					args.comment = sys.stdin.read()
+				if conn.comment_from == '-':
+					conn.comment = sys.stdin.read()
 				else:
-					args.comment = open(args.comment_from, 'r').read()
+					conn.comment = open(conn.comment_from, 'r').read()
 			except IOError as e:
 				raise BugzError('unable to read file: %s: %s' % \
-					(args.comment_from, e))
+					(conn.comment_from, e))
 
-		if args.comment_editor:
-			args.comment = block_edit('Enter comment:')
+		if conn.comment_editor:
+			conn.comment = block_edit('Enter comment:')
 
 		params = {}
-		if args.blocks_add is not None or args.blocks_remove is not None:
-			params['blocks'] = {}
-		if args.depends_on_add is not None \
-			or args.depends_on_remove is not None:
-			params['depends_on'] = {}
-		if args.cc_add is not None or args.cc_remove is not None:
-			params['cc'] = {}
-		if args.comment is not None:
-			params['comment'] = {}
-		if args.groups_add is not None or args.groups_remove is not None:
-			params['groups'] = {}
-		if args.keywords_set is not None:
-			params['keywords'] = {}
-		if args.see_also_add is not None or args.see_also_remove is not None:
-			params['see_also'] = {}
+		params['ids'] = [conn.bugid]
+		if getattr(conn, 'alias', None) is not None:
+			params['alias'] = conn.alias
+		if getattr(conn, 'assigned_to', None) is not None:
+			params['assigned_to'] = conn.assigned_to
+		if getattr(conn, 'blocks_add', None) is not None:
+			if not 'blocks' in params:
+				params['blocks'] = {}
+			params['blocks']['add'] = conn.blocks_add
+		if getattr(conn, 'blocks_remove', None) is not None:
+			if not 'blocks' in params:
+				params['blocks'] = {}
+			params['blocks']['remove'] = conn.blocks_remove
+		if getattr(conn, 'depends_on_add', None) is not None:
+			if not 'depends_on' in params:
+				params['depends_on'] = {}
+			params['depends_on']['add'] = conn.depends_on_add
+		if getattr(conn, 'depends_on_remove', None) is not None:
+			if not 'depends_on' in params:
+				params['depends_on'] = {}
+			params['depends_on']['remove'] = conn.depends_on_remove
+		if getattr(conn, 'cc_add', None) is not None:
+			if not 'cc' in params:
+				params['cc'] = {}
+			params['cc']['add'] = conn.cc_add
+		if getattr(conn, 'cc_remove', None) is not None:
+			if not 'cc' in params:
+				params['cc'] = {}
+			params['cc']['remove'] = conn.cc_remove
+		if getattr(conn, 'comment', None) is not None:
+			if not 'comment' in params:
+				params['comment'] = {}
+			params['comment']['body'] = conn.comment
+		if getattr(conn, 'component', None) is not None:
+			params['component'] = conn.component
+		if getattr(conn, 'dupe_of', None) is not None:
+			params['dupe_of'] = conn.dupe_of
+			del conn['status']
+			del conn['resolution']
+		if getattr(conn, 'groups_add', None) is not None:
+			if not 'groups' in params:
+				params['groups'] = {}
+			params['groups']['add'] = conn.groups_add
+		if getattr(conn, 'groups_remove', None) is not None:
+			if not 'groups' in params:
+				params['groups'] = {}
+			params['groups']['remove'] = conn.groups_remove
+		if getattr(conn, 'keywords_set', None) is not None:
+			if not 'keywords' in params:
+				params['keywords'] = {}
+			params['keywords']['set'] = conn.keywords_set
+		if getattr(conn, 'op_sys', None) is not None:
+			params['op_sys'] = conn.op_sys
+		if getattr(conn, 'platform', None) is not None:
+			params['platform'] = conn.platform
+		if getattr(conn, 'priority', None) is not None:
+			params['priority'] = conn.priority
+		if getattr(conn, 'product', None) is not None:
+			params['product'] = conn.product
+		if getattr(conn, 'resolution', None) is not None:
+			params['resolution'] = conn.resolution
+		if getattr(conn, 'see_also_add', None) is not None:
+			if not 'see_also' in params:
+				params['see_also'] = {}
+			params['see_also']['add'] = conn.see_also_add
+		if getattr(conn, 'see_also_remove', None) is not None:
+			if not 'see_also' in params:
+				params['see_also'] = {}
+			params['see_also']['remove'] = conn.see_also_remove
+		if getattr(conn, 'severity', None) is not None:
+			params['severity'] = conn.severity
+		if getattr(conn, 'status', None) is not None:
+			params['status'] = conn.status
+		if getattr(conn, 'summary', None) is not None:
+			params['summary'] = conn.summary
+		if getattr(conn, 'url', None) is not None:
+			params['url'] = conn.url
+		if getattr(conn, 'version', None) is not None:
+			params['version'] = conn.version
+		if getattr(conn, 'whiteboard', None) is not None:
+			params['whiteboard'] = conn.whiteboard
 
-		params['ids'] = [args.bugid]
-		if args.alias is not None:
-			params['alias'] = args.alias
-		if args.assigned_to is not None:
-			params['assigned_to'] = args.assigned_to
-		if args.blocks_add is not None:
-			params['blocks']['add'] = args.blocks_add
-		if args.blocks_remove is not None:
-			params['blocks']['remove'] = args.blocks_remove
-		if args.depends_on_add is not None:
-			params['depends_on']['add'] = args.depends_on_add
-		if args.depends_on_remove is not None:
-			params['depends_on']['remove'] = args.depends_on_remove
-		if args.cc_add is not None:
-			params['cc']['add'] = args.cc_add
-		if args.cc_remove is not None:
-			params['cc']['remove'] = args.cc_remove
-		if args.comment is not None:
-			params['comment']['body'] = args.comment
-		if args.component is not None:
-			params['component'] = args.component
-		if args.dupe_of:
-			params['dupe_of'] = args.dupe_of
-			args.status = None
-			args.resolution = None
-		if args.groups_add is not None:
-			params['groups']['add'] = args.groups_add
-		if args.groups_remove is not None:
-			params['groups']['remove'] = args.groups_remove
-		if args.keywords_set is not None:
-			params['keywords']['set'] = args.keywords_set
-		if args.op_sys is not None:
-			params['op_sys'] = args.op_sys
-		if args.platform is not None:
-			params['platform'] = args.platform
-		if args.priority is not None:
-			params['priority'] = args.priority
-		if args.product is not None:
-			params['product'] = args.product
-		if args.resolution is not None:
-			params['resolution'] = args.resolution
-		if args.see_also_add is not None:
-			params['see_also']['add'] = args.see_also_add
-		if args.see_also_remove is not None:
-			params['see_also']['remove'] = args.see_also_remove
-		if args.severity is not None:
-			params['severity'] = args.severity
-		if args.status is not None:
-			params['status'] = args.status
-		if args.summary is not None:
-			params['summary'] = args.summary
-		if args.url is not None:
-			params['url'] = args.url
-		if args.version is not None:
-			params['version'] = args.version
-		if args.whiteboard is not None:
-			params['whiteboard'] = args.whiteboard
-
-		if args.fixed:
+		if getattr(conn, 'fixed', None):
 			params['status'] = 'RESOLVED'
 			params['resolution'] = 'FIXED'
 
-		if args.invalid:
+		if getattr(conn, 'invalid', None):
 			params['status'] = 'RESOLVED'
 			params['resolution'] = 'INVALID'
 
@@ -518,15 +524,15 @@ class PrettyBugz:
 					log_info('%-12s: removed %s' %(key, changes[key]['removed']))
 					log_info('%-12s: added %s' %(key, changes[key]['added']))
 
-	def attachment(self, args):
+	def attachment(self, conn):
 		""" Download or view an attachment given the id."""
-		log_info('Getting attachment %s' % args.attachid)
+		log_info('Getting attachment %s' % conn.attachid)
 
 		params = {}
-		params['attachment_ids'] = [args.attachid]
+		params['attachment_ids'] = [conn.attachid]
 		result = self.call_bz(self.bz.Bug.attachments, params)
-		result = result['attachments'][args.attachid]
-		view = getattr(args, 'view', False)
+		result = result['attachments'][conn.attachid]
+		view = getattr(conn, 'view', False)
 
 		action = {True:'Viewing', False:'Saving'}
 		log_info('%s attachment: "%s"' %
@@ -544,14 +550,14 @@ class PrettyBugz:
 			fd.write(result['data'].data)
 			fd.close()
 
-	def attach(self, args):
+	def attach(self, conn):
 		""" Attach a file to a bug given a filename. """
-		filename = args.filename
-		content_type = args.content_type
-		bugid = args.bugid
-		summary = args.summary
-		is_patch = args.is_patch
-		comment = args.comment
+		filename = conn.filename
+		content_type = conn.content_type
+		bugid = conn.bugid
+		summary = conn.summary
+		is_patch = conn.is_patch
+		comment = conn.comment
 
 		if not os.path.exists(filename):
 			raise BugzError('File not found: %s' % filename)
@@ -581,7 +587,7 @@ class PrettyBugz:
 		result =  self.call_bz(self.bz.Bug.add_attachment, params)
 		log_info("'%s' has been attached to bug %s" % (filename, bugid))
 
-	def list_bugs(self, buglist, args):
+	def list_bugs(self, buglist, conn):
 		for bug in buglist:
 			bugid = bug['id']
 			status = bug['status']
@@ -590,19 +596,19 @@ class PrettyBugz:
 			assignee = bug['assigned_to'].split('@')[0]
 			desc = bug['summary']
 			line = '%s' % (bugid)
-			if args.show_status:
+			if conn.show_status:
 				line = '%s %-12s' % (line, status)
-			if args.show_priority:
+			if conn.show_priority:
 				line = '%s %-12s' % (line, priority)
-			if args.show_severity:
+			if conn.show_severity:
 				line = '%s %-12s' % (line, severity)
 			line = '%s %-20s' % (line, assignee)
 			line = '%s %s' % (line, desc)
-			print(line[:self.columns])
+			print(line[:conn.columns])
 
 		log_info("%i bug(s) found." % len(buglist))
 
-	def show_bug_info(self, bug, args):
+	def show_bug_info(self, bug, conn):
 		FieldMap = {
 			'alias': 'Alias',
 			'summary': 'Title',
@@ -650,7 +656,7 @@ class PrettyBugz:
 			elif value is not None and value != '':
 				print('%-12s: %s' % (desc, value))
 
-		if not getattr(args, 'no_attachments', False):
+		if not getattr(conn, 'no_attachments', False):
 			bug_attachments = self.call_bz(self.bz.Bug.attachments, {'ids':[bug['id']]})
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
@@ -661,14 +667,13 @@ class PrettyBugz:
 				when = attachment['creation_time']
 				print('[Attachment] [%s] [%s]' % (aid, desc))
 
-		if not getattr(args, 'no_comments', False):
+		if not getattr(conn, 'no_comments', False):
 			bug_comments = self.call_bz(self.bz.Bug.comments, {'ids':[bug['id']]})
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-			print()
 			print('%-12s: %d' % ('Comments', len(bug_comments)))
 			print()
 			i = 0
-			wrapper = textwrap.TextWrapper(width = self.columns,
+			wrapper = textwrap.TextWrapper(width = conn.columns,
 				break_long_words = False,
 				break_on_hyphens = False)
 			for comment in bug_comments:
@@ -676,14 +681,14 @@ class PrettyBugz:
 				when = comment['time']
 				what = comment['text']
 				print('[Comment #%d] %s : %s' % (i, who, when))
-				print('-' * (self.columns - 1))
+				print('-' * (conn.columns - 1))
 
 				if what is None:
 					what = ''
 
 				# print wrapped version
 				for line in what.splitlines():
-					if len(line) < self.columns:
+					if len(line) < conn.columns:
 						print(line)
 					else:
 						for shortline in wrapper.wrap(line):

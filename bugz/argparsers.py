@@ -99,7 +99,6 @@ def make_modify_parser(subparsers):
 		help = 'change the component for this bug')
 	modify_parser.add_argument('-d', '--duplicate',
 		type = int,
-		default = 0,
 		help = 'this bug is a duplicate',
 		dest = 'dupe_of')
 	modify_parser.add_argument('--add-group',
@@ -255,12 +254,10 @@ def make_search_parser(subparsers):
 
 def make_parser(parser):
 	parser.add_argument('--config-file',
-		default = '~/.bugzrc',
 		help = 'read an alternate configuration file')
 	parser.add_argument('--connection',
 		help = 'use [connection] section of your configuration file')
 	parser.add_argument('-b', '--base',
-				default = 'https://bugs.gentoo.org/xmlrpc.cgi',
 		help = 'base URL of Bugzilla')
 	parser.add_argument('-u', '--user',
 		help = 'username for commands requiring authentication')

@@ -20,35 +20,39 @@ Classes
 """
 
 import argparse
+import configparser
 import locale
 import os
 import sys
 
 from bugz.argparsers import make_parser
 from bugz.cli import PrettyBugz
+from bugz.configfile import get_config
+from bugz.connection import Connection
 from bugz.errhandling import BugzError
 from bugz.log import log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
-from bugz.configfile import get_config
 
 def main():
 	ArgParser = argparse.ArgumentParser(
+		argument_default = argparse.SUPPRESS,
 		epilog = 'use -h after a sub-command for sub-command specific help')
 	make_parser(ArgParser)
 	args = ArgParser.parse_args()
 
-	if not hasattr(args, 'func'):
+	ConfigParser = configparser.ConfigParser(default_section = 'default')
+	get_config(ConfigParser, getattr(args, 'config_file', None))
+
+	conn = Connection(args, ConfigParser)
+
+	if not hasattr(conn, 'func'):
 		ArgParser.print_usage()
 		return 1
 
-	get_config(args)
-
-	log_setDebugLevel(args.debug)
-	log_setQuiet(args.quiet)
-
 	try:
-		bugz = PrettyBugz(args)
-		args.func(bugz, args)
+		bugz = PrettyBugz(conn)
+
+		conn.func(bugz, conn)
 		return 0
 
 	except BugzError as e:
