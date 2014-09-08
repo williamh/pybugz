@@ -4,8 +4,6 @@ import sys
 
 from bugz.log import log_error
 
-DEFAULT_CONFIG_FILE = '~/.bugzrc'
-
 def config_option(parser, get, section, option):
 	if parser.has_option(section, option):
 		try:
@@ -34,8 +32,6 @@ def fill_config(args, parser, section):
 
 def get_config(args):
 	config_file = getattr(args, 'config_file')
-	if config_file is None:
-			config_file = DEFAULT_CONFIG_FILE
 	section = getattr(args, 'connection')
 	parser = configparser.ConfigParser()
 	config_file_name = os.path.expanduser(config_file)

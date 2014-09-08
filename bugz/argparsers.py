@@ -264,6 +264,7 @@ def make_parser():
 	parser = argparse.ArgumentParser(
 		epilog = 'use -h after a sub-command for sub-command specific help')
 	parser.add_argument('--config-file',
+		default = '~/.bugzrc',
 		help = 'read an alternate configuration file')
 	parser.add_argument('--connection',
 		help = 'use [connection] section of your configuration file')
