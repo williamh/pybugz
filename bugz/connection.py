@@ -88,6 +88,10 @@ class Connection:
 				self.quiet = False
 		log_setQuiet(self.quiet)
 
+		if config.has_option(self.connection, 'search_statuses'):
+			self.search_statuses = get_config_option(config.get, self.connection,
+					'search_statuses').split()
+
 		if not hasattr(self, 'skip_auth'):
 			if config.has_option(self.connection, 'skip_auth'):
 				self.skip_auth = get_config_option(config.getboolean,

@@ -630,12 +630,12 @@ the keywords given on the title (or the body if specified).
 	if not (params or search_term):
 		raise BugzError('Please give search terms or options.')
 
-	if 'status' not in params:
-		params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
-	else:
+	if 'status' in params:
 		for x in params['status'][:]:
 			if x in ['all', 'ALL']:
 				del params['status']
+	elif hasattr(conn, 'search_statuses'):
+		params['status'] = conn.search_statuses
 
 	log_info('Searching for bugs meeting the following criteria:')
 	for key in params:

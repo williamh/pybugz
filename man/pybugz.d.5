@@ -116,6 +116,11 @@ Bugzilla instance. It is possible to define this in the default section.
 However, it does not make sense to do so most of the time. If this is
 set, you will not be prompted for a component when you run bugz post,
 and this will also be the default value for bugz search.
+.PP
+search_statuses = confirmed in_progress unconfirmed
+.PP
+This sets the default statuses to be used in a search command. It is a
+space separated list of Bugzilla statuses.
 .SH BUGS
 .PP
 The home page of this project is http://www.github.com/williamh/pybugz.
