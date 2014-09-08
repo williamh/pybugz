@@ -8,6 +8,7 @@ import http.cookiejar
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
 import xmlrpc.client
+import sys
 
 class RequestTransport(xmlrpc.client.Transport):
 	def __init__(self, uri, cookiejar=None, use_datetime=0):
@@ -41,7 +42,12 @@ class RequestTransport(xmlrpc.client.Transport):
 		if hasattr(self, 'accept_gzip_encoding') and self.accept_gzip_encoding:
 			req.add_header('Accept-Encoding', 'gzip')
 
-		req.add_data(request_body)
+		# Python 3.4 doesn't have an add_data method.
+		major, minor = sys.version_info[0], sys.version_info[1]
+		if major >= 3 and minor >= 4:
+			req.data = request_body
+		else:
+			req.add_data(request_body)
 
 		resp = self.opener.open(req)
 
