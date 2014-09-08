@@ -40,11 +40,6 @@ def get_config(args):
 	try:
 		file = open(config_file_name)
 	except IOError:
-		if getattr(args, 'config_file') is not None:
-			log_error("Error: Can't find user configuration file: "
-					+config_file_name)
-			sys.exit(1)
-		else:
 			return
 
 	# try to parse config file
