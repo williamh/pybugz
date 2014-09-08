@@ -10,6 +10,10 @@ Author
 ------
 Alastair Tse <alastair@liquidx.net>. Copyright (c) 2006 under GPL-2.
 
+Requirements
+------------
+ - Python 3.3 or later
+
 Features
 --------
 * Searching bugzilla
