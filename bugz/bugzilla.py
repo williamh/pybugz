@@ -6,7 +6,6 @@
 
 import http.cookiejar
 import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
 import xmlrpc.client
 
 class RequestTransport(xmlrpc.client.Transport):
