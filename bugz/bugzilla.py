@@ -40,7 +40,7 @@ class RequestTransport(xmlrpc.client.Transport):
 		if hasattr(self, 'accept_gzip_encoding') and self.accept_gzip_encoding:
 			req.add_header('Accept-Encoding', 'gzip')
 
-		req.add_data(request_body)
+		req.data = request_body
 
 		resp = self.opener.open(req)
 
