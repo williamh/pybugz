@@ -44,11 +44,6 @@ class RequestTransport(xmlrpc.client.Transport):
 
 		resp = self.opener.open(req)
 
-		# In Python 2, resp is a urllib.addinfourl instance, which does not
-		# have the getheader method that parse_response expects.
-		if not hasattr(resp, 'getheader'):
-			resp.getheader = resp.headers.getheader
-
 		if resp.code == 200:
 			self.verbose = verbose
 			return self.parse_response(resp)
