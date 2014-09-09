@@ -37,8 +37,6 @@ def main():
 	# parse options
 	args = parser.parse_args()
 	get_config(args)
-	if getattr(args, 'columns') is None:
-		setattr(args, 'columns', 0)
 	log_setDebugLevel(args.debug)
 	log_setQuiet(args.quiet)
 

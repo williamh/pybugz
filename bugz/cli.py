@@ -121,7 +121,10 @@ def block_edit(comment, comment_from = ''):
 
 class PrettyBugz:
 	def __init__(self, args):
-		self.columns = args.columns or terminal_width()
+		if hasattr(args, 'columns'):
+			self.columns = args.columns
+		else:
+			self.columns = terminal_width()
 		self.user = args.user
 		self.password = args.password
 		self.passwordcmd = args.passwordcmd
