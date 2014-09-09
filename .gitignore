@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 .*swp
+*.swo
 *~
 tags
 build
