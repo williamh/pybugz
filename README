@@ -12,10 +12,12 @@ Alastair Tse <alastair@liquidx.net>. Copyright (c) 2006 under GPL-2.
 
 Requirements
 ------------
- - Python 3.3 or later
+
+* Python 3.3 or later
 
 Features
 --------
+
 * Searching bugzilla
 * Listing details of a bug including comments and attachments
 * Downloading/viewing attachments from bugzilla
