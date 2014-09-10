@@ -22,7 +22,6 @@ Classes
 import locale
 import os
 import sys
-import traceback
 
 from bugz.argparsers import make_parser
 from bugz.cli import PrettyBugz
@@ -47,12 +46,6 @@ def main():
 
 	except BugzError as e:
 		log_error(e)
-		return 1
-
-	except TypeError as e:
-		# where this comes from?
-		log_error('Incorrect number of arguments supplied')
-		traceback.print_exc()
 		return 1
 
 	except RuntimeError as e:
