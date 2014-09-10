@@ -1,5 +1,3 @@
-import argparse
-
 from bugz import __version__
 from bugz.cli import PrettyBugz
 
@@ -260,9 +258,7 @@ def make_search_parser(subparsers):
 		help='show severity of bugs')
 	search_parser.set_defaults(func = PrettyBugz.search)
 
-def make_parser():
-	parser = argparse.ArgumentParser(
-		epilog = 'use -h after a sub-command for sub-command specific help')
+def make_parser(parser):
 	parser.add_argument('--config-file',
 		default = '~/.bugzrc',
 		help = 'read an alternate configuration file')
