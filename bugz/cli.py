@@ -121,7 +121,7 @@ def block_edit(comment, comment_from = ''):
 
 class PrettyBugz:
 	def __init__(self, args):
-		if hasattr(args, 'columns'):
+		if args.columns is not None:
 			self.columns = args.columns
 		else:
 			self.columns = terminal_width()
