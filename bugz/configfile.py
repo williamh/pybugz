@@ -40,7 +40,7 @@ def get_config(args):
 	try:
 		file = open(config_file_name)
 	except IOError:
-			return
+		return
 
 	# try to parse config file
 	try:
