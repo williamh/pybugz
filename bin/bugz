@@ -19,6 +19,7 @@ Classes
 
 """
 
+import argparse
 import locale
 import os
 import sys
@@ -31,11 +32,17 @@ from bugz.log import log_setDebugLevel, log_setQuiet
 from bugz.configfile import get_config
 
 def main():
-	parser = make_parser()
+	ArgParser = argparse.ArgumentParser(
+		epilog = 'use -h after a sub-command for sub-command specific help')
+	make_parser(ArgParser)
+	args = ArgParser.parse_args()
 
-	# parse options
-	args = parser.parse_args()
+	if not hasattr(args, 'func'):
+		ArgParser.print_usage()
+		return 1
+
 	get_config(args)
+
 	log_setDebugLevel(args.debug)
 	log_setQuiet(args.quiet)
 
