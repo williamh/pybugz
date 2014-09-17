@@ -111,7 +111,8 @@ def block_edit(comment, comment_from = ''):
 		new_text = raw_input_block()
 		return new_text
 
-	initial_text = '\n'.join(['BUGZ: %s'%line for line in comment.split('\n')])
+	initial_text = '\n'.join(['BUGZ: %s'%line for line in
+		comment.splitlines()])
 	new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text, comment_from)
 
 	if new_text.strip():
@@ -780,7 +781,7 @@ class PrettyBugz:
 					what = ''
 
 				# print wrapped version
-				for line in what.split('\n'):
+				for line in what.splitlines():
 					if len(line) < self.columns:
 						print(line)
 					else:
