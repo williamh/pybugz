@@ -187,7 +187,7 @@ class PrettyBugz:
 				process = subprocess.Popen(self.passwordcmd, shell=True,
 					stdout=subprocess.PIPE)
 				self.password, _ = process.communicate()
-				self.password = self.password.split('\n')[0]
+				self.password = self.password.splitlines()[0]
 
 		# perform login
 		params = {}
