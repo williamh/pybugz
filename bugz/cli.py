@@ -183,7 +183,7 @@ class PrettyBugz:
 					+ fault.faultString)
 
 		for bug in result['bugs']:
-			self.show_bug_info(bug, args.attachments, args.comments)
+			self.show_bug_info(bug, args)
 
 	def post(self, args):
 		"""Post a new bug"""
@@ -601,7 +601,7 @@ class PrettyBugz:
 
 		log_info("%i bug(s) found." % len(buglist))
 
-	def show_bug_info(self, bug, show_attachments, show_comments):
+	def show_bug_info(self, bug, args):
 		FieldMap = {
 			'alias': 'Alias',
 			'summary': 'Title',
@@ -649,7 +649,7 @@ class PrettyBugz:
 			elif value is not None and value != '':
 				print('%-12s: %s' % (desc, value))
 
-		if show_attachments:
+		if not getattr(args, 'no_attachments', False):
 			bug_attachments = self.call_bz(self.bz.Bug.attachments, {'ids':[bug['id']]})
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
@@ -660,7 +660,7 @@ class PrettyBugz:
 				when = attachment['creation_time']
 				print('[Attachment] [%s] [%s]' % (aid, desc))
 
-		if show_comments:
+		if not getattr(args, 'no_comments', False):
 			bug_comments = self.call_bz(self.bz.Bug.comments, {'ids':[bug['id']]})
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
 			print()

@@ -39,15 +39,11 @@ def make_get_parser(subparsers):
 	get_parser.add_argument('bugid',
 		help = 'the ID of the bug to retrieve.')
 	get_parser.add_argument("-a", "--no-attachments",
-		action="store_false",
-		default = True,
-		help = 'do not show attachments',
-		dest = 'attachments')
+		action="store_true",
+		help = 'do not show attachments')
 	get_parser.add_argument("-n", "--no-comments",
-		action="store_false",
-		default = True,
-		help = 'do not show comments',
-		dest = 'comments')
+		action="store_true",
+		help = 'do not show comments')
 	get_parser.set_defaults(func = PrettyBugz.get)
 
 def make_login_parser(subparsers):
