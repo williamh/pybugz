@@ -526,14 +526,15 @@ class PrettyBugz:
 		params['attachment_ids'] = [args.attachid]
 		result = self.call_bz(self.bz.Bug.attachments, params)
 		result = result['attachments'][args.attachid]
+		view = getattr(args, 'view', False)
 
 		action = {True:'Viewing', False:'Saving'}
 		log_info('%s attachment: "%s"' %
-			(action[args.view], result['file_name']))
+			(action[view], result['file_name']))
 		safe_filename = os.path.basename(re.sub(r'\.\.', '',
 												result['file_name']))
 
-		if args.view:
+		if view:
 			print(result['data'].data)
 		else:
 			if os.path.exists(result['file_name']):

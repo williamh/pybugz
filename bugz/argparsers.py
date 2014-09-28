@@ -29,7 +29,6 @@ def make_attachment_parser(subparsers):
 		help = 'the ID of the attachment')
 	attachment_parser.add_argument('-v', '--view',
 		action="store_true",
-		default = False,
 		help = 'print attachment rather than save')
 	attachment_parser.set_defaults(func = PrettyBugz.attachment)
 
