@@ -54,9 +54,6 @@ class PrettyBugz:
 		log_info("Using %s " % args.base)
 		self.bz = BugzillaProxy(args.base, cookiejar=self.cookiejar)
 
-	def get_input(self, prompt):
-		return input(prompt)
-
 	def set_token(self, *args):
 		if args and self.token:
 			args[0]['Bugzilla_token'] = self.token
@@ -80,7 +77,7 @@ class PrettyBugz:
 		# prompt for username if we were not supplied with it
 		if not self.user:
 			log_info('No username given.')
-			self.user = self.get_input('Username: ')
+			self.user = input('Username: ')
 
 		# prompt for password if we were not supplied with it
 		if not self.password:
@@ -214,21 +211,21 @@ class PrettyBugz:
 			# check for product
 			if not args.product:
 				while not args.product or len(args.product) < 1:
-					args.product = self.get_input('Enter product: ')
+					args.product = input('Enter product: ')
 			else:
 				log_info('Enter product: %s' % args.product)
 
 			# check for component
 			if not args.component:
 				while not args.component or len(args.component) < 1:
-					args.component = self.get_input('Enter component: ')
+					args.component = input('Enter component: ')
 			else:
 				log_info('Enter component: %s' % args.component)
 
 			# check for version
 			# FIXME: This default behaviour is not too nice.
 			if not args.version:
-				line = self.get_input('Enter version (default: unspecified): ')
+				line = input('Enter version (default: unspecified): ')
 				if len(line):
 					args.version = line
 				else:
@@ -239,7 +236,7 @@ class PrettyBugz:
 			# check for title
 			if not args.summary:
 				while not args.summary or len(args.summary) < 1:
-					args.summary = self.get_input('Enter title: ')
+					args.summary = input('Enter title: ')
 			else:
 				log_info('Enter title: %s' % args.summary)
 
@@ -254,7 +251,7 @@ class PrettyBugz:
 			# check for operating system
 			if not args.op_sys:
 				op_sys_msg = 'Enter operating system where this bug occurs: '
-				line = self.get_input(op_sys_msg)
+				line = input(op_sys_msg)
 				if len(line):
 					args.op_sys = line
 			else:
@@ -263,7 +260,7 @@ class PrettyBugz:
 			# check for platform
 			if not args.platform:
 				platform_msg = 'Enter hardware platform where this bug occurs: '
-				line = self.get_input(platform_msg)
+				line = input(platform_msg)
 				if len(line):
 					args.platform = line
 			else:
@@ -272,7 +269,7 @@ class PrettyBugz:
 			# check for default priority
 			if args.priority is None:
 				priority_msg ='Enter priority (eg. Normal) (optional): '
-				line = self.get_input(priority_msg)
+				line = input(priority_msg)
 				if len(line):
 					args.priority = line
 			else:
@@ -281,7 +278,7 @@ class PrettyBugz:
 			# check for default severity
 			if args.severity is None:
 				severity_msg ='Enter severity (eg. normal) (optional): '
-				line = self.get_input(severity_msg)
+				line = input(severity_msg)
 				if len(line):
 					args.severity = line
 			else:
@@ -290,7 +287,7 @@ class PrettyBugz:
 			# check for default alias
 			if args.alias is None:
 				alias_msg ='Enter an alias for this bug (optional): '
-				line = self.get_input(alias_msg)
+				line = input(alias_msg)
 				if len(line):
 					args.alias = line
 			else:
@@ -299,7 +296,7 @@ class PrettyBugz:
 			# check for default assignee
 			if args.assigned_to is None:
 				assign_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
-				line = self.get_input(assign_msg)
+				line = input(assign_msg)
 				if len(line):
 					args.assigned_to = line
 			else:
@@ -308,7 +305,7 @@ class PrettyBugz:
 			# check for CC list
 			if args.cc is None:
 				cc_msg = 'Enter a CC list (comma separated) (optional): '
-				line = self.get_input(cc_msg)
+				line = input(cc_msg)
 				if len(line):
 					args.cc = line.split(', ')
 			else:
@@ -317,7 +314,7 @@ class PrettyBugz:
 			# check for URL
 			if args.url is None:
 				url_msg = 'Enter a URL (optional): '
-				line = self.get_input(url_msg)
+				line = input(url_msg)
 				if len(line):
 					args.url = line
 			else:
@@ -330,7 +327,7 @@ class PrettyBugz:
 			# fixme: milestone
 
 			if args.append_command is None:
-				args.append_command = self.get_input('Append the output of the following command (leave blank for none): ')
+				args.append_command = input('Append the output of the following command (leave blank for none): ')
 			else:
 				log_info('Append command (optional): %s' % args.append_command)
 
