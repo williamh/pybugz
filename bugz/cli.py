@@ -460,7 +460,7 @@ class PrettyBugz:
 			params['comment']['body'] = args.comment
 		if args.component is not None:
 			params['component'] = args.component
-		if args.dupe_of:
+		if getattr(args, 'dupe_of', None) is not None:
 			params['dupe_of'] = args.dupe_of
 			args.status = None
 			args.resolution = None
