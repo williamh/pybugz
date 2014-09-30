@@ -20,6 +20,10 @@ class Connection:
 				log_error('No default connection specified')
 				sys.exit(1)
 
+		if not self.connection in config.sections():
+			log_error('connection "{0}" not found'.format(self.connection))
+			sys.exit(1)
+
 		if not hasattr(self, 'base'):
 			if config.has_option(self.connection, 'base'):
 				self.base = get_config_option(config.get,
