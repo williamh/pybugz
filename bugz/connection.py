@@ -5,6 +5,7 @@ from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
 from bugz.utils import terminal_width
 
+
 class Connection:
 	def __init__(self, args, config):
 		for attr, value in args.__dict__.items():
@@ -77,5 +78,5 @@ class Connection:
 		log_info("Using [{0}] ({1})".format(self.connection, self.base))
 
 		log_debug('Connection debug dump:', 3)
-		for attr,value in self.__dict__.items():
+		for attr, value in self.__dict__.items():
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)

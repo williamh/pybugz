@@ -5,8 +5,11 @@
 # http://www.bugzilla.org/docs/4.2/en/html/api/Bugzilla/WebService.html
 
 import http.cookiejar
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import xmlrpc.client
+
 
 class RequestTransport(xmlrpc.client.Transport):
 	def __init__(self, uri, cookiejar=None, use_datetime=0):
@@ -49,7 +52,9 @@ class RequestTransport(xmlrpc.client.Transport):
 			return self.parse_response(resp)
 
 		resp.close()
-		raise xmlrpc.client.ProtocolError(self.uri, resp.status, resp.reason, resp.msg)
+		raise xmlrpc.client.ProtocolError(self.uri,
+				resp.status, resp.reason, resp.msg)
+
 
 class BugzillaProxy(xmlrpc.client.ServerProxy):
 	def __init__(self, uri, encoding=None, verbose=0, allow_none=0,

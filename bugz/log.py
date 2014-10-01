@@ -5,31 +5,33 @@ debugLevel = 0
 quiet = False
 
 LogSettings = {
-	'W' : {
-		'sym' : '!',
-		'word' : 'Warn',
+	'W': {
+		'sym': '!',
+		'word': 'Warn',
 	},
-	'E' : {
-		'sym' : '#',
-		'word' : 'Error',
+	'E': {
+		'sym': '#',
+		'word': 'Error',
 	},
-	'D' : {
-		'sym' : '~',
-		'word' : 'Dbg',
+	'D': {
+		'sym': '~',
+		'word': 'Dbg',
 	},
-	'I' : {
-		'sym' : '*',
-		'word' : 'Info',
+	'I': {
+		'sym': '*',
+		'word': 'Info',
 	},
-	'!' : {
-		'sym' : '!',
-		'word' : 'UNKNWN',
+	'!': {
+		'sym': '!',
+		'word': 'UNKNWN',
 	},
 }
+
 
 def log_setQuiet(newQuiet):
 	global quiet
 	quiet = newQuiet
+
 
 def log_setDebugLevel(newLevel):
 	global debugLevel
@@ -41,28 +43,33 @@ def log_setDebugLevel(newLevel):
 	else:
 		debugLevel = newLevel
 
+
 def formatOut(msg, id='!'):
 	lines = str(msg).split('\n')
 	start = True
-	sym=LogSettings[id]['sym']
-	word=LogSettings[id]['word'] + ":"
+	sym = LogSettings[id]['sym']
+	word = LogSettings[id]['word'] + ":"
 
 	for line in lines:
 		print(' ' + sym + ' ' + line)
+
 
 def log_error(string):
 	formatOut(string, 'E')
 	return
 
+
 def log_warn(string):
 	formatOut(string, 'W')
 	return
+
 
 def log_info(string):
 	# debug implies info
 	if not quiet or debugLevel:
 		formatOut(string, 'I')
 	return
+
 
 def log_debug(string, msgLevel=1):
 	if debugLevel >= msgLevel:

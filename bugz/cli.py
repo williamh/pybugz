@@ -23,6 +23,7 @@ from bugz.utils import block_edit, get_content_type
 DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_TOKEN_FILE = '.bugz_token'
 
+
 class PrettyBugz:
 	def __init__(self, conn):
 		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
@@ -112,7 +113,8 @@ class PrettyBugz:
 			raise BugzError("Failed to logout: " + fault.faultString)
 
 	def search(self, conn):
-		"""Performs a search on the bugzilla database with the keywords given on the title (or the body if specified).
+		"""Performs a search on the bugzilla database with
+the keywords given on the title (or the body if specified).
 		"""
 		valid_keys = ['alias', 'assigned_to', 'component', 'creator',
 			'limit', 'offset', 'op_sys', 'platform',
@@ -164,9 +166,9 @@ class PrettyBugz:
 		""" Fetch bug details given the bug id """
 		log_info('Getting bug %s ..' % conn.bugid)
 		try:
-			result = self.call_bz(self.bz.Bug.get, {'ids':[conn.bugid]})
+			result = self.call_bz(self.bz.Bug.get, {'ids': [conn.bugid]})
 		except xmlrpc.client.Fault as fault:
-			raise BugzError("Can't get bug #" + str(conn.bugid) + ": " \
+			raise BugzError("Can't get bug #" + str(conn.bugid) + ": "
 					+ fault.faultString)
 
 		for bug in result['bugs']:
@@ -181,7 +183,7 @@ class PrettyBugz:
 					if conn.description_from == '-':
 						conn.description = sys.stdin.read()
 					else:
-						conn.description = open( conn.description_from, 'r').read()
+						conn.description = open(conn.description_from, 'r').read()
 			except IOError as e:
 				raise BugzError('Unable to read from file: %s: %s' %
 					(conn.description_from, e))
@@ -256,7 +258,7 @@ class PrettyBugz:
 
 			# check for default priority
 			if not hasattr(conn, 'priority'):
-				priority_msg ='Enter priority (eg. Normal) (optional): '
+				priority_msg = 'Enter priority (eg. Normal) (optional): '
 				line = input(priority_msg)
 				if len(line):
 					conn.priority = line
@@ -265,7 +267,7 @@ class PrettyBugz:
 
 			# check for default severity
 			if not hasattr(conn, 'severity'):
-				severity_msg ='Enter severity (eg. normal) (optional): '
+				severity_msg = 'Enter severity (eg. normal) (optional): '
 				line = input(severity_msg)
 				if len(line):
 					conn.severity = line
@@ -274,7 +276,7 @@ class PrettyBugz:
 
 			# check for default alias
 			if not hasattr(conn, 'alias'):
-				alias_msg ='Enter an alias for this bug (optional): '
+				alias_msg = 'Enter an alias for this bug (optional): '
 				line = input(alias_msg)
 				if len(line):
 					conn.alias = line
@@ -283,7 +285,7 @@ class PrettyBugz:
 
 			# check for default assignee
 			if not hasattr(conn, 'assigned_to'):
-				assign_msg ='Enter assignee (eg. liquidx@gentoo.org) (optional): '
+				assign_msg = 'Enter assignee (eg. liquidx@gentoo.org) (optional): '
 				line = input(assign_msg)
 				if len(line):
 					conn.assigned_to = line
@@ -315,7 +317,8 @@ class PrettyBugz:
 			# fixme: milestone
 
 			if not hasattr(conn, 'append_command'):
-				line = input('Append the output of the following command (leave blank for none): ')
+				line = input('Append the output of the'
+				' following command (leave blank for none): ')
 				if len(line):
 					conn.append_command = line
 			else:
@@ -342,7 +345,7 @@ class PrettyBugz:
 		# print submission confirmation
 		print('-' * (conn.columns - 1))
 		print('%-12s: %s' % ('Product', conn.product))
-		print('%-12s: %s' %('Component', conn.component))
+		print('%-12s: %s' % ('Component', conn.component))
 		print('%-12s: %s' % ('Title', conn.summary))
 		print('%-12s: %s' % ('Version', conn.version))
 		print('%-12s: %s' % ('Description', conn.description))
@@ -368,7 +371,7 @@ class PrettyBugz:
 		print('-' * (conn.columns - 1))
 
 		if not getattr(conn, 'batch', None):
-			if conn.default_confirm in ['Y','y']:
+			if conn.default_confirm in ['Y', 'y']:
 				confirm = input('Confirm bug submission (Y/n)? ')
 			else:
 				confirm = input('Confirm bug submission (y/N)? ')
@@ -378,7 +381,7 @@ class PrettyBugz:
 				log_info('Submission aborted')
 				return
 
-		params={}
+		params = {}
 		params['product'] = conn.product
 		params['component'] = conn.component
 		params['version'] = conn.version
@@ -414,7 +417,7 @@ class PrettyBugz:
 				else:
 					conn.comment = open(conn.comment_from, 'r').read()
 			except IOError as e:
-				raise BugzError('unable to read file: %s: %s' % \
+				raise BugzError('unable to read file: %s: %s' %
 					(conn.comment_from, e))
 
 		if conn.comment_editor:
@@ -521,8 +524,8 @@ class PrettyBugz:
 			else:
 				log_info('Modified the following fields in bug %s' % bug['id'])
 				for key in changes:
-					log_info('%-12s: removed %s' %(key, changes[key]['removed']))
-					log_info('%-12s: added %s' %(key, changes[key]['added']))
+					log_info('%-12s: removed %s' % (key, changes[key]['removed']))
+					log_info('%-12s: added %s' % (key, changes[key]['added']))
 
 	def attachment(self, conn):
 		""" Download or view an attachment given the id."""
@@ -534,7 +537,7 @@ class PrettyBugz:
 		result = result['attachments'][conn.attachid]
 		view = getattr(conn, 'view', False)
 
-		action = {True:'Viewing', False:'Saving'}
+		action = {True: 'Viewing', False: 'Saving'}
 		log_info('%s attachment: "%s"' %
 			(action[view], result['file_name']))
 		safe_filename = os.path.basename(re.sub(r'\.\.', '',
@@ -581,10 +584,10 @@ class PrettyBugz:
 		params['file_name'] = os.path.basename(filename)
 		params['summary'] = summary
 		if not is_patch:
-			params['content_type'] = content_type;
+			params['content_type'] = content_type
 		params['comment'] = comment
 		params['is_patch'] = is_patch
-		result =  self.call_bz(self.bz.Bug.add_attachment, params)
+		result = self.call_bz(self.bz.Bug.add_attachment, params)
 		log_info("'%s' has been attached to bug %s" % (filename, bugid))
 
 	def list_bugs(self, buglist, conn):
@@ -648,7 +651,7 @@ class PrettyBugz:
 			value = bug[field]
 			if field in ['cc', 'see_also']:
 				for x in value:
-					print('%-12s: %s' %  (desc, x))
+					print('%-12s: %s' % (desc, x))
 			elif isinstance(value, list):
 				s = ', '.join(["%s" % x for x in value])
 				if s:
@@ -657,7 +660,8 @@ class PrettyBugz:
 				print('%-12s: %s' % (desc, value))
 
 		if not getattr(conn, 'no_attachments', False):
-			bug_attachments = self.call_bz(self.bz.Bug.attachments, {'ids':[bug['id']]})
+			bug_attachments = self.call_bz(self.bz.Bug.attachments,
+					{'ids': [bug['id']]})
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
 			print()
@@ -668,14 +672,14 @@ class PrettyBugz:
 				print('[Attachment] [%s] [%s]' % (aid, desc))
 
 		if not getattr(conn, 'no_comments', False):
-			bug_comments = self.call_bz(self.bz.Bug.comments, {'ids':[bug['id']]})
+			bug_comments = self.call_bz(self.bz.Bug.comments, {'ids': [bug['id']]})
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
 			print('%-12s: %d' % ('Comments', len(bug_comments)))
 			print()
 			i = 0
-			wrapper = textwrap.TextWrapper(width = conn.columns,
-				break_long_words = False,
-				break_on_hyphens = False)
+			wrapper = textwrap.TextWrapper(width=conn.columns,
+				break_long_words=False,
+				break_on_hyphens=False)
 			for comment in bug_comments:
 				who = comment['creator']
 				when = comment['time']

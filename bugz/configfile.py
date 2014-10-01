@@ -5,6 +5,7 @@ import sys
 
 from bugz.log import log_error
 
+
 def read_config(parser, ConfigFiles):
 	try:
 		parser.read(ConfigFiles)
@@ -25,8 +26,9 @@ def read_config(parser, ConfigFiles):
 		log_error(e)
 		sys.exit(1)
 
+
 def get_config(parser, UserConfig=None):
-	DefaultConfigs = sorted(glob.glob(sys.prefix+'/share/pybugz.d/*.conf'))
+	DefaultConfigs = sorted(glob.glob(sys.prefix + '/share/pybugz.d/*.conf'))
 	SystemConfigs = sorted(glob.glob('/etc/pybugz.d/*.conf'))
 	if UserConfig is not None:
 		UserConfig = os.path.expanduser(UserConfig)
@@ -36,16 +38,17 @@ def get_config(parser, UserConfig=None):
 	read_config(parser, SystemConfigs)
 	read_config(parser, UserConfig)
 
+
 def get_config_option(get, section, option):
 	try:
 		value = get(section, option)
 		if value == '':
-			log_error("Error: "+option+" is not set")
+			log_error("Error: " + option + " is not set")
 			sys.exit(1)
 
 		return value
 
 	except ValueError as e:
-		log_error("Error: option "+option+
-				" is not in the right format: "+str(e))
+		log_error("Error: option " + option +
+				" is not in the right format: " + str(e))
 		sys.exit(1)

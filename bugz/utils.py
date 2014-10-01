@@ -13,8 +13,7 @@ from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError
 from bugz.log import log_info
 
-BUGZ_COMMENT_TEMPLATE = \
-"""
+BUGZ_COMMENT_TEMPLATE = """
 BUGZ: ---------------------------------------------------
 %s
 BUGZ: Any line beginning with 'BUGZ:' will be ignored.
@@ -27,8 +26,10 @@ DEFAULT_NUM_COLS = 80
 # Auxiliary functions
 #
 
+
 def get_content_type(filename):
 	return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+
 
 def raw_input_block():
 	""" Allows multiple line input until a Ctrl+D is detected.
@@ -46,13 +47,17 @@ def raw_input_block():
 #
 # This function was lifted from Bazaar 1.9.
 #
+
+
 def terminal_width():
 	"""Return estimated terminal width."""
 	if sys.platform == 'win32':
 		return win32utils.get_console_size()[0]
 	width = DEFAULT_NUM_COLS
 	try:
-		import struct, fcntl, termios
+		import struct
+		import fcntl
+		import termios
 		s = struct.pack('HHHH', 0, 0, 0, 0)
 		x = fcntl.ioctl(1, termios.TIOCGWINSZ, s)
 		width = struct.unpack('HHHH', x)[1]
@@ -68,7 +73,8 @@ def terminal_width():
 
 	return width
 
-def launch_editor(initial_text, comment_from = '',comment_prefix = 'BUGZ:'):
+
+def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
 	"""Launch an editor with some default text.
 
 	Lifted from Mercurial 0.9.
@@ -94,7 +100,8 @@ def launch_editor(initial_text, comment_from = '',comment_prefix = 'BUGZ:'):
 
 	return ''
 
-def block_edit(comment, comment_from = ''):
+
+def block_edit(comment, comment_from=''):
 	editor = (os.environ.get('BUGZ_EDITOR') or
 			os.environ.get('EDITOR'))
 
@@ -103,7 +110,7 @@ def block_edit(comment, comment_from = ''):
 		new_text = raw_input_block()
 		return new_text
 
-	initial_text = '\n'.join(['BUGZ: %s'%line for line in
+	initial_text = '\n'.join(['BUGZ: %s' % line for line in
 		comment.splitlines()])
 	new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text, comment_from)
 
