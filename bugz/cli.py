@@ -26,6 +26,7 @@ DEFAULT_TOKEN_FILE = '.bugz_token'
 
 class PrettyBugz:
 	def __init__(self, conn):
+		self.conn = conn
 		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
 		self.cookiejar = LWPCookieJar(cookie_file)
 
@@ -54,8 +55,8 @@ class PrettyBugz:
 			return method(*self.set_token(*args))
 		except xmlrpc.client.Fault as fault:
 			# Fault code 410 means login required
-			if fault.faultCode == 410 and not conn.skip_auth:
-				self.login()
+			if fault.faultCode == 410 and not self.conn.skip_auth:
+				self.login(self.conn)
 				return method(*self.set_token(*args))
 			raise
 
