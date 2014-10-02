@@ -69,6 +69,13 @@ class Connection:
 			else:
 				self.quiet = False
 
+		if not hasattr(self, 'skip_auth'):
+			if config.has_option(self.connection, 'skip_auth'):
+				self.skip_auth = get_config_option(config.getboolean,
+					self.connection, 'skip_auth')
+			else:
+				self.skip_auth = False
+
 		if getattr(self, 'encoding', None) is not None:
 			log_info('The encoding option is deprecated.')
 
