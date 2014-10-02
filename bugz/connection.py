@@ -52,6 +52,13 @@ class Connection:
 				self.passwordcmd = get_config_option(config.get,
 					self.connection, 'passwordcmd')
 
+		if not hasattr(self, 'skip_auth'):
+			if config.has_option(self.connection, 'skip_auth'):
+				self.skip_auth = get_config_option(config.get,
+					self.connection, 'skip_auth')
+			else:
+				self.skip_auth = False
+
 		if not hasattr(self, 'columns'):
 			if config.has_option(self.connection, 'columns'):
 				self.columns = get_config_option(config.getint,
