@@ -11,34 +11,24 @@ try:
 except ImportError:
 	readline = None
 
-from http.cookiejar import LWPCookieJar
 
 from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError
 from bugz.log import log_info
 from bugz.utils import block_edit, get_content_type
 
-DEFAULT_COOKIE_FILE = '.bugz_cookie'
 DEFAULT_TOKEN_FILE = '.bugz_token'
 
 
 class PrettyBugz:
 	def __init__(self, conn):
-		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
-		self.cookiejar = LWPCookieJar(cookie_file)
-
-		try:
-			self.cookiejar.load()
-		except IOError:
-			pass
-
 		self.token_file = os.path.join(os.environ['HOME'], DEFAULT_TOKEN_FILE)
 		try:
 			self.token = open(self.token_file).read().strip()
 		except IOError:
 			self.token = None
 
-		self.bz = BugzillaProxy(conn.base, cookiejar=self.cookiejar)
+		self.bz = BugzillaProxy(conn.base)
 
 	def set_token(self, *args):
 		if args and self.token:
@@ -80,8 +70,6 @@ class PrettyBugz:
 		params = {}
 		params['login'] = conn.user
 		params['password'] = conn.password
-		if args is not None:
-			params['remember'] = True
 		log_info('Logging in')
 		try:
 			self.bz.User.login(params)
@@ -99,9 +87,6 @@ class PrettyBugz:
 				fd.write('\n')
 				fd.close()
 				os.chmod(self.token_file, 0o600)
-			else:
-				self.cookiejar.save()
-				os.chmod(self.cookiejar.filename, 0o600)
 
 	def logout(self, conn):
 		log_info('logging out')
