@@ -227,6 +227,7 @@ the keywords given on the title (or the body if specified).
 				summary = None
 				while not summary or len(summary) < 1:
 					summary = input('Enter title: ')
+				conn.summary = summary
 			else:
 				log_info('Enter title: %s' % conn.summary)
 
