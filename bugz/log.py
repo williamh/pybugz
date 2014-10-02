@@ -1,5 +1,8 @@
-#This module contains a set of common routines for logging messages.
-# TODO: use the python's  'logging' feature?
+""" This module contains a set of routines for logging messages.
+
+	If someone wants to convert this to use python's built-in loggig,
+	patches are welcome.
+"""
 
 debugLevel = 0
 quiet = False
@@ -46,32 +49,27 @@ def log_setDebugLevel(newLevel):
 
 def formatOut(msg, id='!'):
 	lines = str(msg).split('\n')
-	start = True
 	sym = LogSettings[id]['sym']
 	word = LogSettings[id]['word'] + ":"
 
 	for line in lines:
-		print(' ' + sym + ' ' + line)
+		print(' {0} {1} {2}'.format(sym, word, line))
 
 
 def log_error(string):
 	formatOut(string, 'E')
-	return
 
 
 def log_warn(string):
 	formatOut(string, 'W')
-	return
 
 
 def log_info(string):
 	# debug implies info
 	if not quiet or debugLevel:
 		formatOut(string, 'I')
-	return
 
 
 def log_debug(string, msgLevel=1):
 	if debugLevel >= msgLevel:
 		formatOut(string, 'D')
-	return
