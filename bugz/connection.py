@@ -1,5 +1,6 @@
 import sys
 
+from bugz.cli import PrettyBugz
 from bugz.configfile import get_config_option
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
@@ -12,6 +13,9 @@ class Connection:
 			sv = getattr(self, attr, None)
 			if sv != value:
 				setattr(self, attr, value)
+
+# Only remember login details when the login command is used.
+		self.remember = getattr(self, 'func', None) == PrettyBugz.login
 
 		if not hasattr(self, 'connection'):
 			if config.has_option('default', 'connection'):
@@ -47,6 +51,13 @@ class Connection:
 			if config.has_option(self.connection, 'passwordcmd'):
 				self.passwordcmd = get_config_option(config.get,
 					self.connection, 'passwordcmd')
+
+		if not hasattr(self, 'skip_auth'):
+			if config.has_option(self.connection, 'skip_auth'):
+				self.skip_auth = get_config_option(config.get,
+					self.connection, 'skip_auth')
+			else:
+				self.skip_auth = False
 
 		if not hasattr(self, 'columns'):
 			if config.has_option(self.connection, 'columns'):

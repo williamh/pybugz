@@ -24,6 +24,7 @@ DEFAULT_TOKEN_FILE = '.bugz_token'
 
 class PrettyBugz:
 	def __init__(self, conn):
+		self.conn = conn
 		cookie_file = os.path.join(os.environ['HOME'], DEFAULT_COOKIE_FILE)
 		self.cookiejar = LWPCookieJar(cookie_file)
 
@@ -52,8 +53,8 @@ class PrettyBugz:
 			return method(*self.set_token(*args))
 		except xmlrpc.client.Fault as fault:
 			# Fault code 410 means login required
-			if fault.faultCode == 410 and not conn.skip_auth:
-				self.login()
+			if fault.faultCode == 410 and not self.conn.skip_auth:
+				self.login(self.conn)
 				return method(*self.set_token(*args))
 			raise
 
@@ -80,7 +81,7 @@ class PrettyBugz:
 		params = {}
 		params['login'] = conn.user
 		params['password'] = conn.password
-		if args is not None:
+		if conn.remember:
 			params['remember'] = True
 		log_info('Logging in')
 		try:
@@ -225,6 +226,7 @@ the keywords given on the title (or the body if specified).
 				summary = None
 				while not summary or len(summary) < 1:
 					summary = input('Enter title: ')
+				conn.summary = summary
 			else:
 				log_info('Enter title: %s' % conn.summary)
 
