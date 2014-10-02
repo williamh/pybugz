@@ -82,7 +82,7 @@ class PrettyBugz:
 		params = {}
 		params['login'] = conn.user
 		params['password'] = conn.password
-		if args is not None:
+		if conn.remember:
 			params['remember'] = True
 		log_info('Logging in')
 		try:
