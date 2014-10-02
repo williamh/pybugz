@@ -1,10 +1,8 @@
 import getpass
-import locale
 import os
 import re
 import subprocess
 import sys
-import tempfile
 import textwrap
 import xmlrpc.client
 
@@ -13,7 +11,7 @@ try:
 except ImportError:
 	readline = None
 
-from http.cookiejar import CookieJar, LWPCookieJar
+from http.cookiejar import LWPCookieJar
 
 from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError

@@ -9,10 +9,6 @@ try:
 except ImportError:
 	readline = None
 
-from bugz.bugzilla import BugzillaProxy
-from bugz.errhandling import BugzError
-from bugz.log import log_info
-
 BUGZ_COMMENT_TEMPLATE = """
 BUGZ: ---------------------------------------------------
 %s
