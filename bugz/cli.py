@@ -149,7 +149,8 @@ the keywords given on the title (or the body if specified).
 		""" Fetch bug details given the bug id """
 		log_info('Getting bug %s ..' % conn.bugid)
 		try:
-			result = self.call_bz(self.bz.Bug.get, {'ids': [conn.bugid]})
+			params = {'ids': [conn.bugid]}
+			result = self.call_bz(self.bz.Bug.get, params)
 		except xmlrpc.client.Fault as fault:
 			raise BugzError("Can't get bug #" + str(conn.bugid) + ": "
 					+ fault.faultString)
@@ -643,8 +644,9 @@ the keywords given on the title (or the body if specified).
 				print('%-12s: %s' % (desc, value))
 
 		if not getattr(conn, 'no_attachments', False):
+			params = {'ids': [bug['id']]}
 			bug_attachments = self.call_bz(self.bz.Bug.attachments,
-					{'ids': [bug['id']]})
+					params)
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
 			print()
@@ -655,7 +657,8 @@ the keywords given on the title (or the body if specified).
 				print('[Attachment] [%s] [%s]' % (aid, desc))
 
 		if not getattr(conn, 'no_comments', False):
-			bug_comments = self.call_bz(self.bz.Bug.comments, {'ids': [bug['id']]})
+			params = {'ids': [bug['id']]}
+			bug_comments = self.call_bz(self.bz.Bug.comments, params)
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
 			print('%-12s: %d' % ('Comments', len(bug_comments)))
 			print()
