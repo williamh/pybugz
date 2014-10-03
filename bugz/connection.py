@@ -82,8 +82,8 @@ class Connection:
 		log_setDebugLevel(self.debug)
 		log_setQuiet(self.quiet)
 
-		log_info("Using [{0}] ({1})".format(self.connection, self.base))
-
 		log_debug('Connection debug dump:', 3)
 		for attr, value in self.__dict__.items():
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
+
+		log_info("Using [{0}] ({1})".format(self.connection, self.base))
