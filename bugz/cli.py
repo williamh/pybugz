@@ -573,7 +573,9 @@ the keywords given on the title (or the body if specified).
 		params['comment'] = comment
 		params['is_patch'] = is_patch
 		result = self.call_bz(self.bz.Bug.add_attachment, params)
-		log_info("'%s' has been attached to bug %s" % (filename, bugid))
+		attachid = result['ids'][0]
+		log_info('{0} ({1}) has been attached to bug {2}'.format(
+			filename, attachid, bugid))
 
 	def list_bugs(self, buglist, conn):
 		for bug in buglist:
