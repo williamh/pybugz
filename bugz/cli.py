@@ -26,25 +26,25 @@ class PrettyBugz:
 		try:
 			self.token = open(self.token_file).read().strip()
 		except IOError:
-			self.token = None
+			pass
 
 		self.bz = BugzillaProxy(conn.base)
 
-	def set_token(self, *args):
-		if args and self.token:
-			args[0]['Bugzilla_token'] = self.token
-		return args
-
-	def call_bz(self, method, *args):
+	def call_bz(self, method, params):
 		"""Attempt to call method with args. Log in if authentication is required.
 		"""
 		try:
-			return method(*self.set_token(*args))
+			if hasattr(self, 'token'):
+				params['Bugzilla_token'] = self.token
+
+			return method(params)
 		except xmlrpc.client.Fault as fault:
 			# Fault code 410 means login required
 			if fault.faultCode == 410 and not conn.skip_auth:
 				self.login()
-				return method(*self.set_token(*args))
+			if hasattr(self, 'token'):
+				params['Bugzilla_token'] = self.token
+				return method(params)
 			raise
 
 	def login(self, conn):
@@ -79,14 +79,11 @@ class PrettyBugz:
 		result = self.bz.User.login(params)
 		if 'token' in result:
 			self.token = result['token']
-
-		if conn is not None:
-			if self.token:
-				fd = open(self.token_file, 'w')
-				fd.write(self.token)
-				fd.write('\n')
-				fd.close()
-				os.chmod(self.token_file, 0o600)
+			fd = open(self.token_file, 'w')
+			fd.write(self.token)
+			fd.write('\n')
+			fd.close()
+			os.chmod(self.token_file, 0o600)
 
 	def logout(self, conn):
 		log_info('logging out')
