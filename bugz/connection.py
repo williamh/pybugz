@@ -1,5 +1,6 @@
 import sys
 
+from bugz.bugzilla import BugzillaProxy
 from bugz.configfile import get_config_option
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
@@ -32,6 +33,8 @@ class Connection:
 			else:
 				log_error('No base URL specified')
 				sys.exit(1)
+
+		self.bz = BugzillaProxy(self.base)
 
 		if not hasattr(self, 'user'):
 			if config.has_option(self.connection, 'user'):

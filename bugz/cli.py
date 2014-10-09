@@ -12,7 +12,6 @@ except ImportError:
 	readline = None
 
 
-from bugz.bugzilla import BugzillaProxy
 from bugz.errhandling import BugzError
 from bugz.log import log_info
 from bugz.utils import block_edit, get_content_type
@@ -27,8 +26,6 @@ class PrettyBugz:
 			self.token = open(self.token_file).read().strip()
 		except IOError:
 			pass
-
-		self.bz = BugzillaProxy(conn.base)
 
 	def call_bz(self, method, params):
 		"""Attempt to call method with args. Log in if authentication is required.
@@ -72,11 +69,11 @@ class PrettyBugz:
 		params['password'] = conn.password
 		log_info('Logging in')
 		try:
-			self.bz.User.login(params)
+			conn.bz.User.login(params)
 		except xmlrpc.client.Fault as fault:
 			raise BugzError("Can't login: " + fault.faultString)
 		log_info('Logging in')
-		result = self.bz.User.login(params)
+		result = conn.bz.User.login(params)
 		if 'token' in result:
 			self.token = result['token']
 			fd = open(self.token_file, 'w')
@@ -88,7 +85,7 @@ class PrettyBugz:
 	def logout(self, conn):
 		log_info('logging out')
 		try:
-			self.bz.User.logout()
+			conn.bz.User.logout()
 		except xmlrpc.client.Fault as fault:
 			raise BugzError("Failed to logout: " + fault.faultString)
 
@@ -135,7 +132,7 @@ the keywords given on the title (or the body if specified).
 				if x in ['all', 'ALL']:
 					del params['status']
 
-		result = self.call_bz(self.bz.Bug.search, params)['bugs']
+		result = self.call_bz(conn.bz.Bug.search, params)['bugs']
 
 		if not len(result):
 			log_info('No bugs found.')
@@ -147,7 +144,7 @@ the keywords given on the title (or the body if specified).
 		log_info('Getting bug %s ..' % conn.bugid)
 		try:
 			params = {'ids': [conn.bugid]}
-			result = self.call_bz(self.bz.Bug.get, params)
+			result = self.call_bz(conn.bz.Bug.get, params)
 		except xmlrpc.client.Fault as fault:
 			raise BugzError("Can't get bug #" + str(conn.bugid) + ": "
 					+ fault.faultString)
@@ -387,7 +384,7 @@ the keywords given on the title (or the body if specified).
 		if getattr(conn, 'url', None) is not None:
 			params['url'] = conn.url
 
-		result = self.call_bz(self.bz.Bug.create, params)
+		result = self.call_bz(conn.bz.Bug.create, params)
 		log_info('Bug %d submitted' % result['id'])
 
 	def modify(self, conn):
@@ -498,7 +495,7 @@ the keywords given on the title (or the body if specified).
 
 		if len(params) < 2:
 			raise BugzError('No changes were specified')
-		result = self.call_bz(self.bz.Bug.update, params)
+		result = self.call_bz(conn.bz.Bug.update, params)
 		for bug in result['bugs']:
 			changes = bug['changes']
 			if not len(changes):
@@ -515,7 +512,7 @@ the keywords given on the title (or the body if specified).
 
 		params = {}
 		params['attachment_ids'] = [conn.attachid]
-		result = self.call_bz(self.bz.Bug.attachments, params)
+		result = self.call_bz(conn.bz.Bug.attachments, params)
 		result = result['attachments'][conn.attachid]
 		view = getattr(conn, 'view', False)
 
@@ -569,7 +566,7 @@ the keywords given on the title (or the body if specified).
 			params['content_type'] = content_type
 		params['comment'] = comment
 		params['is_patch'] = is_patch
-		result = self.call_bz(self.bz.Bug.add_attachment, params)
+		result = self.call_bz(conn.bz.Bug.add_attachment, params)
 		attachid = result['ids'][0]
 		log_info('{0} ({1}) has been attached to bug {2}'.format(
 			filename, attachid, bugid))
@@ -645,7 +642,7 @@ the keywords given on the title (or the body if specified).
 
 		if not getattr(conn, 'no_attachments', False):
 			params = {'ids': [bug['id']]}
-			bug_attachments = self.call_bz(self.bz.Bug.attachments,
+			bug_attachments = self.call_bz(conn.bz.Bug.attachments,
 					params)
 			bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
 			print('%-12s: %d' % ('Attachments', len(bug_attachments)))
@@ -658,7 +655,7 @@ the keywords given on the title (or the body if specified).
 
 		if not getattr(conn, 'no_comments', False):
 			params = {'ids': [bug['id']]}
-			bug_comments = self.call_bz(self.bz.Bug.comments, params)
+			bug_comments = self.call_bz(conn.bz.Bug.comments, params)
 			bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
 			print('%-12s: %d' % ('Comments', len(bug_comments)))
 			print()
