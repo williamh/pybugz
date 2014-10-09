@@ -59,11 +59,13 @@ def terminal_width():
 		width = struct.unpack('HHHH', x)[1]
 	except IOError:
 		pass
+
 	if width <= 0:
 		try:
 			width = int(os.environ['COLUMNS'])
 		except:
 			pass
+
 	if width <= 0:
 		width = DEFAULT_NUM_COLS
 

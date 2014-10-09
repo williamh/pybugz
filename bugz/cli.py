@@ -33,7 +33,6 @@ class PrettyBugz:
 		try:
 			if hasattr(self, 'token'):
 				params['Bugzilla_token'] = self.token
-
 			return method(params)
 		except xmlrpc.client.Fault as fault:
 			# Fault code 410 means login required

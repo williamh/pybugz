@@ -47,24 +47,19 @@ def main():
 		ArgParser.print_usage()
 		return 1
 
+	bugz = PrettyBugz(conn)
 	try:
-		bugz = PrettyBugz(conn)
-
 		conn.func(bugz, conn)
 		return 0
-
 	except BugzError as e:
 		log_error(e)
 		return 1
-
 	except RuntimeError as e:
 		log_error(e)
 		return 1
-
 	except KeyboardInterrupt:
 		log_info('Stopped due to keyboard interrupt')
 		return 1
-
 	except:
 		raise
 
