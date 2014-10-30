@@ -325,7 +325,8 @@ the keywords given on the title (or the body if specified).
 		print('%-12s: %s' % ('Product', conn.product))
 		print('%-12s: %s' % ('Component', conn.component))
 		print('%-12s: %s' % ('Title', conn.summary))
-		print('%-12s: %s' % ('Version', conn.version))
+		if hasattr(conn, 'version'):
+			print('%-12s: %s' % ('Version', conn.version))
 		print('%-12s: %s' % ('Description', conn.description))
 		if hasattr(conn, 'op_sys'):
 			print('%-12s: %s' % ('Operating System', conn.op_sys))
@@ -362,7 +363,8 @@ the keywords given on the title (or the body if specified).
 		params = {}
 		params['product'] = conn.product
 		params['component'] = conn.component
-		params['version'] = conn.version
+		if getattr(conn, 'version', None) is not None:
+			params['version'] = conn.version
 		params['summary'] = conn.summary
 		if getattr(conn, 'description', None) is not None:
 			params['description'] = conn.description
@@ -533,12 +535,12 @@ the keywords given on the title (or the body if specified).
 
 	def attach(self, conn):
 		""" Attach a file to a bug given a filename. """
-		filename = conn.filename
-		content_type = conn.content_type
-		bugid = conn.bugid
-		summary = conn.summary
-		is_patch = conn.is_patch
-		comment = conn.comment
+		filename = getattr(conn, 'filename', None)
+		content_type = getattr(conn, 'content_type', None)
+		bugid = getattr(conn, 'bugid', None)
+		summary = getattr(conn, 'summary', None)
+		is_patch = getattr(conn, 'is_patch', None)
+		comment = getattr(conn, 'comment', None)
 
 		if not os.path.exists(filename):
 			raise BugzError('File not found: %s' % filename)
