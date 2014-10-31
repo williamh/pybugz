@@ -524,7 +524,7 @@ the keywords given on the title (or the body if specified).
 												result['file_name']))
 
 		if view:
-			print(result['data'].data)
+			print(result['data'].data.decode('utf-8'))
 		else:
 			if os.path.exists(result['file_name']):
 				raise RuntimeError('Filename already exists')
