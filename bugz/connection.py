@@ -22,7 +22,7 @@ class Connection:
 				log_error('No default connection specified')
 				sys.exit(1)
 
-		if not self.connection in config.sections():
+		if self.connection not in config.sections():
 			log_error('connection "{0}" not found'.format(self.connection))
 			sys.exit(1)
 

@@ -410,31 +410,31 @@ the keywords given on the title (or the body if specified).
 		if getattr(conn, 'assigned_to', None) is not None:
 			params['assigned_to'] = conn.assigned_to
 		if getattr(conn, 'blocks_add', None) is not None:
-			if not 'blocks' in params:
+			if 'blocks' not in params:
 				params['blocks'] = {}
 			params['blocks']['add'] = conn.blocks_add
 		if getattr(conn, 'blocks_remove', None) is not None:
-			if not 'blocks' in params:
+			if 'blocks' not in params:
 				params['blocks'] = {}
 			params['blocks']['remove'] = conn.blocks_remove
 		if getattr(conn, 'depends_on_add', None) is not None:
-			if not 'depends_on' in params:
+			if 'depends_on' not in params:
 				params['depends_on'] = {}
 			params['depends_on']['add'] = conn.depends_on_add
 		if getattr(conn, 'depends_on_remove', None) is not None:
-			if not 'depends_on' in params:
+			if 'depends_on' not in params:
 				params['depends_on'] = {}
 			params['depends_on']['remove'] = conn.depends_on_remove
 		if getattr(conn, 'cc_add', None) is not None:
-			if not 'cc' in params:
+			if 'cc' not in params:
 				params['cc'] = {}
 			params['cc']['add'] = conn.cc_add
 		if getattr(conn, 'cc_remove', None) is not None:
-			if not 'cc' in params:
+			if 'cc' not in params:
 				params['cc'] = {}
 			params['cc']['remove'] = conn.cc_remove
 		if getattr(conn, 'comment', None) is not None:
-			if not 'comment' in params:
+			if 'comment' not in params:
 				params['comment'] = {}
 			params['comment']['body'] = conn.comment
 		if getattr(conn, 'component', None) is not None:
@@ -444,15 +444,15 @@ the keywords given on the title (or the body if specified).
 			del conn['status']
 			del conn['resolution']
 		if getattr(conn, 'groups_add', None) is not None:
-			if not 'groups' in params:
+			if 'groups' not in params:
 				params['groups'] = {}
 			params['groups']['add'] = conn.groups_add
 		if getattr(conn, 'groups_remove', None) is not None:
-			if not 'groups' in params:
+			if 'groups' not in params:
 				params['groups'] = {}
 			params['groups']['remove'] = conn.groups_remove
 		if getattr(conn, 'keywords_set', None) is not None:
-			if not 'keywords' in params:
+			if 'keywords' not in params:
 				params['keywords'] = {}
 			params['keywords']['set'] = conn.keywords_set
 		if getattr(conn, 'op_sys', None) is not None:
@@ -466,11 +466,11 @@ the keywords given on the title (or the body if specified).
 		if getattr(conn, 'resolution', None) is not None:
 			params['resolution'] = conn.resolution
 		if getattr(conn, 'see_also_add', None) is not None:
-			if not 'see_also' in params:
+			if 'see_also' not in params:
 				params['see_also'] = {}
 			params['see_also']['add'] = conn.see_also_add
 		if getattr(conn, 'see_also_remove', None) is not None:
-			if not 'see_also' in params:
+			if 'see_also' not in params:
 				params['see_also'] = {}
 			params['see_also']['remove'] = conn.see_also_remove
 		if getattr(conn, 'severity', None) is not None:
