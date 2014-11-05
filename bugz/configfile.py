@@ -39,11 +39,11 @@ def get_config_option(get, section, option):
 	try:
 		value = get(section, option)
 		if value == '':
-			log_error("Error: " + option + " is not set")
+			log_error('{0} is not set'.format(option))
 			sys.exit(1)
 
 		return value
 	except ValueError as e:
-		log_error("Error: option " + option +
-				" is not in the right format: " + str(e))
+		log_error('{0} is not in the right format: {1}'.format(option,
+			str(e)))
 		sys.exit(1)
