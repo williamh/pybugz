@@ -1,5 +1,6 @@
+import bugz.cli
+
 from bugz import __version__
-from bugz.cli import PrettyBugz
 
 
 def make_attach_parser(subparsers):
@@ -21,7 +22,7 @@ def make_attach_parser(subparsers):
 	attach_parser.add_argument('-t', '--title',
 		help='a short description of the attachment (default: filename).',
 		dest='summary')
-	attach_parser.set_defaults(func=PrettyBugz.attach)
+	attach_parser.set_defaults(func=bugz.cli.attach)
 
 
 def make_attachment_parser(subparsers):
@@ -32,7 +33,7 @@ def make_attachment_parser(subparsers):
 	attachment_parser.add_argument('-v', '--view',
 		action="store_true",
 		help='print attachment rather than save')
-	attachment_parser.set_defaults(func=PrettyBugz.attachment)
+	attachment_parser.set_defaults(func=bugz.cli.attachment)
 
 
 def make_get_parser(subparsers):
@@ -46,19 +47,19 @@ def make_get_parser(subparsers):
 	get_parser.add_argument("-n", "--no-comments",
 		action="store_true",
 		help='do not show comments')
-	get_parser.set_defaults(func=PrettyBugz.get)
+	get_parser.set_defaults(func=bugz.cli.get)
 
 
 def make_login_parser(subparsers):
 	login_parser = subparsers.add_parser('login',
 		help='log into bugzilla')
-	login_parser.set_defaults(func=PrettyBugz.login)
+	login_parser.set_defaults(func=bugz.cli.login)
 
 
 def make_logout_parser(subparsers):
 	logout_parser = subparsers.add_parser('logout',
 		help='log out of bugzilla')
-	logout_parser.set_defaults(func=PrettyBugz.logout)
+	logout_parser.set_defaults(func=bugz.cli.logout)
 
 
 def make_modify_parser(subparsers):
@@ -158,7 +159,7 @@ def make_modify_parser(subparsers):
 	modify_parser.add_argument('--invalid',
 		action='store_true',
 		help='mark bug as RESOLVED, INVALID')
-	modify_parser.set_defaults(func=PrettyBugz.modify)
+	modify_parser.set_defaults(func=bugz.cli.modify)
 
 
 def make_post_parser(subparsers):
@@ -202,7 +203,7 @@ def make_post_parser(subparsers):
 		choices=['y', 'Y', 'n', 'N'],
 		default='y',
 		help='default answer to confirmation question')
-	post_parser.set_defaults(func=PrettyBugz.post)
+	post_parser.set_defaults(func=bugz.cli.post)
 
 
 def make_search_parser(subparsers):
@@ -260,7 +261,7 @@ def make_search_parser(subparsers):
 	search_parser.add_argument('--show-severity',
 		action='store_true',
 		help='show severity of bugs')
-	search_parser.set_defaults(func=PrettyBugz.search)
+	search_parser.set_defaults(func=bugz.cli.search)
 
 
 def make_parser(parser):

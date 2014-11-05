@@ -15,7 +15,6 @@ Requirements
 Classes
 -------
  - BugzillaProxy - Server proxy for communication with Bugzilla
- - PrettyBugz - Command line interface to Bugzilla
 
 """
 
@@ -24,7 +23,6 @@ import configparser
 import sys
 
 from bugz.argparsers import make_parser
-from bugz.cli import PrettyBugz
 from bugz.configfile import get_config
 from bugz.connection import Connection
 from bugz.errhandling import BugzError
@@ -43,13 +41,12 @@ def main():
 
 	conn = Connection(args, ConfigParser)
 
-	if not hasattr(conn, 'func'):
+	if not hasattr(args, 'func'):
 		ArgParser.print_usage()
 		return 1
 
-	bugz = PrettyBugz(conn)
 	try:
-		conn.func(bugz, conn)
+		args.func(conn)
 		return 0
 	except BugzError as e:
 		log_error(e)

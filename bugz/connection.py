@@ -1,10 +1,15 @@
+import os
 import sys
+import xmlrpc.client
 
 from bugz.bugzilla import BugzillaProxy
 from bugz.configfile import get_config_option
+from bugz.errhandling import BugzError
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
 from bugz.utils import terminal_width
+
+DEFAULT_TOKEN_FILE = '.bugz_token'
 
 
 class Connection:
@@ -21,6 +26,9 @@ class Connection:
 			else:
 				log_error('No default connection specified')
 				sys.exit(1)
+
+		self.token_file = os.path.join(os.environ['HOME'], DEFAULT_TOKEN_FILE)
+		self.bz_token = None
 
 		if self.connection not in config.sections():
 			log_error('connection "{0}" not found'.format(self.connection))
@@ -90,3 +98,32 @@ class Connection:
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
 
 		log_info("Using [{0}] ({1})".format(self.connection, self.base))
+
+	def load_token(self):
+		try:
+			self.bz_token = open(self.token_file).read().strip()
+			log_debug('successfully loaded token', 3)
+		except IOError:
+			pass
+
+	def save_token(self, bz_token=None):
+		if bz_token is not None:
+			self.bz_token = bz_token
+		fd = open(self.token_file, 'w')
+		fd.write(bz_token)
+		fd.write('\n')
+		fd.close()
+		os.chmod(self.token_file, 0o600)
+
+	def destroy_token(self):
+		os.unlink(self.token_file)
+
+	def call_bz(self, method, params):
+		"""Attempt to call method with args.
+		"""
+		if self.bz_token is not None:
+			params['Bugzilla_token'] = self.bz_token
+		try:
+			return method(params)
+		except xmlrpc.client.Fault as fault:
+			raise BugzError('Bugzilla error: {0}'.format(fault.faultString))
