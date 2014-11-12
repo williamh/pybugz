@@ -1,6 +1,7 @@
 import os
 import sys
 import xmlrpc.client
+import re
 
 from bugz.bugzilla import BugzillaProxy
 from bugz.configfile import get_config_option
@@ -97,7 +98,7 @@ class Connection:
 		for attr, value in self.__dict__.items():
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
 
-		log_info("Using [{0}] ({1})".format(self.connection, self.base))
+		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base()))
 
 	def load_token(self):
 		try:
@@ -127,3 +128,8 @@ class Connection:
 			return method(params)
 		except xmlrpc.client.Fault as fault:
 			raise BugzError('Bugzilla error: {0}'.format(fault.faultString))
+
+	def safe_base(self):
+		"""Strip credentials from connection
+		"""
+		return re.sub(r"^(https?://)[^:@/]+:[^@/]*@", r"\1", self.base)
