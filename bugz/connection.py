@@ -1,6 +1,7 @@
 import os
 import sys
 import urllib.error
+import urllib.parse
 import xmlrpc.client
 
 from bugz.bugzilla import BugzillaProxy
@@ -44,6 +45,9 @@ class Connection:
 				sys.exit(1)
 
 		self.bz = BugzillaProxy(self.base)
+		parse_result = urllib.parse.urlparse(self.base)
+		new_netloc = parse_result.netloc.split('@')[-1]
+		self.safe_base = parse_result._replace(netloc=new_netloc).geturl()
 
 		if not hasattr(self, 'component'):
 			if config.has_option(self.connection, 'component'):
@@ -108,7 +112,7 @@ class Connection:
 		for attr, value in self.__dict__.items():
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
 
-		log_info("Using [{0}] ({1})".format(self.connection, self.base))
+		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
 	def load_token(self):
 		try:
