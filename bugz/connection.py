@@ -1,7 +1,7 @@
 import os
 import sys
 import xmlrpc.client
-import re
+import urllib.parse
 
 from bugz.bugzilla import BugzillaProxy
 from bugz.configfile import get_config_option
@@ -9,6 +9,7 @@ from bugz.errhandling import BugzError
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
 from bugz.utils import terminal_width
+
 
 DEFAULT_TOKEN_FILE = '.bugz_token'
 
@@ -39,7 +40,9 @@ class Connection:
 			if config.has_option(self.connection, 'base'):
 				self.base = get_config_option(config.get,
 					self.connection, 'base')
-				self.safe_base = re.sub(r"^(https?://)[^:@/]+:[^@/]*@", r"\1", self.base)
+				parse_result = urllib.parse.urlparse(self.base)
+				new_netloc = parse_result.netloc.split('@')[-1]
+				self.safe_base = parse_result._replace(netloc=new_netloc).geturl()
 			else:
 				log_error('No base URL specified')
 				sys.exit(1)
