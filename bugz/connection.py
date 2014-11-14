@@ -1,5 +1,6 @@
 import os
 import sys
+import urllib
 import xmlrpc.client
 
 from bugz.bugzilla import BugzillaProxy
@@ -127,3 +128,5 @@ class Connection:
 			return method(params)
 		except xmlrpc.client.Fault as fault:
 			raise BugzError('Bugzilla error: {0}'.format(fault.faultString))
+		except urllib.error.URLError as e:
+			raise BugzError(e)
