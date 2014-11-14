@@ -1,6 +1,6 @@
 import os
 import sys
-import urllib
+import urllib.error
 import xmlrpc.client
 
 from bugz.bugzilla import BugzillaProxy
