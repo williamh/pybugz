@@ -39,6 +39,130 @@ def list_bugs(buglist, conn):
 	log_info("%i bug(s) found." % len(buglist))
 
 
+def prompt_for_bug(conn):
+	""" Prompt for the information for a bug
+	"""
+	log_info('Press Ctrl+C at any time to abort.')
+
+	if not hasattr(conn, 'product'):
+		product = None
+		while not product or len(product) < 1:
+			product = input('Enter product: ')
+		conn.product = product
+	else:
+		log_info('Enter product: %s' % conn.product)
+
+	if not hasattr(conn, 'component'):
+		component = None
+		while not component or len(component) < 1:
+			component = input('Enter component: ')
+		conn.component = component
+	else:
+		log_info('Enter component: %s' % conn.component)
+
+	if not hasattr(conn, 'version'):
+		line = input('Enter version (default: unspecified): ')
+		if len(line):
+			conn.version = line
+		else:
+			conn.version = 'unspecified'
+	else:
+		log_info('Enter version: %s' % conn.version)
+
+	if not hasattr(conn, 'summary'):
+		summary = None
+		while not summary or len(summary) < 1:
+			summary = input('Enter title: ')
+		conn.summary = summary
+	else:
+		log_info('Enter title: %s' % conn.summary)
+
+	if not hasattr(conn, 'description'):
+		line = block_edit('Enter bug description: ')
+		if len(line):
+			conn.description = line
+	else:
+		log_info('Enter bug description: %s' % conn.description)
+
+	if not hasattr(conn, 'op_sys'):
+		op_sys_msg = 'Enter operating system where this bug occurs: '
+		line = input(op_sys_msg)
+		if len(line):
+			conn.op_sys = line
+	else:
+		log_info('Enter operating system: %s' % conn.op_sys)
+
+	if not hasattr(conn, 'platform'):
+		platform_msg = 'Enter hardware platform where this bug occurs: '
+		line = input(platform_msg)
+		if len(line):
+			conn.platform = line
+	else:
+		log_info('Enter hardware platform: %s' % conn.platform)
+
+	if not hasattr(conn, 'priority'):
+		priority_msg = 'Enter priority (eg. Normal) (optional): '
+		line = input(priority_msg)
+		if len(line):
+			conn.priority = line
+	else:
+		log_info('Enter priority (optional): %s' % conn.priority)
+
+	if not hasattr(conn, 'severity'):
+		severity_msg = 'Enter severity (eg. normal) (optional): '
+		line = input(severity_msg)
+		if len(line):
+			conn.severity = line
+	else:
+		log_info('Enter severity (optional): %s' % conn.severity)
+
+	if not hasattr(conn, 'alias'):
+		alias_msg = 'Enter an alias for this bug (optional): '
+		line = input(alias_msg)
+		if len(line):
+			conn.alias = line
+	else:
+		log_info('Enter alias (optional): %s' % conn.alias)
+
+	if not hasattr(conn, 'assigned_to'):
+		assign_msg = 'Enter assignee (eg. liquidx@gentoo.org) (optional): '
+		line = input(assign_msg)
+		if len(line):
+			conn.assigned_to = line
+	else:
+		log_info('Enter assignee (optional): %s' % conn.assigned_to)
+
+	if not hasattr(conn, 'cc'):
+		cc_msg = 'Enter a CC list (comma separated) (optional): '
+		line = input(cc_msg)
+		if len(line):
+			conn.cc = line.split(', ')
+	else:
+		log_info('Enter a CC list (optional): %s' % conn.cc)
+
+	if not hasattr(conn, 'url'):
+		url_msg = 'Enter a URL (optional): '
+		line = input(url_msg)
+		if len(line):
+			conn.url = line
+	else:
+		log_info('Enter a URL (optional): %s' % conn.url)
+
+	# fixme: groups
+
+	# fixme: status
+
+	# fixme: milestone
+
+	if not hasattr(conn, 'append_command'):
+		line = input('Append the output of the'
+				' following command (leave blank for none): ')
+		if len(line):
+			conn.append_command = line
+	else:
+		log_info('Append command (optional): %s' % conn.append_command)
+
+
 def show_bug_info(bug, conn):
 	FieldMap = {
 		'alias': 'Alias',
@@ -394,141 +518,7 @@ def post(conn):
 				(conn.description_from, e))
 
 	if not conn.batch:
-		log_info('Press Ctrl+C at any time to abort.')
-
-		#  Check all bug fields.
-		#
-
-		# check for product
-		if not hasattr(conn, 'product'):
-			product = None
-			while not product or len(product) < 1:
-				product = input('Enter product: ')
-			conn.product = product
-		else:
-			log_info('Enter product: %s' % conn.product)
-
-		# check for component
-		if not hasattr(conn, 'component'):
-			component = None
-			while not component or len(component) < 1:
-				component = input('Enter component: ')
-			conn.component = component
-		else:
-			log_info('Enter component: %s' % conn.component)
-
-		# check for version
-		if not hasattr(conn, 'version'):
-			line = input('Enter version (default: unspecified): ')
-			if len(line):
-				conn.version = line
-			else:
-				conn.version = 'unspecified'
-		else:
-			log_info('Enter version: %s' % conn.version)
-
-		# check for title
-		if not hasattr(conn, 'summary'):
-			summary = None
-			while not summary or len(summary) < 1:
-				summary = input('Enter title: ')
-			conn.summary = summary
-		else:
-			log_info('Enter title: %s' % conn.summary)
-
-		# check for description
-		if not hasattr(conn, 'description'):
-			line = block_edit('Enter bug description: ')
-			if len(line):
-				conn.description = line
-		else:
-			log_info('Enter bug description: %s' % conn.description)
-
-		# check for operating system
-		if not hasattr(conn, 'op_sys'):
-			op_sys_msg = 'Enter operating system where this bug occurs: '
-			line = input(op_sys_msg)
-			if len(line):
-				conn.op_sys = line
-		else:
-			log_info('Enter operating system: %s' % conn.op_sys)
-
-		# check for platform
-		if not hasattr(conn, 'platform'):
-			platform_msg = 'Enter hardware platform where this bug occurs: '
-			line = input(platform_msg)
-			if len(line):
-				conn.platform = line
-		else:
-			log_info('Enter hardware platform: %s' % conn.platform)
-
-		# check for default priority
-		if not hasattr(conn, 'priority'):
-			priority_msg = 'Enter priority (eg. Normal) (optional): '
-			line = input(priority_msg)
-			if len(line):
-				conn.priority = line
-		else:
-			log_info('Enter priority (optional): %s' % conn.priority)
-
-		# check for default severity
-		if not hasattr(conn, 'severity'):
-			severity_msg = 'Enter severity (eg. normal) (optional): '
-			line = input(severity_msg)
-			if len(line):
-				conn.severity = line
-		else:
-			log_info('Enter severity (optional): %s' % conn.severity)
-
-		# check for default alias
-		if not hasattr(conn, 'alias'):
-			alias_msg = 'Enter an alias for this bug (optional): '
-			line = input(alias_msg)
-			if len(line):
-				conn.alias = line
-		else:
-			log_info('Enter alias (optional): %s' % conn.alias)
-
-		# check for default assignee
-		if not hasattr(conn, 'assigned_to'):
-			assign_msg = 'Enter assignee (eg. liquidx@gentoo.org) (optional): '
-			line = input(assign_msg)
-			if len(line):
-				conn.assigned_to = line
-		else:
-			log_info('Enter assignee (optional): %s' % conn.assigned_to)
-
-		# check for CC list
-		if not hasattr(conn, 'cc'):
-			cc_msg = 'Enter a CC list (comma separated) (optional): '
-			line = input(cc_msg)
-			if len(line):
-				conn.cc = line.split(', ')
-		else:
-			log_info('Enter a CC list (optional): %s' % conn.cc)
-
-		# check for URL
-		if not hasattr(conn, 'url'):
-			url_msg = 'Enter a URL (optional): '
-			line = input(url_msg)
-			if len(line):
-				conn.url = line
-		else:
-			log_info('Enter a URL (optional): %s' % conn.url)
-
-		# fixme: groups
-
-		# fixme: status
-
-		# fixme: milestone
-
-		if not hasattr(conn, 'append_command'):
-			line = input('Append the output of the'
-			' following command (leave blank for none): ')
-			if len(line):
-				conn.append_command = line
-		else:
-			log_info('Append command (optional): %s' % conn.append_command)
+		prompt_for_bug(conn)
 
 	# raise an exception if mandatory fields are not specified.
 	if getattr(conn, 'product', None) is None:
