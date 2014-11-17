@@ -45,6 +45,11 @@ class Connection:
 
 		self.bz = BugzillaProxy(self.base)
 
+		if not hasattr(self, 'component'):
+			if config.has_option(self.connection, 'component'):
+				self.component = get_config_option(config.get,
+					self.connection, 'component')
+
 		if not hasattr(self, 'user'):
 			if config.has_option(self.connection, 'user'):
 				self.user = get_config_option(config.get,
@@ -59,6 +64,11 @@ class Connection:
 			if config.has_option(self.connection, 'passwordcmd'):
 				self.passwordcmd = get_config_option(config.get,
 					self.connection, 'passwordcmd')
+
+		if not hasattr(self, 'product'):
+			if config.has_option(self.connection, 'product'):
+				self.product = get_config_option(config.get,
+					self.connection, 'product')
 
 		if not hasattr(self, 'columns'):
 			if config.has_option(self.connection, 'columns'):

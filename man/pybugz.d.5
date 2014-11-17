@@ -100,6 +100,20 @@ quiet = False
 If set to true, this requests that pybugz run in quiet mode. This means
 only output returned from the Bugzilla will be displayed; several more
 verbose log messages will not be displayed.
+.PP
+product = string
+.PP
+This is the default setting for the product field in bugs in this
+Bugzilla instance. It is possible to define this in the default section.
+However, it does not make sense to do so most of the time. If this is
+set, you will not be prompted for a product when you run bugz post.
+.PP
+component = string
+.PP
+This is the default setting for the component field in bugs in this
+Bugzilla instance. It is possible to define this in the default section.
+However, it does not make sense to do so most of the time. If this is
+set, you will not be prompted for a component when you run bugz post.
 .SH BUGS
 .PP
 The home page of this project is http://www.github.com/williamh/pybugz.
