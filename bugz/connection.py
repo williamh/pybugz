@@ -9,9 +9,8 @@ from bugz.configfile import get_config_option
 from bugz.errhandling import BugzError
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
+from bugz.tokens import Tokens
 from bugz.utils import terminal_width
-
-DEFAULT_TOKEN_FILE = '.bugz_token'
 
 
 class Connection:
@@ -99,15 +98,14 @@ class Connection:
 		if getattr(self, 'encoding', None) is not None:
 			log_info('The encoding option is deprecated.')
 
-		self.token_file = os.path.join(os.environ['HOME'], DEFAULT_TOKEN_FILE)
-		self.bz_token = None
-
 		self.bz = BugzillaProxy(self.base)
 		self.connections = config.sections()
 
 		parse_result = urllib.parse.urlparse(self.base)
 		new_netloc = parse_result.netloc.split('@')[-1]
 		self.safe_base = parse_result._replace(netloc=new_netloc).geturl()
+		self.tokens = Tokens()
+		self.bz_token = None
 
 		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
@@ -116,22 +114,16 @@ class Connection:
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
 
 	def load_token(self):
-		try:
-			self.bz_token = open(self.token_file).read().strip()
-			log_debug('successfully loaded token', 3)
-		except IOError:
-			pass
+		self.bz_token = self.tokens.get_token(self.connection)
 
 	def save_token(self, bz_token):
-		self.bz_token = bz_token
-		fd = open(self.token_file, 'w')
-		fd.write(bz_token)
-		fd.write('\n')
-		fd.close()
-		os.chmod(self.token_file, 0o600)
+		self.tokens.set_token(self.connection, bz_token)
+		self.tokens.save_tokens()
 
 	def destroy_token(self):
-		os.unlink(self.token_file)
+		self.bz_token = None
+		self.tokens.remove_token(self.connection)
+		self.tokens.save_tokens()
 
 	def call_bz(self, method, params):
 		"""Attempt to call method with args.
