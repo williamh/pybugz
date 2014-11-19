@@ -29,9 +29,6 @@ class Connection:
 				log_error('No default connection specified')
 				sys.exit(1)
 
-		self.token_file = os.path.join(os.environ['HOME'], DEFAULT_TOKEN_FILE)
-		self.bz_token = None
-
 		if self.connection not in config.sections():
 			log_error('connection "{0}" not found'.format(self.connection))
 			sys.exit(1)
@@ -43,11 +40,6 @@ class Connection:
 			else:
 				log_error('No base URL specified')
 				sys.exit(1)
-
-		self.bz = BugzillaProxy(self.base)
-		parse_result = urllib.parse.urlparse(self.base)
-		new_netloc = parse_result.netloc.split('@')[-1]
-		self.safe_base = parse_result._replace(netloc=new_netloc).geturl()
 
 		if not hasattr(self, 'component'):
 			if config.has_option(self.connection, 'component'):
@@ -87,6 +79,7 @@ class Connection:
 					self.connection, 'debug')
 			else:
 				self.debug = 0
+		log_setDebugLevel(self.debug)
 
 		if not hasattr(self, 'quiet'):
 			if config.has_option(self.connection, 'quiet'):
@@ -94,6 +87,7 @@ class Connection:
 					self.connection, 'quiet')
 			else:
 				self.quiet = False
+		log_setQuiet(self.quiet)
 
 		if not hasattr(self, 'skip_auth'):
 			if config.has_option(self.connection, 'skip_auth'):
@@ -105,14 +99,20 @@ class Connection:
 		if getattr(self, 'encoding', None) is not None:
 			log_info('The encoding option is deprecated.')
 
-		log_setDebugLevel(self.debug)
-		log_setQuiet(self.quiet)
+		self.token_file = os.path.join(os.environ['HOME'], DEFAULT_TOKEN_FILE)
+		self.bz_token = None
+
+		self.bz = BugzillaProxy(self.base)
+
+		parse_result = urllib.parse.urlparse(self.base)
+		new_netloc = parse_result.netloc.split('@')[-1]
+		self.safe_base = parse_result._replace(netloc=new_netloc).geturl()
+
+		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
 		log_debug('Connection debug dump:', 3)
 		for attr, value in self.__dict__.items():
 			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
-
-		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
 	def load_token(self):
 		try:
