@@ -377,6 +377,7 @@ def login(conn):
 
 
 def logout(conn):
+	conn.load_token()
 	params = {}
 	log_info('logging out')
 	conn.call_bz(conn.bz.User.logout, params)
