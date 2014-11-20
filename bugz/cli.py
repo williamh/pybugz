@@ -301,7 +301,10 @@ def attachment(conn):
 
 	params = {}
 	params['attachment_ids'] = [conn.attachid]
-	login(conn)
+
+	if not conn.skip_auth:
+		login(conn)
+
 	result = conn.call_bz(conn.bz.Bug.attachments, params)
 	result = result['attachments'][conn.attachid]
 	view = getattr(conn, 'view', False)
@@ -325,7 +328,9 @@ def attachment(conn):
 
 def get(conn):
 	""" Fetch bug details given the bug id """
-	login(conn)
+	if not conn.skip_auth:
+		login(conn)
+
 	log_info('Getting bug %s ..' % conn.bugid)
 	params = {'ids': [conn.bugid]}
 	result = conn.call_bz(conn.bz.Bug.get, params)
@@ -337,10 +342,6 @@ def get(conn):
 def login(conn):
 	"""Authenticate a session.
 	"""
-	if conn.skip_auth:
-		log_debug('Skipping authentication', 3)
-		return
-
 	conn.load_token()
 	if conn.bz_token is not None:
 		return
@@ -650,7 +651,9 @@ the keywords given on the title (or the body if specified).
 			if x in ['all', 'ALL']:
 				del params['status']
 
-	login(conn)
+	if not conn.skip_auth:
+		login(conn)
+
 	result = conn.call_bz(conn.bz.Bug.search, params)['bugs']
 
 	if not len(result):
