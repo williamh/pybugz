@@ -121,9 +121,8 @@ class Connection:
 		except IOError:
 			pass
 
-	def save_token(self, bz_token=None):
-		if bz_token is not None:
-			self.bz_token = bz_token
+	def save_token(self, bz_token):
+		self.bz_token = bz_token
 		fd = open(self.token_file, 'w')
 		fd.write(bz_token)
 		fd.write('\n')
