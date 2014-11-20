@@ -107,6 +107,21 @@ class Connection:
 		self.tokens = Tokens()
 		self.bz_token = None
 
+		old_token_file = os.path.join(os.environ['HOME'], '.bugz_token')
+		try:
+			old_token = open(old_token_file).read().strip()
+			self.save_token(old_token)
+			os.remove(old_token_file)
+			print('Your ~/.bugz_token file was moved to ~/.bugz_tokens')
+			print('The token was assigned to the {0} connection'
+					.format(self.connection))
+			print('If this is not correct, please edit ~/.bugz_tokens')
+			print('and adjust the name of the connection.')
+			print('This is the name enclosed in square brackets.')
+			print('The connections command lists known connections.')
+		except (IOError, OSError):
+			pass
+
 		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
 		log_debug('Connection debug dump:', 3)
