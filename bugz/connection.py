@@ -103,6 +103,7 @@ class Connection:
 		self.bz_token = None
 
 		self.bz = BugzillaProxy(self.base)
+		self.connections = config.sections()
 
 		parse_result = urllib.parse.urlparse(self.base)
 		new_netloc = parse_result.netloc.split('@')[-1]

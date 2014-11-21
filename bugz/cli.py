@@ -661,3 +661,9 @@ the keywords given on the title (or the body if specified).
 		log_info('No bugs found.')
 	else:
 		list_bugs(result, conn)
+
+def connections(conn):
+	print('Known bug trackers:')
+	print()
+	for tracker in conn.connections:
+		print(tracker)

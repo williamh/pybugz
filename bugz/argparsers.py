@@ -264,6 +264,12 @@ def make_search_parser(subparsers):
 	search_parser.set_defaults(func=bugz.cli.search)
 
 
+def make_connections_parser(subparsers):
+	connections_parser = subparsers.add_parser('connections',
+		help='list known bug trackers')
+	connections_parser.set_defaults(func=bugz.cli.connections)
+
+
 def make_parser(parser):
 	parser.add_argument('--config-file',
 		help='read an alternate configuration file')
@@ -304,4 +310,5 @@ def make_parser(parser):
 	make_modify_parser(subparsers)
 	make_post_parser(subparsers)
 	make_search_parser(subparsers)
+	make_connections_parser(subparsers)
 	return parser
