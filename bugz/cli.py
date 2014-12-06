@@ -618,9 +618,6 @@ the keywords given on the title (or the body if specified).
 		'priority', 'product', 'resolution',
 		'severity', 'status', 'version', 'whiteboard']
 
-	search_opts = sorted([(opt, val) for opt, val in list(conn.__dict__.items())
-		if val is not None and opt in valid_keys])
-
 	params = {}
 	for key in conn.__dict__:
 		if key in valid_keys and getattr(conn, key) is not None:
@@ -633,24 +630,16 @@ the keywords given on the title (or the body if specified).
 	if not (params or search_term):
 		raise BugzError('Please give search terms or options.')
 
-	if search_term:
-		log_msg = 'Searching for \'%s\' ' % search_term
-	else:
-		log_msg = 'Searching for bugs '
-
-	if search_opts:
-		log_info(log_msg + 'with the following options:')
-		for opt, val in search_opts:
-			log_info('   %-20s = %s' % (opt, val))
-	else:
-		log_info(log_msg)
-
 	if 'status' not in params:
 		params['status'] = ['CONFIRMED', 'IN_PROGRESS', 'UNCONFIRMED']
 	else:
 		for x in params['status'][:]:
 			if x in ['all', 'ALL']:
 				del params['status']
+
+	log_info('Searching for bugs meeting the following criteria:')
+	for key in params:
+		log_info('   {0:<20} = {1}'.format(key, params[key]))
 
 	if not conn.skip_auth:
 		login(conn)
