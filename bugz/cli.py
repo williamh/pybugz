@@ -651,6 +651,7 @@ the keywords given on the title (or the body if specified).
 	else:
 		list_bugs(result, conn)
 
+
 def connections(conn):
 	print('Known bug trackers:')
 	print()
