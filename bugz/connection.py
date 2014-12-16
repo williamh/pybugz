@@ -4,7 +4,6 @@ import urllib.error
 import urllib.parse
 import xmlrpc.client
 
-from bugz.bugzilla import BugzillaProxy
 from bugz.configfile import get_config_option
 from bugz.errhandling import BugzError
 from bugz.log import log_debug, log_error, log_info
@@ -102,7 +101,7 @@ class Connection:
 		if getattr(self, 'encoding', None) is not None:
 			log_info('The encoding option is deprecated.')
 
-		self.bz = BugzillaProxy(self.base)
+		self.bz = xmlrpc.client.ServerProxy(self.base)
 		self.connections = config.sections()
 
 		parse_result = urllib.parse.urlparse(self.base)
