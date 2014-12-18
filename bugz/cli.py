@@ -437,8 +437,6 @@ def modify(conn):
 		params['component'] = conn.component
 	if getattr(conn, 'dupe_of', None) is not None:
 		params['dupe_of'] = conn.dupe_of
-		del conn['status']
-		del conn['resolution']
 	if getattr(conn, 'groups_add', None) is not None:
 		if 'groups' not in params:
 			params['groups'] = {}
