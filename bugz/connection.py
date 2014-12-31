@@ -15,12 +15,7 @@ from bugz.utils import terminal_width
 class Connection:
 	def __init__(self, args, config):
 		for attr, value in args.__dict__.items():
-			if ('dupe_of' in args.__dict__ and
-					attr in ['status', 'resolution']):
-				continue
-			sv = getattr(self, attr, None)
-			if sv != value:
-				setattr(self, attr, value)
+			setattr(self, attr, value)
 
 		if not hasattr(self, 'connection'):
 			if config.has_option('default', 'connection'):
