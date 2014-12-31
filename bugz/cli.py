@@ -488,6 +488,10 @@ def modify(conn):
 		params['status'] = 'RESOLVED'
 		params['resolution'] = 'INVALID'
 
+	if 'dupe_of' in params:
+		del params['status']
+		del params['resolution']
+
 	if len(params) < 2:
 		raise BugzError('No changes were specified')
 	login(conn)
