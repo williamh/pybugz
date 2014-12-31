@@ -42,6 +42,7 @@ def make_arg_parser():
 		description='use -h after a sub-command for more help')
 
 	attach_parser = subparsers.add_parser('attach',
+	argument_default=argparse.SUPPRESS,
 		help='attach file to a bug')
 	attach_parser.add_argument('bugid',
 		help='the ID of the bug where the file should be attached')
@@ -62,6 +63,7 @@ def make_arg_parser():
 	attach_parser.set_defaults(func=bugz.cli.attach)
 
 	attachment_parser = subparsers.add_parser('attachment',
+	argument_default=argparse.SUPPRESS,
 		help='get an attachment from bugzilla')
 	attachment_parser.add_argument('attachid',
 		help='the ID of the attachment')
@@ -75,6 +77,7 @@ def make_arg_parser():
 	connections_parser.set_defaults(func=bugz.cli.connections)
 
 	get_parser = subparsers.add_parser('get',
+	argument_default=argparse.SUPPRESS,
 		help='get a bug from bugzilla')
 	get_parser.add_argument('bugid',
 		help='the ID of the bug to retrieve.')
@@ -95,6 +98,7 @@ def make_arg_parser():
 	logout_parser.set_defaults(func=bugz.cli.logout)
 
 	modify_parser = subparsers.add_parser('modify',
+	argument_default=argparse.SUPPRESS,
 		help='modify a bug (eg. post a comment)')
 	modify_parser.add_argument('bugid',
 		help='the ID of the bug to modify')
@@ -193,6 +197,7 @@ def make_arg_parser():
 	modify_parser.set_defaults(func=bugz.cli.modify)
 
 	post_parser = subparsers.add_parser('post',
+	argument_default=argparse.SUPPRESS,
 		help='post a new bug into bugzilla')
 	post_parser.add_argument('--product',
 		help='product')
@@ -235,6 +240,7 @@ def make_arg_parser():
 	post_parser.set_defaults(func=bugz.cli.post)
 
 	search_parser = subparsers.add_parser('search',
+	argument_default=argparse.SUPPRESS,
 		help='search for bugs in bugzilla')
 	search_parser.add_argument('terms',
 		nargs='*',

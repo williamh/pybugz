@@ -26,11 +26,11 @@ def list_bugs(buglist, conn):
 		assignee = bug['assigned_to'].split('@')[0]
 		desc = bug['summary']
 		line = '%s' % (bugid)
-		if conn.show_status:
+		if hasattr(conn, 'show_status'):
 			line = '%s %-12s' % (line, status)
-		if conn.show_priority:
+		if hasattr(conn, 'show_priority'):
 			line = '%s %-12s' % (line, priority)
-		if conn.show_severity:
+		if hasattr(conn, 'show_severity'):
 			line = '%s %-12s' % (line, severity)
 		line = '%s %-20s' % (line, assignee)
 		line = '%s %s' % (line, desc)
@@ -211,7 +211,7 @@ def show_bug_info(bug, conn):
 		elif value is not None and value != '':
 			print('%-12s: %s' % (desc, value))
 
-	if not getattr(conn, 'no_attachments', False):
+	if not hasattr(conn, 'no_attachments'):
 		params = {'ids': [bug['id']]}
 		bug_attachments = conn.call_bz(conn.bz.Bug.attachments, params)
 		bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
@@ -223,7 +223,7 @@ def show_bug_info(bug, conn):
 			when = attachment['creation_time']
 			print('[Attachment] [%s] [%s]' % (aid, desc))
 
-	if not getattr(conn, 'no_comments', False):
+	if not hasattr(conn, 'no_comments'):
 		params = {'ids': [bug['id']]}
 		bug_comments = conn.call_bz(conn.bz.Bug.comments, params)
 		bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
@@ -307,7 +307,7 @@ def attachment(conn):
 
 	result = conn.call_bz(conn.bz.Bug.attachments, params)
 	result = result['attachments'][conn.attachid]
-	view = getattr(conn, 'view', False)
+	view = hasattr(conn, 'view')
 
 	action = {True: 'Viewing', False: 'Saving'}
 	log_info('%s attachment: "%s"' %
@@ -347,15 +347,15 @@ def login(conn):
 		return
 
 	# prompt for username if we were not supplied with it
-	if getattr(conn, 'user', None) is None:
+	if not hasattr(conn, 'user'):
 		log_info('No username given.')
 		user = input('Username: ')
 	else:
 		user = conn.user
 
 	# prompt for password if we were not supplied with it
-	if getattr(conn, 'password', None) is None:
-		if getattr(conn, 'passwordcmd', None) is None:
+	if not hasattr(conn, 'password'):
+		if not hasattr(conn, 'passwordcmd'):
 			log_info('No password given.')
 			password = getpass.getpass()
 		else:
@@ -386,7 +386,7 @@ def logout(conn):
 
 def modify(conn):
 	"""Modify an existing bug (eg. adding a comment or changing resolution.)"""
-	if getattr(conn, 'comment_from', None) is not None:
+	if hasattr(conn, 'comment_from'):
 		try:
 			if conn.comment_from == '-':
 				conn.comment = sys.stdin.read()
@@ -396,95 +396,95 @@ def modify(conn):
 			raise BugzError('unable to read file: %s: %s' %
 				(conn.comment_from, e))
 
-	if conn.comment_editor:
+	if hasattr(conn, 'comment_editor'):
 		conn.comment = block_edit('Enter comment:')
 
 	params = {}
 	params['ids'] = [conn.bugid]
-	if getattr(conn, 'alias', None) is not None:
+	if hasattr(conn, 'alias'):
 		params['alias'] = conn.alias
-	if getattr(conn, 'assigned_to', None) is not None:
+	if hasattr(conn, 'assigned_to'):
 		params['assigned_to'] = conn.assigned_to
-	if getattr(conn, 'blocks_add', None) is not None:
+	if hasattr(conn, 'blocks_add'):
 		if 'blocks' not in params:
 			params['blocks'] = {}
 		params['blocks']['add'] = conn.blocks_add
-	if getattr(conn, 'blocks_remove', None) is not None:
+	if hasattr(conn, 'blocks_remove'):
 		if 'blocks' not in params:
 			params['blocks'] = {}
 		params['blocks']['remove'] = conn.blocks_remove
-	if getattr(conn, 'depends_on_add', None) is not None:
+	if hasattr(conn, 'depends_on_add'):
 		if 'depends_on' not in params:
 			params['depends_on'] = {}
 		params['depends_on']['add'] = conn.depends_on_add
-	if getattr(conn, 'depends_on_remove', None) is not None:
+	if hasattr(conn, 'depends_on_remove'):
 		if 'depends_on' not in params:
 			params['depends_on'] = {}
 		params['depends_on']['remove'] = conn.depends_on_remove
-	if getattr(conn, 'cc_add', None) is not None:
+	if hasattr(conn, 'cc_add'):
 		if 'cc' not in params:
 			params['cc'] = {}
 		params['cc']['add'] = conn.cc_add
-	if getattr(conn, 'cc_remove', None) is not None:
+	if hasattr(conn, 'cc_remove'):
 		if 'cc' not in params:
 			params['cc'] = {}
 		params['cc']['remove'] = conn.cc_remove
-	if getattr(conn, 'comment', None) is not None:
+	if hasattr(conn, 'comment'):
 		if 'comment' not in params:
 			params['comment'] = {}
 		params['comment']['body'] = conn.comment
-	if getattr(conn, 'component', None) is not None:
+	if hasattr(conn, 'component'):
 		params['component'] = conn.component
-	if getattr(conn, 'dupe_of', None) is not None:
+	if hasattr(conn, 'dupe_of'):
 		params['dupe_of'] = conn.dupe_of
-	if getattr(conn, 'groups_add', None) is not None:
+	if hasattr(conn, 'groups_add'):
 		if 'groups' not in params:
 			params['groups'] = {}
 		params['groups']['add'] = conn.groups_add
-	if getattr(conn, 'groups_remove', None) is not None:
+	if hasattr(conn, 'groups_remove'):
 		if 'groups' not in params:
 			params['groups'] = {}
 		params['groups']['remove'] = conn.groups_remove
-	if getattr(conn, 'keywords_set', None) is not None:
+	if hasattr(conn, 'keywords_set'):
 		if 'keywords' not in params:
 			params['keywords'] = {}
 		params['keywords']['set'] = conn.keywords_set
-	if getattr(conn, 'op_sys', None) is not None:
+	if hasattr(conn, 'op_sys'):
 		params['op_sys'] = conn.op_sys
-	if getattr(conn, 'platform', None) is not None:
+	if hasattr(conn, 'platform'):
 		params['platform'] = conn.platform
-	if getattr(conn, 'priority', None) is not None:
+	if hasattr(conn, 'priority'):
 		params['priority'] = conn.priority
-	if getattr(conn, 'product', None) is not None:
+	if hasattr(conn, 'product'):
 		params['product'] = conn.product
-	if getattr(conn, 'resolution', None) is not None:
+	if hasattr(conn, 'resolution'):
 		params['resolution'] = conn.resolution
-	if getattr(conn, 'see_also_add', None) is not None:
+	if hasattr(conn, 'see_also_add'):
 		if 'see_also' not in params:
 			params['see_also'] = {}
 		params['see_also']['add'] = conn.see_also_add
-	if getattr(conn, 'see_also_remove', None) is not None:
+	if hasattr(conn, 'see_also_remove'):
 		if 'see_also' not in params:
 			params['see_also'] = {}
 		params['see_also']['remove'] = conn.see_also_remove
-	if getattr(conn, 'severity', None) is not None:
+	if hasattr(conn, 'severity'):
 		params['severity'] = conn.severity
-	if getattr(conn, 'status', None) is not None:
+	if hasattr(conn, 'status'):
 		params['status'] = conn.status
-	if getattr(conn, 'summary', None) is not None:
+	if hasattr(conn, 'summary'):
 		params['summary'] = conn.summary
-	if getattr(conn, 'url', None) is not None:
+	if hasattr(conn, 'url'):
 		params['url'] = conn.url
-	if getattr(conn, 'version', None) is not None:
+	if hasattr(conn, 'version'):
 		params['version'] = conn.version
-	if getattr(conn, 'whiteboard', None) is not None:
+	if hasattr(conn, 'whiteboard'):
 		params['whiteboard'] = conn.whiteboard
 
-	if getattr(conn, 'fixed', None):
+	if hasattr(conn, 'fixed'):
 		params['status'] = 'RESOLVED'
 		params['resolution'] = 'FIXED'
 
-	if getattr(conn, 'invalid', None):
+	if hasattr(conn, 'invalid'):
 		params['status'] = 'RESOLVED'
 		params['resolution'] = 'INVALID'
 
@@ -511,7 +511,7 @@ def post(conn):
 	"""Post a new bug"""
 	login(conn)
 	# load description from file if possible
-	if getattr(conn, 'description_from', None) is not None:
+	if hasattr(conn, 'description_from'):
 		try:
 				if conn.description_from == '-':
 					conn.description = sys.stdin.read()
@@ -521,17 +521,17 @@ def post(conn):
 			raise BugzError('Unable to read from file: %s: %s' %
 				(conn.description_from, e))
 
-	if not conn.batch:
+	if not hasattr(conn, 'batch'):
 		prompt_for_bug(conn)
 
 	# raise an exception if mandatory fields are not specified.
-	if getattr(conn, 'product', None) is None:
+	if not hasattr(conn, 'product'):
 		raise RuntimeError('Product not specified')
-	if getattr(conn, 'component', None) is None:
+	if not hasattr(conn, 'component'):
 		raise RuntimeError('Component not specified')
-	if getattr(conn, 'summary', None) is None:
+	if not hasattr(conn, 'summary'):
 		raise RuntimeError('Title not specified')
-	if getattr(conn, 'description', None) is None:
+	if not hasattr(conn, 'description'):
 		raise RuntimeError('Description not specified')
 
 	# append the output from append_command to the description
@@ -571,7 +571,7 @@ def post(conn):
 	# fixme: Milestone
 	print('-' * (conn.columns - 1))
 
-	if not getattr(conn, 'batch', None):
+	if not hasattr(conn, 'batch'):
 		if conn.default_confirm in ['Y', 'y']:
 			confirm = input('Confirm bug submission (Y/n)? ')
 		else:
@@ -585,26 +585,26 @@ def post(conn):
 	params = {}
 	params['product'] = conn.product
 	params['component'] = conn.component
-	if getattr(conn, 'version', None) is not None:
+	if hasattr(conn, 'version'):
 		params['version'] = conn.version
 	params['summary'] = conn.summary
-	if getattr(conn, 'description', None) is not None:
+	if hasattr(conn, 'description'):
 		params['description'] = conn.description
-	if getattr(conn, 'op_sys', None) is not None:
+	if hasattr(conn, 'op_sys'):
 		params['op_sys'] = conn.op_sys
-	if getattr(conn, 'platform', None) is not None:
+	if hasattr(conn, 'platform'):
 		params['platform'] = conn.platform
-	if getattr(conn, 'priority', None) is not None:
+	if hasattr(conn, 'priority'):
 		params['priority'] = conn.priority
-	if getattr(conn, 'severity', None) is not None:
+	if hasattr(conn, 'severity'):
 		params['severity'] = conn.severity
-	if getattr(conn, 'alias', None) is not None:
+	if hasattr(conn, 'alias'):
 		params['alias'] = conn.alias
-	if getattr(conn, 'assigned_to', None) is not None:
+	if hasattr(conn, 'assigned_to'):
 		params['assigned_to'] = conn.assigned_to
-	if getattr(conn, 'cc', None) is not None:
+	if hasattr(conn, 'cc'):
 		params['cc'] = conn.cc
-	if getattr(conn, 'url', None) is not None:
+	if hasattr(conn, 'url'):
 		params['url'] = conn.url
 
 	result = conn.call_bz(conn.bz.Bug.create, params)
@@ -622,21 +622,16 @@ the keywords given on the title (or the body if specified).
 
 	params = {}
 	for key in vars(conn):
-		if key in valid_keys and getattr(conn, key) is not None:
+		if key in valid_keys and hasattr(conn, key):
 			params[key] = getattr(conn, key)
-	if getattr(conn, 'terms'):
+	if hasattr(conn, 'terms'):
 		params['summary'] = conn.terms
+		search_term = ' '.join(conn.terms).strip()
 
-	search_term = ' '.join(conn.terms).strip()
-
-	if not (params or search_term):
+	if not params:
 		raise BugzError('Please give search terms or options.')
 
-	if 'status' in params:
-		for x in params['status'][:]:
-			if x in ['all', 'ALL']:
-				del params['status']
-	elif hasattr(conn, 'search_statuses'):
+	if hasattr(conn, 'search_statuses'):
 		params['status'] = conn.search_statuses
 
 	log_info('Searching for bugs meeting the following criteria:')
