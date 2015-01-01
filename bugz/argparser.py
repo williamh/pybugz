@@ -1,9 +1,46 @@
+import argparse
+
 import bugz.cli
 
 from bugz import __version__
 
 
-def make_attach_parser(subparsers):
+def make_arg_parser():
+	parser = argparse.ArgumentParser(
+		argument_default=argparse.SUPPRESS,
+		epilog='use -h after a sub-command for sub-command specific help')
+	parser.add_argument('--config-file',
+		help='read an alternate configuration file')
+	parser.add_argument('--connection',
+		help='use [connection] section of your configuration file')
+	parser.add_argument('-b', '--base',
+		help='base URL of Bugzilla')
+	parser.add_argument('-u', '--user',
+		help='username for commands requiring authentication')
+	parser.add_argument('-p', '--password',
+		help='password for commands requiring authentication')
+	parser.add_argument('--passwordcmd',
+		help='password command to evaluate for commands requiring authentication')
+	parser.add_argument('-q', '--quiet',
+		action='store_true',
+		help='quiet mode')
+	parser.add_argument('-d', '--debug',
+		type=int,
+		help='debug level (from 0 to 3)')
+	parser.add_argument('--columns',
+		type=int,
+		help='maximum number of columns output should use')
+	parser.add_argument('--encoding',
+		help='output encoding (default: utf-8) (deprecated)')
+	parser.add_argument('--skip-auth',
+		action='store_true',
+		help='skip Authentication.')
+	parser.add_argument('--version',
+		action='version',
+		help='show program version and exit',
+		version='%(prog)s ' + __version__)
+	subparsers = parser.add_subparsers(help='help for sub-commands')
+
 	attach_parser = subparsers.add_parser('attach',
 		help='attach file to a bug')
 	attach_parser.add_argument('bugid',
@@ -24,8 +61,6 @@ def make_attach_parser(subparsers):
 		dest='summary')
 	attach_parser.set_defaults(func=bugz.cli.attach)
 
-
-def make_attachment_parser(subparsers):
 	attachment_parser = subparsers.add_parser('attachment',
 		help='get an attachment from bugzilla')
 	attachment_parser.add_argument('attachid',
@@ -35,8 +70,10 @@ def make_attachment_parser(subparsers):
 		help='print attachment rather than save')
 	attachment_parser.set_defaults(func=bugz.cli.attachment)
 
+	connections_parser = subparsers.add_parser('connections',
+		help='list known bug trackers')
+	connections_parser.set_defaults(func=bugz.cli.connections)
 
-def make_get_parser(subparsers):
 	get_parser = subparsers.add_parser('get',
 		help='get a bug from bugzilla')
 	get_parser.add_argument('bugid',
@@ -49,20 +86,14 @@ def make_get_parser(subparsers):
 		help='do not show comments')
 	get_parser.set_defaults(func=bugz.cli.get)
 
-
-def make_login_parser(subparsers):
 	login_parser = subparsers.add_parser('login',
 		help='log into bugzilla')
 	login_parser.set_defaults(func=bugz.cli.login)
 
-
-def make_logout_parser(subparsers):
 	logout_parser = subparsers.add_parser('logout',
 		help='log out of bugzilla')
 	logout_parser.set_defaults(func=bugz.cli.logout)
 
-
-def make_modify_parser(subparsers):
 	modify_parser = subparsers.add_parser('modify',
 		help='modify a bug (eg. post a comment)')
 	modify_parser.add_argument('bugid',
@@ -161,8 +192,6 @@ def make_modify_parser(subparsers):
 		help='mark bug as RESOLVED, INVALID')
 	modify_parser.set_defaults(func=bugz.cli.modify)
 
-
-def make_post_parser(subparsers):
 	post_parser = subparsers.add_parser('post',
 		help='post a new bug into bugzilla')
 	post_parser.add_argument('--product',
@@ -205,8 +234,6 @@ def make_post_parser(subparsers):
 		help='default answer to confirmation question')
 	post_parser.set_defaults(func=bugz.cli.post)
 
-
-def make_search_parser(subparsers):
 	search_parser = subparsers.add_parser('search',
 		help='search for bugs in bugzilla')
 	search_parser.add_argument('terms',
@@ -263,52 +290,4 @@ def make_search_parser(subparsers):
 		help='show severity of bugs')
 	search_parser.set_defaults(func=bugz.cli.search)
 
-
-def make_connections_parser(subparsers):
-	connections_parser = subparsers.add_parser('connections',
-		help='list known bug trackers')
-	connections_parser.set_defaults(func=bugz.cli.connections)
-
-
-def make_parser(parser):
-	parser.add_argument('--config-file',
-		help='read an alternate configuration file')
-	parser.add_argument('--connection',
-		help='use [connection] section of your configuration file')
-	parser.add_argument('-b', '--base',
-		help='base URL of Bugzilla')
-	parser.add_argument('-u', '--user',
-		help='username for commands requiring authentication')
-	parser.add_argument('-p', '--password',
-		help='password for commands requiring authentication')
-	parser.add_argument('--passwordcmd',
-		help='password command to evaluate for commands requiring authentication')
-	parser.add_argument('-q', '--quiet',
-		action='store_true',
-		help='quiet mode')
-	parser.add_argument('-d', '--debug',
-		type=int,
-		help='debug level (from 0 to 3)')
-	parser.add_argument('--columns',
-		type=int,
-		help='maximum number of columns output should use')
-	parser.add_argument('--encoding',
-		help='output encoding (default: utf-8) (deprecated)')
-	parser.add_argument('--skip-auth',
-		action='store_true',
-		help='skip Authentication.')
-	parser.add_argument('--version',
-		action='version',
-		help='show program version and exit',
-		version='%(prog)s ' + __version__)
-	subparsers = parser.add_subparsers(help='help for sub-commands')
-	make_attach_parser(subparsers)
-	make_attachment_parser(subparsers)
-	make_get_parser(subparsers)
-	make_login_parser(subparsers)
-	make_logout_parser(subparsers)
-	make_modify_parser(subparsers)
-	make_post_parser(subparsers)
-	make_search_parser(subparsers)
-	make_connections_parser(subparsers)
 	return parser

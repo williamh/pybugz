@@ -18,11 +18,10 @@ Classes
 
 """
 
-import argparse
 import configparser
 import sys
 
-from bugz.argparser import make_parser
+from bugz.argparser import make_arg_parser
 from bugz.configfile import get_config
 from bugz.connection import Connection
 from bugz.exceptions import BugzError
@@ -30,10 +29,7 @@ from bugz.log import log_error, log_info
 
 
 def main():
-	ArgParser = argparse.ArgumentParser(
-		argument_default=argparse.SUPPRESS,
-		epilog='use -h after a sub-command for sub-command specific help')
-	make_parser(ArgParser)
+	ArgParser = make_arg_parser()
 	args = ArgParser.parse_args()
 
 	ConfigParser = configparser.ConfigParser(default_section='default')
