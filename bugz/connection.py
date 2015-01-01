@@ -14,8 +14,8 @@ from bugz.utils import terminal_width
 
 class Connection:
 	def __init__(self, args, config):
-		for attr, value in args.__dict__.items():
-			setattr(self, attr, value)
+		for key in vars(args):
+			setattr(self, key, getattr(args, key))
 
 		if not hasattr(self, 'connection'):
 			if config.has_option('default', 'connection'):
@@ -126,8 +126,8 @@ class Connection:
 		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
 		log_debug('Connection debug dump:', 3)
-		for attr, value in self.__dict__.items():
-			log_debug('{0}, {1}'.format(attr, getattr(self, attr)), 3)
+		for key in vars(self):
+			log_debug('{0}, {1}'.format(key, getattr(self, key)), 3)
 
 	def load_token(self):
 		self.bz_token = self.tokens.get_token(self.connection)

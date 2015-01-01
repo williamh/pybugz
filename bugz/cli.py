@@ -621,7 +621,7 @@ the keywords given on the title (or the body if specified).
 		'severity', 'status', 'version', 'whiteboard']
 
 	params = {}
-	for key in conn.__dict__:
+	for key in vars(conn):
 		if key in valid_keys and getattr(conn, key) is not None:
 			params[key] = getattr(conn, key)
 	if getattr(conn, 'terms'):
