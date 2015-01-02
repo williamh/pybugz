@@ -18,11 +18,10 @@ Classes
 
 """
 
-import configparser
 import sys
 
 from bugz.argparser import make_arg_parser
-from bugz.configfile import get_config
+from bugz.configfile import load_config
 from bugz.connection import Connection
 from bugz.exceptions import BugzError
 from bugz.log import log_error, log_info
@@ -32,8 +31,7 @@ def main():
 	ArgParser = make_arg_parser()
 	args = ArgParser.parse_args()
 
-	ConfigParser = configparser.ConfigParser(default_section='default')
-	get_config(ConfigParser, getattr(args, 'config_file', None))
+	ConfigParser = load_config(getattr(args, 'config_file', None))
 
 	conn = Connection(args, ConfigParser)
 
