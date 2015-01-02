@@ -125,6 +125,10 @@ class Connection:
 
 		log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
+		log_debug('Command line debug dump:', 3)
+		for key in vars(args):
+			log_debug('{0}, {1}'.format(key, getattr(args, key)), 3)
+
 		log_debug('Connection debug dump:', 3)
 		for key in vars(self):
 			log_debug('{0}, {1}'.format(key, getattr(self, key)), 3)
