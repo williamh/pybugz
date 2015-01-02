@@ -22,7 +22,7 @@ import argparse
 import configparser
 import sys
 
-from bugz.argparsers import make_parser
+from bugz.argparser import make_parser
 from bugz.configfile import get_config
 from bugz.connection import Connection
 from bugz.errhandling import BugzError
