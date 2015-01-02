@@ -12,7 +12,7 @@ except ImportError:
 	pass
 
 
-from bugz.errhandling import BugzError
+from bugz.exceptions import BugzError
 from bugz.log import log_debug, log_info
 from bugz.utils import block_edit, get_content_type
 

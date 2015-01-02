@@ -5,7 +5,7 @@ import urllib.parse
 import xmlrpc.client
 
 from bugz.configfile import get_config_option
-from bugz.errhandling import BugzError
+from bugz.exceptions import BugzError
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
 from bugz.tokens import Tokens

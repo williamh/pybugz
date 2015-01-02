@@ -25,7 +25,7 @@ import sys
 from bugz.argparser import make_parser
 from bugz.configfile import get_config
 from bugz.connection import Connection
-from bugz.errhandling import BugzError
+from bugz.exceptions import BugzError
 from bugz.log import log_error, log_info
 
 
