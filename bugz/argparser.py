@@ -6,9 +6,7 @@ from bugz import __version__
 
 
 def make_arg_parser():
-	parser = argparse.ArgumentParser(
-		argument_default=argparse.SUPPRESS,
-		epilog='use -h after a sub-command for sub-command specific help')
+	parser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
 	parser.add_argument('--config-file',
 		help='read an alternate configuration file')
 	parser.add_argument('--connection',
@@ -39,7 +37,9 @@ def make_arg_parser():
 		action='version',
 		help='show program version and exit',
 		version='%(prog)s ' + __version__)
-	subparsers = parser.add_subparsers(help='help for sub-commands')
+
+	subparsers = parser.add_subparsers(title='sub-commands',
+		description='use -h after a sub-command for more help')
 
 	attach_parser = subparsers.add_parser('attach',
 		help='attach file to a bug')
