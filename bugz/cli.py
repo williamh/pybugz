@@ -136,7 +136,7 @@ def prompt_for_bug(conn):
 		cc_msg = 'Enter a CC list (comma separated) (optional): '
 		line = input(cc_msg)
 		if len(line):
-			conn.cc = line.split(', ')
+			conn.cc = re.split(r',\s*', line)
 	else:
 		log_info('Enter a CC list (optional): %s' % conn.cc)
 
