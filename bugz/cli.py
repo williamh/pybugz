@@ -617,22 +617,25 @@ the keywords given on the title (or the body if specified).
 	"""
 	valid_keys = ['alias', 'assigned_to', 'component', 'creator',
 		'limit', 'offset', 'op_sys', 'platform',
-		'priority', 'product', 'resolution',
-		'severity', 'status', 'version', 'whiteboard']
+		'priority', 'product', 'resolution', 'severity',
+		'version', 'whiteboard']
 
 	params = {}
-	for key in vars(conn):
-		if key in valid_keys and hasattr(conn, key):
-			params[key] = getattr(conn, key)
-	if hasattr(conn, 'terms'):
-		params['summary'] = conn.terms
-		search_term = ' '.join(conn.terms).strip()
+	d = vars(conn)
+	for key in d:
+		if key in valid_keys:
+			params[key] = d[key]
+	if 'status' in d:
+		if 'all' not in d['status']:
+			params['status'] = d['status']
+	elif 'search_statuses' in d:
+				params['status'] = d['search_statuses']
+	if 'terms' in d:
+		params['summary'] = d['terms']
+		search_term = ' '.join(d['terms']).strip()
 
 	if not params:
 		raise BugzError('Please give search terms or options.')
-
-	if hasattr(conn, 'search_statuses'):
-		params['status'] = conn.search_statuses
 
 	log_info('Searching for bugs meeting the following criteria:')
 	for key in params:
