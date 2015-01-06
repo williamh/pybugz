@@ -458,7 +458,8 @@ def modify(conn):
 	if hasattr(conn, 'product'):
 		params['product'] = conn.product
 	if hasattr(conn, 'resolution'):
-		params['resolution'] = conn.resolution
+		if not hasattr(conn, 'dupe_of'):
+			params['resolution'] = conn.resolution
 	if hasattr(conn, 'see_also_add'):
 		if 'see_also' not in params:
 			params['see_also'] = {}
@@ -470,7 +471,8 @@ def modify(conn):
 	if hasattr(conn, 'severity'):
 		params['severity'] = conn.severity
 	if hasattr(conn, 'status'):
-		params['status'] = conn.status
+		if not hasattr(conn, 'dupe_of'):
+			params['status'] = conn.status
 	if hasattr(conn, 'summary'):
 		params['summary'] = conn.summary
 	if hasattr(conn, 'url'):
@@ -487,10 +489,6 @@ def modify(conn):
 	if hasattr(conn, 'invalid'):
 		params['status'] = 'RESOLVED'
 		params['resolution'] = 'INVALID'
-
-	if 'dupe_of' in params:
-		del params['status']
-		del params['resolution']
 
 	if len(params) < 2:
 		raise BugzError('No changes were specified')
