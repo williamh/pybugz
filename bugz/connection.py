@@ -154,5 +154,7 @@ class Connection:
 			return method(params)
 		except xmlrpc.client.Fault as fault:
 			raise BugzError('Bugzilla error: {0}'.format(fault.faultString))
+		except xmlrpc.client.ProtocolError as e:
+			raise BugzError(e)
 		except urllib.error.URLError as e:
 			raise BugzError(e)
