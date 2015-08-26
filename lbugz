@@ -13,7 +13,7 @@ This is based on a patch from Mike Frysinger <vapier@gentoo.org>.
 import os
 import subprocess
 import sys
- 
+
 args = sys.argv
 path = os.path.normpath(os.path.dirname(os.path.realpath(__file__)))
 pkg = os.path.join(path, 'bugz')
