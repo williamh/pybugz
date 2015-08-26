@@ -18,24 +18,23 @@ from bugz.utils import block_edit, get_content_type
 
 
 def list_bugs(buglist, conn):
-	for bug in buglist:
-		bugid = bug['id']
-		status = bug['status']
-		priority = bug['priority']
-		severity = bug['severity']
-		assignee = bug['assigned_to'].split('@')[0]
-		desc = bug['summary']
-		line = '%s' % (bugid)
-		if hasattr(conn, 'show_status'):
-			line = '%s %-12s' % (line, status)
-		if hasattr(conn, 'show_priority'):
-			line = '%s %-12s' % (line, priority)
-		if hasattr(conn, 'show_severity'):
-			line = '%s %-12s' % (line, severity)
-		line = '%s %-20s' % (line, assignee)
-		line = '%s %s' % (line, desc)
-		print(line[:conn.columns])
 
+	fmt = conn.format
+	for bug in buglist:
+		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
+
+		if fmt is None:
+			fmt = '{bug[id]}'
+			if hasattr(conn, 'show_status'):
+				fmt += ' {bug[status]:>12}'
+			if hasattr(conn, 'show_priority'):
+				fmt += ' {bug[priority]:>12}'
+			if hasattr(conn, 'show_severity'):
+				fmt += ' {bug[severity]:>12}'
+			fmt += ' {bug[short_assigned_to]:>20}'
+			fmt += ' {bug[summary]}'
+
+		print(fmt.format(bug=bug)[:conn.columns])
 	log_info("%i bug(s) found." % len(buglist))
 
 
