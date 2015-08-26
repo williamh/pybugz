@@ -1,10 +1,16 @@
 import getpass
+import json
 import os
 import re
 import subprocess
 import sys
 import textwrap
+
 import xmlrpc.client
+
+from bugz.exceptions import BugzError
+from bugz.log import log_debug, log_info
+from bugz.utils import block_edit, get_content_type
 
 try:
 	import readline
@@ -12,13 +18,9 @@ except ImportError:
 	pass
 
 
-from bugz.exceptions import BugzError
-from bugz.log import log_debug, log_info
-from bugz.utils import block_edit, get_content_type
 
 
 def list_bugs(buglist, conn):
-
 	fmt = conn.format
 	for bug in buglist:
 		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
@@ -37,6 +39,12 @@ def list_bugs(buglist, conn):
 		print(fmt.format(bug=bug)[:conn.columns])
 	log_info("%i bug(s) found." % len(buglist))
 
+def json_bugs(buglist):
+	for bug in buglist:
+		for k, v in list(bug.items()):
+			if isinstance(v, xmlrpc.client.DateTime):
+				bug[k] = str(v)
+		print(json.dumps(bug))
 
 def prompt_for_bug(conn):
 	""" Prompt for the information for a bug
@@ -645,6 +653,8 @@ the keywords given on the title (or the body if specified).
 
 	if not len(result):
 		log_info('No bugs found.')
+	elif conn.json:
+		json_bugs(result)
 	else:
 		list_bugs(result, conn)
 
