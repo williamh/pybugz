@@ -24,6 +24,7 @@ def list_bugs(buglist, conn):
 		priority = bug['priority']
 		severity = bug['severity']
 		assignee = bug['assigned_to'].split('@')[0]
+		creator = bug['creator']
 		desc = bug['summary']
 		line = '%s' % (bugid)
 		if hasattr(conn, 'show_status'):
@@ -33,6 +34,7 @@ def list_bugs(buglist, conn):
 		if hasattr(conn, 'show_severity'):
 			line = '%s %-12s' % (line, severity)
 		line = '%s %-20s' % (line, assignee)
+		line = '%s %-20s' % (line, creator)
 		line = '%s %s' % (line, desc)
 		print(line[:conn.columns])
 
