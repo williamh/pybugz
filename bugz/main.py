@@ -28,31 +28,31 @@ from bugz.log import log_error, log_info
 
 
 def main():
-	ArgParser = make_arg_parser()
-	args = ArgParser.parse_args()
+    ArgParser = make_arg_parser()
+    args = ArgParser.parse_args()
 
-	ConfigParser = load_config(getattr(args, 'config_file', None))
+    ConfigParser = load_config(getattr(args, 'config_file', None))
 
-	conn = Connection(args, ConfigParser)
+    conn = Connection(args, ConfigParser)
 
-	if not hasattr(args, 'func'):
-		ArgParser.print_usage()
-		return 1
+    if not hasattr(args, 'func'):
+        ArgParser.print_usage()
+        return 1
 
-	try:
-		args.func(conn)
-	except BugzError as e:
-		log_error(e)
-		return 1
-	except RuntimeError as e:
-		log_error(e)
-		return 1
-	except KeyboardInterrupt:
-		log_info('Stopped due to keyboard interrupt')
-		return 1
+    try:
+        args.func(conn)
+    except BugzError as e:
+        log_error(e)
+        return 1
+    except RuntimeError as e:
+        log_error(e)
+        return 1
+    except KeyboardInterrupt:
+        log_info('Stopped due to keyboard interrupt')
+        return 1
 
-	return 0
+    return 0
 
 
 if __name__ == "__main__":
-	sys.exit(main())
+    sys.exit(main())
