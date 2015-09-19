@@ -31,7 +31,7 @@ except ImportError:
     pass
 
 
-from bugz.argparser import make_arg_parser
+from bugz.cli_argparser import make_arg_parser
 from bugz.configfile import load_config
 from bugz.connection import Connection
 from bugz.exceptions import BugzError
