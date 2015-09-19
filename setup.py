@@ -19,5 +19,5 @@ setup(
         ('share/man/man5', ['man/pybugz.d.5']),
         ('share/pybugz.d', glob.glob('pybugz.d/*.conf')),
     ],
-    entry_points={'console_scripts': ['bugz=bugz.main:main']},
+    entry_points={'console_scripts': ['bugz=bugz.cli:main']},
 )
