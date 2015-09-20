@@ -31,6 +31,7 @@ except ImportError:
     pass
 
 
+from bugz.bugtracker import BugTracker
 from bugz.cli_argparser import make_arg_parser
 from bugz.configfile import load_config
 from bugz.settings import Settings
@@ -235,7 +236,7 @@ def show_bug_info(bug, settings):
 
     if not hasattr(settings, 'no_attachments'):
         params = {'ids': [bug['id']]}
-        bug_attachments = settings.call_bz(settings.bz.Bug.attachments, params)
+        bug_attachments = bugtracker.run('Bug.attachments', params)
         bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
         print('%-12s: %d' % ('Attachments', len(bug_attachments)))
         print()
@@ -247,7 +248,7 @@ def show_bug_info(bug, settings):
 
     if not hasattr(settings, 'no_comments'):
         params = {'ids': [bug['id']]}
-        bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
+        bug_comments = bugtracker.run('Bug.comments', params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
         print('%-12s: %d' % ('Comments', len(bug_comments)))
         print()
@@ -276,7 +277,7 @@ def show_bug_info(bug, settings):
             i += 1
 
 
-def attach(settings):
+def attach(settings, bugtracker):
     """ Attach a file to a bug given a filename. """
     filename = getattr(settings, 'filename', None)
     content_type = getattr(settings, 'content_type', None)
@@ -310,14 +311,14 @@ def attach(settings):
     params['comment'] = comment
     if is_patch is not None:
         params['is_patch'] = is_patch
-    login(settings)
-    result = settings.call_bz(settings.bz.Bug.add_attachment, params)
+    login(settings, bugtracker)
+    result = bugtracker.run('Bug.add_attachment', params)
     attachid = result['ids'][0]
     log_info('{0} ({1}) has been attached to bug {2}'.format(
         filename, attachid, bugid))
 
 
-def attachment(settings):
+def attachment(settings, bugtracker):
     """ Download or view an attachment given the id."""
     log_info('Getting attachment %s' % settings.attachid)
 
@@ -325,9 +326,9 @@ def attachment(settings):
     params['attachment_ids'] = [settings.attachid]
 
     if not settings.skip_auth:
-        login(settings)
+        login(settings, bugtracker)
 
-    result = settings.call_bz(settings.bz.Bug.attachments, params)
+    result = bugtracker.run('Bug.attachments', params)
     result = result['attachments'][settings.attachid]
     view = hasattr(settings, 'view')
 
@@ -348,20 +349,20 @@ def attachment(settings):
         fd.close()
 
 
-def get(settings):
+def get(settings, bugtracker):
     """ Fetch bug details given the bug id """
     if not settings.skip_auth:
-        login(settings)
+        login(settings, bugtracker)
 
     log_info('Getting bug %s ..' % settings.bugid)
     params = {'ids': [settings.bugid]}
-    result = settings.call_bz(settings.bz.Bug.get, params)
+    result = bugtracker.run('Bug.get', params)
 
     for bug in result['bugs']:
         show_bug_info(bug, settings)
 
 
-def login(settings):
+def login(settings, bugtracker):
     """Authenticate a session.
     """
     settings.load_token()
@@ -393,20 +394,20 @@ def login(settings):
     params['login'] = user
     params['password'] = password
     log_info('Logging in')
-    result = settings.call_bz(settings.bz.User.login, params)
+    result = bugtracker.run('User.login', params)
     if 'token' in result:
         settings.save_token(result['token'])
 
 
-def logout(settings):
+def logout(settings, bugtracker):
     settings.load_token()
     params = {}
     log_info('logging out')
-    settings.call_bz(settings.bz.User.logout, params)
+    bugtracker.run('User.logout', params)
     settings.destroy_token()
 
 
-def modify(settings):
+def modify(settings, bugtracker):
     """Modify an existing bug (eg. adding a comment or changing resolution.)"""
     if hasattr(settings, 'comment_from'):
         try:
@@ -514,8 +515,8 @@ def modify(settings):
 
     if len(params) < 2:
         raise BugzError('No changes were specified')
-    login(settings)
-    result = settings.call_bz(settings.bz.Bug.update, params)
+    login(settings, bugtracker)
+    result = bugtracker.run('Bug.update', params)
     for bug in result['bugs']:
         changes = bug['changes']
         if not len(changes):
@@ -527,9 +528,9 @@ def modify(settings):
                 log_info('%-12s: added %s' % (key, changes[key]['added']))
 
 
-def post(settings):
+def post(settings, bugtracker):
     """Post a new bug"""
-    login(settings)
+    login(settings, bugtracker)
     # load description from file if possible
     if hasattr(settings, 'description_from'):
         try:
@@ -627,11 +628,11 @@ def post(settings):
     if hasattr(settings, 'url'):
         params['url'] = settings.url
 
-    result = settings.call_bz(settings.bz.Bug.create, params)
+    result = bugtracker.run('Bug.create', params)
     log_info('Bug %d submitted' % result['id'])
 
 
-def search(settings):
+def search(settings, bugtracker):
     """Performs a search on the bugzilla database with
 the keywords given on the title (or the body if specified).
     """
@@ -661,9 +662,9 @@ the keywords given on the title (or the body if specified).
         log_info('   {0:<20} = {1}'.format(key, params[key]))
 
     if not settings.skip_auth:
-        login(settings)
+        login(settings, bugtracker)
 
-    result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
+    result = bugtracker.run('Bug.search', params)['bugs']
 
     if not len(result):
         log_info('No bugs found.')
@@ -671,7 +672,7 @@ the keywords given on the title (or the body if specified).
         list_bugs(result, settings)
 
 
-def connections(settings):
+def connections(settings, bugtracker):
     print('Known bug trackers:')
     print()
     for tracker in settings.connections:
@@ -690,8 +691,9 @@ def main():
         ArgParser.print_usage()
         return 1
 
+    bugtracker = BugTracker(settings.connection, settings.base)
     try:
-        args.func(settings)
+        args.func(settings, bugtracker)
     except BugzError as error:
         log_error(error)
         return 1
