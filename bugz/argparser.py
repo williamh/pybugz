@@ -253,6 +253,22 @@ def make_arg_parser():
 		help='custom format. Format: {product[field]} (see --json)',
 		default=None)
 
+	components_parser = subparsers.add_parser('components',
+		argument_default=argparse.SUPPRESS, help='list available components')
+	components_parser.set_defaults(func=bugz.cli.components)
+	components_parser.add_argument(
+		'--json',
+		action='store_true',
+		help='format results as newline separated json records',
+		default=False)
+	components_parser.add_argument(
+		'--format',
+		type=str,
+		help='custom format. Format: {product[field]} (see --json)',
+		default=None)
+
+
+
 	search_parser = subparsers.add_parser('search',
 	argument_default=argparse.SUPPRESS,
 		help='search for bugs in bugzilla')

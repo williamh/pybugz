@@ -612,10 +612,8 @@ def post(conn):
 	result = conn.call_bz(conn.bz.Bug.create, params)
 	log_info('Bug %d submitted' % result['id'])
 
-
 def products(conn):
-	product_ids = conn.call_bz(conn.bz.Product.get_accessible_products, dict())['ids']
-	products = conn.call_bz(conn.bz.Product.get, dict(ids=product_ids))['products']
+	products = fetch_products(conn)
 	fmt = conn.format
 	if fmt is None:
 		fmt = '{product[name]}'
@@ -624,6 +622,24 @@ def products(conn):
 	else:
 		for product in products:
 			print(fmt.format(product=product)[:conn.columns])
+
+def components(conn):
+	products = fetch_products(conn)
+	fmt = conn.format
+	if fmt is None:
+		fmt = '{product[name]:>20} {component[name]:>20} {component[description]:>20}'
+	if conn.json:
+		json_records(products)
+	else:
+		for product in products:
+			for component in product['components']:
+				print(fmt.format(product=product, component=component)[:conn.columns])
+
+
+
+def fetch_products(conn):
+	product_ids = conn.call_bz(conn.bz.Product.get_accessible_products, dict())['ids']
+	return conn.call_bz(conn.bz.Product.get, dict(ids=product_ids))['products']
 
 def search(conn):
 	"""Performs a search on the bugzilla database with
