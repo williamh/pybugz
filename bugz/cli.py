@@ -17,29 +17,26 @@ try:
 except ImportError:
 	pass
 
-
-
-
 def list_bugs(buglist, conn):
 	fmt = conn.format
+	if fmt is None:
+		fmt = '{bug[id]}'
+		if hasattr(conn, 'show_status'):
+			fmt += ' {bug[status]:>12}'
+		if hasattr(conn, 'show_priority'):
+			fmt += ' {bug[priority]:>12}'
+		if hasattr(conn, 'show_severity'):
+			fmt += ' {bug[severity]:>12}'
+		fmt += ' {bug[short_assigned_to]:>20}'
+		fmt += ' {bug[summary]}'
+
 	for bug in buglist:
 		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
-
-		if fmt is None:
-			fmt = '{bug[id]}'
-			if hasattr(conn, 'show_status'):
-				fmt += ' {bug[status]:>12}'
-			if hasattr(conn, 'show_priority'):
-				fmt += ' {bug[priority]:>12}'
-			if hasattr(conn, 'show_severity'):
-				fmt += ' {bug[severity]:>12}'
-			fmt += ' {bug[short_assigned_to]:>20}'
-			fmt += ' {bug[summary]}'
 
 		print(fmt.format(bug=bug)[:conn.columns])
 	log_info("%i bug(s) found." % len(buglist))
 
-def json_bugs(buglist):
+def json_records(buglist):
 	for bug in buglist:
 		for k, v in list(bug.items()):
 			if isinstance(v, xmlrpc.client.DateTime):
@@ -616,6 +613,18 @@ def post(conn):
 	log_info('Bug %d submitted' % result['id'])
 
 
+def products(conn):
+	product_ids = conn.call_bz(conn.bz.Product.get_accessible_products, dict())['ids']
+	products = conn.call_bz(conn.bz.Product.get, dict(ids=product_ids))['products']
+	fmt = conn.format
+	if fmt is None:
+		fmt = '{product[name]}'
+	if conn.json:
+		json_records(products)
+	else:
+		for product in products:
+			print(fmt.format(product=product)[:conn.columns])
+
 def search(conn):
 	"""Performs a search on the bugzilla database with
 the keywords given on the title (or the body if specified).
@@ -654,7 +663,7 @@ the keywords given on the title (or the body if specified).
 	if not len(result):
 		log_info('No bugs found.')
 	elif conn.json:
-		json_bugs(result)
+		json_records(result)
 	else:
 		list_bugs(result, conn)
 
