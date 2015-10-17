@@ -414,9 +414,9 @@ def modify(conn):
                 conn.comment = sys.stdin.read()
             else:
                 conn.comment = open(conn.comment_from, 'r').read()
-        except IOError as e:
+        except IOError as error:
             raise BugzError('unable to read file: %s: %s' %
-                            (conn.comment_from, e))
+                            (conn.comment_from, error))
 
     if hasattr(conn, 'comment_editor'):
         conn.comment = block_edit('Enter comment:')
@@ -537,9 +537,9 @@ def post(conn):
                     conn.description = sys.stdin.read()
                 else:
                     conn.description = open(conn.description_from, 'r').read()
-        except IOError as e:
+        except IOError as error:
             raise BugzError('Unable to read from file: %s: %s' %
-                            (conn.description_from, e))
+                            (conn.description_from, error))
 
     if not hasattr(conn, 'batch'):
         prompt_for_bug(conn)
@@ -692,11 +692,11 @@ def main():
 
     try:
         args.func(conn)
-    except BugzError as e:
-        log_error(e)
+    except BugzError as error:
+        log_error(error)
         return 1
-    except RuntimeError as e:
-        log_error(e)
+    except RuntimeError as error:
+        log_error(error)
         return 1
     except KeyboardInterrupt:
         log_info('Stopped due to keyboard interrupt')

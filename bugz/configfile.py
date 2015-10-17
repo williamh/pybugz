@@ -18,17 +18,17 @@ def load_config(UserConfig=None):
     try:
         parser.read(DefaultConfigs + SystemConfigs + [UserConfig])
 
-    except configparser.DuplicateOptionError as e:
-        log_error(e)
+    except configparser.DuplicateOptionError as error:
+        log_error(error)
         sys.exit(1)
-    except configparser.DuplicateSectionError as e:
-        log_error(e)
+    except configparser.DuplicateSectionError as error:
+        log_error(error)
         sys.exit(1)
-    except configparser.MissingSectionHeaderError as e:
-        log_error(e)
+    except configparser.MissingSectionHeaderError as error:
+        log_error(error)
         sys.exit(1)
-    except configparser.ParsingError as e:
-        log_error(e)
+    except configparser.ParsingError as error:
+        log_error(error)
         sys.exit(1)
 
     return parser
@@ -38,9 +38,9 @@ def get_config_option(get, section, option):
     try:
         value = get(section, option)
 
-    except ValueError as e:
+    except ValueError as error:
         log_error('{0} is not in the right format: {1}'.format(option,
-                  str(e)))
+                  str(error)))
         sys.exit(1)
 
     if value == '':
