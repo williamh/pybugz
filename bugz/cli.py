@@ -33,13 +33,13 @@ except ImportError:
 
 from bugz.cli_argparser import make_arg_parser
 from bugz.configfile import load_config
-from bugz.connection import Connection
+from bugz.settings import Settings
 from bugz.exceptions import BugzError
 from bugz.log import log_error, log_info
 from bugz.utils import block_edit, get_content_type
 
 
-def list_bugs(buglist, conn):
+def list_bugs(buglist, settings):
     for bug in buglist:
         bugid = bug['id']
         status = bug['status']
@@ -48,127 +48,127 @@ def list_bugs(buglist, conn):
         assignee = bug['assigned_to'].split('@')[0]
         desc = bug['summary']
         line = '%s' % (bugid)
-        if hasattr(conn, 'show_status'):
+        if hasattr(settings, 'show_status'):
             line = '%s %-12s' % (line, status)
-        if hasattr(conn, 'show_priority'):
+        if hasattr(settings, 'show_priority'):
             line = '%s %-12s' % (line, priority)
-        if hasattr(conn, 'show_severity'):
+        if hasattr(settings, 'show_severity'):
             line = '%s %-12s' % (line, severity)
         line = '%s %-20s' % (line, assignee)
         line = '%s %s' % (line, desc)
-        print(line[:conn.columns])
+        print(line[:settings.columns])
 
     log_info("%i bug(s) found." % len(buglist))
 
 
-def prompt_for_bug(conn):
+def prompt_for_bug(settings):
     """ Prompt for the information for a bug
     """
     log_info('Press Ctrl+C at any time to abort.')
 
-    if not hasattr(conn, 'product'):
+    if not hasattr(settings, 'product'):
         product = None
         while not product or len(product) < 1:
             product = input('Enter product: ')
-        conn.product = product
+        settings.product = product
     else:
-        log_info('Enter product: %s' % conn.product)
+        log_info('Enter product: %s' % settings.product)
 
-    if not hasattr(conn, 'component'):
+    if not hasattr(settings, 'component'):
         component = None
         while not component or len(component) < 1:
             component = input('Enter component: ')
-        conn.component = component
+        settings.component = component
     else:
-        log_info('Enter component: %s' % conn.component)
+        log_info('Enter component: %s' % settings.component)
 
-    if not hasattr(conn, 'version'):
+    if not hasattr(settings, 'version'):
         line = input('Enter version (default: unspecified): ')
         if len(line):
-            conn.version = line
+            settings.version = line
         else:
-            conn.version = 'unspecified'
+            settings.version = 'unspecified'
     else:
-        log_info('Enter version: %s' % conn.version)
+        log_info('Enter version: %s' % settings.version)
 
-    if not hasattr(conn, 'summary'):
+    if not hasattr(settings, 'summary'):
         summary = None
         while not summary or len(summary) < 1:
             summary = input('Enter title: ')
-        conn.summary = summary
+        settings.summary = summary
     else:
-        log_info('Enter title: %s' % conn.summary)
+        log_info('Enter title: %s' % settings.summary)
 
-    if not hasattr(conn, 'description'):
+    if not hasattr(settings, 'description'):
         line = block_edit('Enter bug description: ')
         if len(line):
-            conn.description = line
+            settings.description = line
     else:
-        log_info('Enter bug description: %s' % conn.description)
+        log_info('Enter bug description: %s' % settings.description)
 
-    if not hasattr(conn, 'op_sys'):
+    if not hasattr(settings, 'op_sys'):
         op_sys_msg = 'Enter operating system where this bug occurs: '
         line = input(op_sys_msg)
         if len(line):
-            conn.op_sys = line
+            settings.op_sys = line
     else:
-        log_info('Enter operating system: %s' % conn.op_sys)
+        log_info('Enter operating system: %s' % settings.op_sys)
 
-    if not hasattr(conn, 'platform'):
+    if not hasattr(settings, 'platform'):
         platform_msg = 'Enter hardware platform where this bug occurs: '
         line = input(platform_msg)
         if len(line):
-            conn.platform = line
+            settings.platform = line
     else:
-        log_info('Enter hardware platform: %s' % conn.platform)
+        log_info('Enter hardware platform: %s' % settings.platform)
 
-    if not hasattr(conn, 'priority'):
+    if not hasattr(settings, 'priority'):
         priority_msg = 'Enter priority (eg. Normal) (optional): '
         line = input(priority_msg)
         if len(line):
-            conn.priority = line
+            settings.priority = line
     else:
-        log_info('Enter priority (optional): %s' % conn.priority)
+        log_info('Enter priority (optional): %s' % settings.priority)
 
-    if not hasattr(conn, 'severity'):
+    if not hasattr(settings, 'severity'):
         severity_msg = 'Enter severity (eg. normal) (optional): '
         line = input(severity_msg)
         if len(line):
-            conn.severity = line
+            settings.severity = line
     else:
-        log_info('Enter severity (optional): %s' % conn.severity)
+        log_info('Enter severity (optional): %s' % settings.severity)
 
-    if not hasattr(conn, 'alias'):
+    if not hasattr(settings, 'alias'):
         alias_msg = 'Enter an alias for this bug (optional): '
         line = input(alias_msg)
         if len(line):
-            conn.alias = line
+            settings.alias = line
     else:
-        log_info('Enter alias (optional): %s' % conn.alias)
+        log_info('Enter alias (optional): %s' % settings.alias)
 
-    if not hasattr(conn, 'assigned_to'):
+    if not hasattr(settings, 'assigned_to'):
         assign_msg = 'Enter assignee (eg. liquidx@gentoo.org) (optional): '
         line = input(assign_msg)
         if len(line):
-            conn.assigned_to = line
+            settings.assigned_to = line
     else:
-        log_info('Enter assignee (optional): %s' % conn.assigned_to)
+        log_info('Enter assignee (optional): %s' % settings.assigned_to)
 
-    if not hasattr(conn, 'cc'):
+    if not hasattr(settings, 'cc'):
         cc_msg = 'Enter a CC list (comma separated) (optional): '
         line = input(cc_msg)
         if len(line):
-            conn.cc = re.split(r',\s*', line)
+            settings.cc = re.split(r',\s*', line)
     else:
-        log_info('Enter a CC list (optional): %s' % conn.cc)
+        log_info('Enter a CC list (optional): %s' % settings.cc)
 
-    if not hasattr(conn, 'url'):
+    if not hasattr(settings, 'url'):
         url_msg = 'Enter a URL (optional): '
         line = input(url_msg)
         if len(line):
-            conn.url = line
+            settings.url = line
     else:
-        log_info('Enter a URL (optional): %s' % conn.url)
+        log_info('Enter a URL (optional): %s' % settings.url)
 
     # fixme: groups
 
@@ -176,16 +176,16 @@ def prompt_for_bug(conn):
 
     # fixme: milestone
 
-    if not hasattr(conn, 'append_command'):
+    if not hasattr(settings, 'append_command'):
         line = input('Append the output of the'
                      ' following command (leave blank for none): ')
         if len(line):
-            conn.append_command = line
+            settings.append_command = line
     else:
-        log_info('Append command (optional): %s' % conn.append_command)
+        log_info('Append command (optional): %s' % settings.append_command)
 
 
-def show_bug_info(bug, conn):
+def show_bug_info(bug, settings):
     FieldMap = {
         'alias': 'Alias',
         'summary': 'Title',
@@ -233,9 +233,9 @@ def show_bug_info(bug, conn):
         elif value is not None and value != '':
             print('%-12s: %s' % (desc, value))
 
-    if not hasattr(conn, 'no_attachments'):
+    if not hasattr(settings, 'no_attachments'):
         params = {'ids': [bug['id']]}
-        bug_attachments = conn.call_bz(conn.bz.Bug.attachments, params)
+        bug_attachments = settings.call_bz(settings.bz.Bug.attachments, params)
         bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
         print('%-12s: %d' % ('Attachments', len(bug_attachments)))
         print()
@@ -245,14 +245,14 @@ def show_bug_info(bug, conn):
             when = attachment['creation_time']
             print('[Attachment] [%s] [%s]' % (aid, desc))
 
-    if not hasattr(conn, 'no_comments'):
+    if not hasattr(settings, 'no_comments'):
         params = {'ids': [bug['id']]}
-        bug_comments = conn.call_bz(conn.bz.Bug.comments, params)
+        bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
         print('%-12s: %d' % ('Comments', len(bug_comments)))
         print()
         i = 0
-        wrapper = textwrap.TextWrapper(width=conn.columns,
+        wrapper = textwrap.TextWrapper(width=settings.columns,
                                        break_long_words=False,
                                        break_on_hyphens=False)
         for comment in bug_comments:
@@ -260,14 +260,14 @@ def show_bug_info(bug, conn):
             when = comment['time']
             what = comment['text']
             print('[Comment #%d] %s : %s' % (i, who, when))
-            print('-' * (conn.columns - 1))
+            print('-' * (settings.columns - 1))
 
             if what is None:
                 what = ''
 
             # print wrapped version
             for line in what.splitlines():
-                if len(line) < conn.columns:
+                if len(line) < settings.columns:
                     print(line)
                 else:
                     for shortline in wrapper.wrap(line):
@@ -276,14 +276,14 @@ def show_bug_info(bug, conn):
             i += 1
 
 
-def attach(conn):
+def attach(settings):
     """ Attach a file to a bug given a filename. """
-    filename = getattr(conn, 'filename', None)
-    content_type = getattr(conn, 'content_type', None)
-    bugid = getattr(conn, 'bugid', None)
-    summary = getattr(conn, 'summary', None)
-    is_patch = getattr(conn, 'is_patch', None)
-    comment = getattr(conn, 'comment', None)
+    filename = getattr(settings, 'filename', None)
+    content_type = getattr(settings, 'content_type', None)
+    bugid = getattr(settings, 'bugid', None)
+    summary = getattr(settings, 'summary', None)
+    is_patch = getattr(settings, 'is_patch', None)
+    comment = getattr(settings, 'comment', None)
 
     if not os.path.exists(filename):
         raise BugzError('File not found: %s' % filename)
@@ -310,26 +310,26 @@ def attach(conn):
     params['comment'] = comment
     if is_patch is not None:
         params['is_patch'] = is_patch
-    login(conn)
-    result = conn.call_bz(conn.bz.Bug.add_attachment, params)
+    login(settings)
+    result = settings.call_bz(settings.bz.Bug.add_attachment, params)
     attachid = result['ids'][0]
     log_info('{0} ({1}) has been attached to bug {2}'.format(
         filename, attachid, bugid))
 
 
-def attachment(conn):
+def attachment(settings):
     """ Download or view an attachment given the id."""
-    log_info('Getting attachment %s' % conn.attachid)
+    log_info('Getting attachment %s' % settings.attachid)
 
     params = {}
-    params['attachment_ids'] = [conn.attachid]
+    params['attachment_ids'] = [settings.attachid]
 
-    if not conn.skip_auth:
-        login(conn)
+    if not settings.skip_auth:
+        login(settings)
 
-    result = conn.call_bz(conn.bz.Bug.attachments, params)
-    result = result['attachments'][conn.attachid]
-    view = hasattr(conn, 'view')
+    result = settings.call_bz(settings.bz.Bug.attachments, params)
+    result = result['attachments'][settings.attachid]
+    view = hasattr(settings, 'view')
 
     action = {True: 'Viewing', False: 'Saving'}
     log_info('%s attachment: "%s"' %
@@ -348,174 +348,174 @@ def attachment(conn):
         fd.close()
 
 
-def get(conn):
+def get(settings):
     """ Fetch bug details given the bug id """
-    if not conn.skip_auth:
-        login(conn)
+    if not settings.skip_auth:
+        login(settings)
 
-    log_info('Getting bug %s ..' % conn.bugid)
-    params = {'ids': [conn.bugid]}
-    result = conn.call_bz(conn.bz.Bug.get, params)
+    log_info('Getting bug %s ..' % settings.bugid)
+    params = {'ids': [settings.bugid]}
+    result = settings.call_bz(settings.bz.Bug.get, params)
 
     for bug in result['bugs']:
-        show_bug_info(bug, conn)
+        show_bug_info(bug, settings)
 
 
-def login(conn):
+def login(settings):
     """Authenticate a session.
     """
-    conn.load_token()
-    if conn.bz_token is not None:
+    settings.load_token()
+    if settings.bz_token is not None:
         return
 
     # prompt for username if we were not supplied with it
-    if not hasattr(conn, 'user'):
+    if not hasattr(settings, 'user'):
         log_info('No username given.')
         user = input('Username: ')
     else:
-        user = conn.user
+        user = settings.user
 
     # prompt for password if we were not supplied with it
-    if not hasattr(conn, 'password'):
-        if not hasattr(conn, 'passwordcmd'):
+    if not hasattr(settings, 'password'):
+        if not hasattr(settings, 'passwordcmd'):
             log_info('No password given.')
             password = getpass.getpass()
         else:
-            process = subprocess.Popen(conn.passwordcmd, shell=True,
+            process = subprocess.Popen(settings.passwordcmd, shell=True,
                                        stdout=subprocess.PIPE)
             password, _ = process.communicate()
             password = password.splitlines()[0]
     else:
-        password = conn.password
+        password = settings.password
 
     # perform login
     params = {}
     params['login'] = user
     params['password'] = password
     log_info('Logging in')
-    result = conn.call_bz(conn.bz.User.login, params)
+    result = settings.call_bz(settings.bz.User.login, params)
     if 'token' in result:
-        conn.save_token(result['token'])
+        settings.save_token(result['token'])
 
 
-def logout(conn):
-    conn.load_token()
+def logout(settings):
+    settings.load_token()
     params = {}
     log_info('logging out')
-    conn.call_bz(conn.bz.User.logout, params)
-    conn.destroy_token()
+    settings.call_bz(settings.bz.User.logout, params)
+    settings.destroy_token()
 
 
-def modify(conn):
+def modify(settings):
     """Modify an existing bug (eg. adding a comment or changing resolution.)"""
-    if hasattr(conn, 'comment_from'):
+    if hasattr(settings, 'comment_from'):
         try:
-            if conn.comment_from == '-':
-                conn.comment = sys.stdin.read()
+            if settings.comment_from == '-':
+                settings.comment = sys.stdin.read()
             else:
-                conn.comment = open(conn.comment_from, 'r').read()
+                settings.comment = open(settings.comment_from, 'r').read()
         except IOError as error:
             raise BugzError('unable to read file: %s: %s' %
-                            (conn.comment_from, error))
+                            (settings.comment_from, error))
 
-    if hasattr(conn, 'comment_editor'):
-        conn.comment = block_edit('Enter comment:')
+    if hasattr(settings, 'comment_editor'):
+        settings.comment = block_edit('Enter comment:')
 
     params = {}
-    params['ids'] = [conn.bugid]
-    if hasattr(conn, 'alias'):
-        params['alias'] = conn.alias
-    if hasattr(conn, 'assigned_to'):
-        params['assigned_to'] = conn.assigned_to
-    if hasattr(conn, 'blocks_add'):
+    params['ids'] = [settings.bugid]
+    if hasattr(settings, 'alias'):
+        params['alias'] = settings.alias
+    if hasattr(settings, 'assigned_to'):
+        params['assigned_to'] = settings.assigned_to
+    if hasattr(settings, 'blocks_add'):
         if 'blocks' not in params:
             params['blocks'] = {}
-        params['blocks']['add'] = conn.blocks_add
-    if hasattr(conn, 'blocks_remove'):
+        params['blocks']['add'] = settings.blocks_add
+    if hasattr(settings, 'blocks_remove'):
         if 'blocks' not in params:
             params['blocks'] = {}
-        params['blocks']['remove'] = conn.blocks_remove
-    if hasattr(conn, 'depends_on_add'):
+        params['blocks']['remove'] = settings.blocks_remove
+    if hasattr(settings, 'depends_on_add'):
         if 'depends_on' not in params:
             params['depends_on'] = {}
-        params['depends_on']['add'] = conn.depends_on_add
-    if hasattr(conn, 'depends_on_remove'):
+        params['depends_on']['add'] = settings.depends_on_add
+    if hasattr(settings, 'depends_on_remove'):
         if 'depends_on' not in params:
             params['depends_on'] = {}
-        params['depends_on']['remove'] = conn.depends_on_remove
-    if hasattr(conn, 'cc_add'):
+        params['depends_on']['remove'] = settings.depends_on_remove
+    if hasattr(settings, 'cc_add'):
         if 'cc' not in params:
             params['cc'] = {}
-        params['cc']['add'] = conn.cc_add
-    if hasattr(conn, 'cc_remove'):
+        params['cc']['add'] = settings.cc_add
+    if hasattr(settings, 'cc_remove'):
         if 'cc' not in params:
             params['cc'] = {}
-        params['cc']['remove'] = conn.cc_remove
-    if hasattr(conn, 'comment'):
+        params['cc']['remove'] = settings.cc_remove
+    if hasattr(settings, 'comment'):
         if 'comment' not in params:
             params['comment'] = {}
-        params['comment']['body'] = conn.comment
-    if hasattr(conn, 'component'):
-        params['component'] = conn.component
-    if hasattr(conn, 'dupe_of'):
-        params['dupe_of'] = conn.dupe_of
-    if hasattr(conn, 'groups_add'):
+        params['comment']['body'] = settings.comment
+    if hasattr(settings, 'component'):
+        params['component'] = settings.component
+    if hasattr(settings, 'dupe_of'):
+        params['dupe_of'] = settings.dupe_of
+    if hasattr(settings, 'groups_add'):
         if 'groups' not in params:
             params['groups'] = {}
-        params['groups']['add'] = conn.groups_add
-    if hasattr(conn, 'groups_remove'):
+        params['groups']['add'] = settings.groups_add
+    if hasattr(settings, 'groups_remove'):
         if 'groups' not in params:
             params['groups'] = {}
-        params['groups']['remove'] = conn.groups_remove
-    if hasattr(conn, 'keywords_set'):
+        params['groups']['remove'] = settings.groups_remove
+    if hasattr(settings, 'keywords_set'):
         if 'keywords' not in params:
             params['keywords'] = {}
-        params['keywords']['set'] = conn.keywords_set
-    if hasattr(conn, 'op_sys'):
-        params['op_sys'] = conn.op_sys
-    if hasattr(conn, 'platform'):
-        params['platform'] = conn.platform
-    if hasattr(conn, 'priority'):
-        params['priority'] = conn.priority
-    if hasattr(conn, 'product'):
-        params['product'] = conn.product
-    if hasattr(conn, 'resolution'):
-        if not hasattr(conn, 'dupe_of'):
-            params['resolution'] = conn.resolution
-    if hasattr(conn, 'see_also_add'):
+        params['keywords']['set'] = settings.keywords_set
+    if hasattr(settings, 'op_sys'):
+        params['op_sys'] = settings.op_sys
+    if hasattr(settings, 'platform'):
+        params['platform'] = settings.platform
+    if hasattr(settings, 'priority'):
+        params['priority'] = settings.priority
+    if hasattr(settings, 'product'):
+        params['product'] = settings.product
+    if hasattr(settings, 'resolution'):
+        if not hasattr(settings, 'dupe_of'):
+            params['resolution'] = settings.resolution
+    if hasattr(settings, 'see_also_add'):
         if 'see_also' not in params:
             params['see_also'] = {}
-        params['see_also']['add'] = conn.see_also_add
-    if hasattr(conn, 'see_also_remove'):
+        params['see_also']['add'] = settings.see_also_add
+    if hasattr(settings, 'see_also_remove'):
         if 'see_also' not in params:
             params['see_also'] = {}
-        params['see_also']['remove'] = conn.see_also_remove
-    if hasattr(conn, 'severity'):
-        params['severity'] = conn.severity
-    if hasattr(conn, 'status'):
-        if not hasattr(conn, 'dupe_of'):
-            params['status'] = conn.status
-    if hasattr(conn, 'summary'):
-        params['summary'] = conn.summary
-    if hasattr(conn, 'url'):
-        params['url'] = conn.url
-    if hasattr(conn, 'version'):
-        params['version'] = conn.version
-    if hasattr(conn, 'whiteboard'):
-        params['whiteboard'] = conn.whiteboard
+        params['see_also']['remove'] = settings.see_also_remove
+    if hasattr(settings, 'severity'):
+        params['severity'] = settings.severity
+    if hasattr(settings, 'status'):
+        if not hasattr(settings, 'dupe_of'):
+            params['status'] = settings.status
+    if hasattr(settings, 'summary'):
+        params['summary'] = settings.summary
+    if hasattr(settings, 'url'):
+        params['url'] = settings.url
+    if hasattr(settings, 'version'):
+        params['version'] = settings.version
+    if hasattr(settings, 'whiteboard'):
+        params['whiteboard'] = settings.whiteboard
 
-    if hasattr(conn, 'fixed'):
+    if hasattr(settings, 'fixed'):
         params['status'] = 'RESOLVED'
         params['resolution'] = 'FIXED'
 
-    if hasattr(conn, 'invalid'):
+    if hasattr(settings, 'invalid'):
         params['status'] = 'RESOLVED'
         params['resolution'] = 'INVALID'
 
     if len(params) < 2:
         raise BugzError('No changes were specified')
-    login(conn)
-    result = conn.call_bz(conn.bz.Bug.update, params)
+    login(settings)
+    result = settings.call_bz(settings.bz.Bug.update, params)
     for bug in result['bugs']:
         changes = bug['changes']
         if not len(changes):
@@ -527,111 +527,111 @@ def modify(conn):
                 log_info('%-12s: added %s' % (key, changes[key]['added']))
 
 
-def post(conn):
+def post(settings):
     """Post a new bug"""
-    login(conn)
+    login(settings)
     # load description from file if possible
-    if hasattr(conn, 'description_from'):
+    if hasattr(settings, 'description_from'):
         try:
-                if conn.description_from == '-':
-                    conn.description = sys.stdin.read()
+                if settings.description_from == '-':
+                    settings.description = sys.stdin.read()
                 else:
-                    conn.description = open(conn.description_from, 'r').read()
+                    settings.description = open(settings.description_from, 'r').read()
         except IOError as error:
             raise BugzError('Unable to read from file: %s: %s' %
-                            (conn.description_from, error))
+                            (settings.description_from, error))
 
-    if not hasattr(conn, 'batch'):
-        prompt_for_bug(conn)
+    if not hasattr(settings, 'batch'):
+        prompt_for_bug(settings)
 
     # raise an exception if mandatory fields are not specified.
-    if not hasattr(conn, 'product'):
+    if not hasattr(settings, 'product'):
         raise RuntimeError('Product not specified')
-    if not hasattr(conn, 'component'):
+    if not hasattr(settings, 'component'):
         raise RuntimeError('Component not specified')
-    if not hasattr(conn, 'summary'):
+    if not hasattr(settings, 'summary'):
         raise RuntimeError('Title not specified')
-    if not hasattr(conn, 'description'):
+    if not hasattr(settings, 'description'):
         raise RuntimeError('Description not specified')
 
     # append the output from append_command to the description
-    append_command = getattr(conn, 'append_command', None)
+    append_command = getattr(settings, 'append_command', None)
     if append_command is not None and append_command != '':
         append_command_output = subprocess.getoutput(append_command)
-        conn.description = conn.description + '\n\n' + \
+        settings.description = settings.description + '\n\n' + \
             '$ ' + append_command + '\n' + \
             append_command_output
 
     # print submission confirmation
-    print('-' * (conn.columns - 1))
-    print('%-12s: %s' % ('Product', conn.product))
-    print('%-12s: %s' % ('Component', conn.component))
-    print('%-12s: %s' % ('Title', conn.summary))
-    if hasattr(conn, 'version'):
-        print('%-12s: %s' % ('Version', conn.version))
-    print('%-12s: %s' % ('Description', conn.description))
-    if hasattr(conn, 'op_sys'):
-        print('%-12s: %s' % ('Operating System', conn.op_sys))
-    if hasattr(conn, 'platform'):
-        print('%-12s: %s' % ('Platform', conn.platform))
-    if hasattr(conn, 'priority'):
-        print('%-12s: %s' % ('Priority', conn.priority))
-    if hasattr(conn, 'severity'):
-        print('%-12s: %s' % ('Severity', conn.severity))
-    if hasattr(conn, 'alias'):
-        print('%-12s: %s' % ('Alias', conn.alias))
-    if hasattr(conn, 'assigned_to'):
-        print('%-12s: %s' % ('Assigned to', conn.assigned_to))
-    if hasattr(conn, 'cc'):
-        print('%-12s: %s' % ('CC', conn.cc))
-    if hasattr(conn, 'url'):
-        print('%-12s: %s' % ('URL', conn.url))
+    print('-' * (settings.columns - 1))
+    print('%-12s: %s' % ('Product', settings.product))
+    print('%-12s: %s' % ('Component', settings.component))
+    print('%-12s: %s' % ('Title', settings.summary))
+    if hasattr(settings, 'version'):
+        print('%-12s: %s' % ('Version', settings.version))
+    print('%-12s: %s' % ('Description', settings.description))
+    if hasattr(settings, 'op_sys'):
+        print('%-12s: %s' % ('Operating System', settings.op_sys))
+    if hasattr(settings, 'platform'):
+        print('%-12s: %s' % ('Platform', settings.platform))
+    if hasattr(settings, 'priority'):
+        print('%-12s: %s' % ('Priority', settings.priority))
+    if hasattr(settings, 'severity'):
+        print('%-12s: %s' % ('Severity', settings.severity))
+    if hasattr(settings, 'alias'):
+        print('%-12s: %s' % ('Alias', settings.alias))
+    if hasattr(settings, 'assigned_to'):
+        print('%-12s: %s' % ('Assigned to', settings.assigned_to))
+    if hasattr(settings, 'cc'):
+        print('%-12s: %s' % ('CC', settings.cc))
+    if hasattr(settings, 'url'):
+        print('%-12s: %s' % ('URL', settings.url))
     # fixme: groups
     # fixme: status
     # fixme: Milestone
-    print('-' * (conn.columns - 1))
+    print('-' * (settings.columns - 1))
 
-    if not hasattr(conn, 'batch'):
-        if conn.default_confirm in ['Y', 'y']:
+    if not hasattr(settings, 'batch'):
+        if settings.default_confirm in ['Y', 'y']:
             confirm = input('Confirm bug submission (Y/n)? ')
         else:
             confirm = input('Confirm bug submission (y/N)? ')
         if len(confirm) < 1:
-            confirm = conn.default_confirm
+            confirm = settings.default_confirm
         if confirm[0] not in ('y', 'Y'):
             log_info('Submission aborted')
             return
 
     params = {}
-    params['product'] = conn.product
-    params['component'] = conn.component
-    if hasattr(conn, 'version'):
-        params['version'] = conn.version
-    params['summary'] = conn.summary
-    if hasattr(conn, 'description'):
-        params['description'] = conn.description
-    if hasattr(conn, 'op_sys'):
-        params['op_sys'] = conn.op_sys
-    if hasattr(conn, 'platform'):
-        params['platform'] = conn.platform
-    if hasattr(conn, 'priority'):
-        params['priority'] = conn.priority
-    if hasattr(conn, 'severity'):
-        params['severity'] = conn.severity
-    if hasattr(conn, 'alias'):
-        params['alias'] = conn.alias
-    if hasattr(conn, 'assigned_to'):
-        params['assigned_to'] = conn.assigned_to
-    if hasattr(conn, 'cc'):
-        params['cc'] = conn.cc
-    if hasattr(conn, 'url'):
-        params['url'] = conn.url
+    params['product'] = settings.product
+    params['component'] = settings.component
+    if hasattr(settings, 'version'):
+        params['version'] = settings.version
+    params['summary'] = settings.summary
+    if hasattr(settings, 'description'):
+        params['description'] = settings.description
+    if hasattr(settings, 'op_sys'):
+        params['op_sys'] = settings.op_sys
+    if hasattr(settings, 'platform'):
+        params['platform'] = settings.platform
+    if hasattr(settings, 'priority'):
+        params['priority'] = settings.priority
+    if hasattr(settings, 'severity'):
+        params['severity'] = settings.severity
+    if hasattr(settings, 'alias'):
+        params['alias'] = settings.alias
+    if hasattr(settings, 'assigned_to'):
+        params['assigned_to'] = settings.assigned_to
+    if hasattr(settings, 'cc'):
+        params['cc'] = settings.cc
+    if hasattr(settings, 'url'):
+        params['url'] = settings.url
 
-    result = conn.call_bz(conn.bz.Bug.create, params)
+    result = settings.call_bz(settings.bz.Bug.create, params)
     log_info('Bug %d submitted' % result['id'])
 
 
-def search(conn):
+def search(settings):
     """Performs a search on the bugzilla database with
 the keywords given on the title (or the body if specified).
     """
@@ -641,7 +641,7 @@ the keywords given on the title (or the body if specified).
                   'version', 'whiteboard']
 
     params = {}
-    d = vars(conn)
+    d = vars(settings)
     for key in d:
         if key in valid_keys:
             params[key] = d[key]
@@ -660,21 +660,21 @@ the keywords given on the title (or the body if specified).
     for key in params:
         log_info('   {0:<20} = {1}'.format(key, params[key]))
 
-    if not conn.skip_auth:
-        login(conn)
+    if not settings.skip_auth:
+        login(settings)
 
-    result = conn.call_bz(conn.bz.Bug.search, params)['bugs']
+    result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
 
     if not len(result):
         log_info('No bugs found.')
     else:
-        list_bugs(result, conn)
+        list_bugs(result, settings)
 
 
-def connections(conn):
+def connections(settings):
     print('Known bug trackers:')
     print()
-    for tracker in conn.connections:
+    for tracker in settings.connections:
         print(tracker)
 
 
@@ -684,14 +684,14 @@ def main():
 
     ConfigParser = load_config(getattr(args, 'config_file', None))
 
-    conn = Connection(args, ConfigParser)
+    settings = Settings(args, ConfigParser)
 
     if not hasattr(args, 'func'):
         ArgParser.print_usage()
         return 1
 
     try:
-        args.func(conn)
+        args.func(settings)
     except BugzError as error:
         log_error(error)
         return 1

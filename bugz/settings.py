@@ -12,7 +12,7 @@ from bugz.tokens import Tokens
 from bugz.utils import terminal_width
 
 
-class Connection:
+class Settings:
     def __init__(self, args, config):
         for key in vars(args):
             setattr(self, key, getattr(args, key))
@@ -133,7 +133,7 @@ class Connection:
         for key in vars(args):
             log_debug('{0}, {1}'.format(key, getattr(args, key)), 3)
 
-        log_debug('Connection debug dump:', 3)
+        log_debug('Settings debug dump:', 3)
         for key in vars(self):
             log_debug('{0}, {1}'.format(key, getattr(self, key)), 3)
 
