@@ -4,4 +4,4 @@
 
 
 class BugzError(Exception):
-	pass
+    pass

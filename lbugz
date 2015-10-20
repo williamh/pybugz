@@ -3,9 +3,9 @@
 """
 lbugz: execute bugz from the git repository.
 
-This script is primarily used to test bugz. It is a wrapper which adds
-the package directory to the system path and executes bin/bugz from the
-git repository passing along any arguments supplied to it.
+This script is primarily used to test pybugz.
+It works by prepending the directory it is located in to sys.path then
+importing  pybugz and running the main function from that directory.
 
 This is based on a patch from Mike Frysinger <vapier@gentoo.org>.
 """
@@ -15,7 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from bugz.main import main
+from bugz.cli import main
 
 if __name__ == "__main__":
 	main()
