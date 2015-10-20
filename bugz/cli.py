@@ -26,6 +26,7 @@ import sys
 import textwrap
 
 import xmlrpc.client
+import urllib.parse
 
 from bugz.cli_argparser import make_arg_parser
 from bugz.configfile import load_config
@@ -675,7 +676,8 @@ the keywords given on the title (or the body if specified).
         if 'all' not in d['status']:
             params['status'] = d['status']
     elif 'search_statuses' in d:
-                params['status'] = d['search_statuses']
+		params['status'] =  [urllib.parse.unquote(s)
+			for s in d['search_statuses']]
     if 'terms' in d:
         params['summary'] = d['terms']
 
