@@ -56,7 +56,7 @@ def make_arg_parser():
 	attach_parser.add_argument('-p', '--patch',
 		action='store_true',
 		help='attachment is a patch',
-		dest='is_patch')
+		dest='is_patch', default=False)
 	attach_parser.add_argument('-t', '--title',
 		help='a short description of the attachment (default: filename).',
 		dest='summary')

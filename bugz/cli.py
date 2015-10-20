@@ -291,8 +291,9 @@ def attach(conn):
 	if not is_patch:
 		params['content_type'] = content_type
 	params['comment'] = comment
-	params['is_patch'] = is_patch
+	params['is_patch'] = False
 	login(conn)
+
 	result = conn.call_bz(conn.bz.Bug.add_attachment, params)
 	attachid = result['ids'][0]
 	log_info('{0} ({1}) has been attached to bug {2}'.format(
