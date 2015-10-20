@@ -288,10 +288,10 @@ def attach(conn):
 
 	params['file_name'] = os.path.basename(filename)
 	params['summary'] = summary
-	if not is_patch:
-		params['content_type'] = content_type
+	params['content_type'] = content_type
 	params['comment'] = comment
-	params['is_patch'] = False
+	if is_patch is not None:
+		params['is_patch'] = is_patch
 	login(conn)
 
 	result = conn.call_bz(conn.bz.Bug.add_attachment, params)
