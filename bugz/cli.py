@@ -40,15 +40,15 @@ try:
 except ImportError:
     pass
 
-def list_bugs(buglist, conn):
-	fmt = conn.format
+def list_bugs(buglist, settings):
+	fmt = settings.format
 	if fmt is None:
 		fmt = '{bug[id]}'
-		if hasattr(conn, 'show_status'):
+		if hasattr(settings, 'show_status'):
 			fmt += ' {bug[status]:>12}'
-		if hasattr(conn, 'show_priority'):
+		if hasattr(settings, 'show_priority'):
 			fmt += ' {bug[priority]:>12}'
-		if hasattr(conn, 'show_severity'):
+		if hasattr(settings, 'show_severity'):
 			fmt += ' {bug[severity]:>12}'
 		fmt += ' {bug[short_assigned_to]:>20}'
 		fmt += ' {bug[summary]}'
@@ -56,7 +56,7 @@ def list_bugs(buglist, conn):
 	for bug in buglist:
 		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
 
-		print(fmt.format(bug=bug)[:conn.columns])
+		print(fmt.format(bug=bug)[:settings.columns])
 	log_info("%i bug(s) found." % len(buglist))
 
 def json_records(buglist):
@@ -635,28 +635,32 @@ def post(settings):
     result = settings.call_bz(settings.bz.Bug.create, params)
     log_info('Bug %d submitted' % result['id'])
 
-def products(conn):
-	products = fetch_products(conn)
-	fmt = conn.format
+def products(settings):
+	products = fetch_products(settings)
+	fmt = settings.format
 	if fmt is None:
 		fmt = '{product[name]}'
-	if conn.json:
+	if settings.json:
 		json_records(products)
 	else:
 		for product in products:
-			print(fmt.format(product=product)[:conn.columns])
+			print(fmt.format(product=product)[:settings.columns])
 
-def components(conn):
-	products = fetch_products(conn)
-	fmt = conn.format
+def components(settings):
+	products = fetch_products(settings)
+	fmt = settings.format
 	if fmt is None:
 		fmt = '{product[name]:>20} {component[name]:>20} {component[description]:>20}'
-	if conn.json:
+	if settings.json:
 		json_records(products)
 	else:
 		for product in products:
 			for component in product['components']:
-				print(fmt.format(product=product, component=component)[:conn.columns])
+				print(fmt.format(product=product, component=component)[:settings.columns])
+
+def fetch_products(settings):
+    product_ids = settings.call_bz(settings.bz.Product.get_accessible_products, dict())['ids']
+    return settings.call_bz(settings.bz.Product.get, dict(ids=product_ids))['products']
 
 def search(settings):
     """Performs a search on the bugzilla database with
@@ -676,8 +680,8 @@ the keywords given on the title (or the body if specified).
         if 'all' not in d['status']:
             params['status'] = d['status']
     elif 'search_statuses' in d:
-		params['status'] =  [urllib.parse.unquote(s)
-			for s in d['search_statuses']]
+        params['status'] =  [urllib.parse.unquote(s)
+            for s in d['search_statuses']]
     if 'terms' in d:
         params['summary'] = d['terms']
 
@@ -695,8 +699,8 @@ the keywords given on the title (or the body if specified).
 
     if not len(result):
         log_info('No bugs found.')
-	elif conn.json:
-		json_records(result)
+    elif settings.json:
+        json_records(result)
     else:
         list_bugs(result, settings)
 
