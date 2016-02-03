@@ -39,6 +39,30 @@ from bugz.log import log_error, log_info
 from bugz.utils import block_edit, get_content_type
 
 
+def login(settings):
+    """Authenticate a session.
+    """
+
+    if settings.skip_auth:
+        return
+
+    # prompt for username if we were not supplied with it
+    if not hasattr(settings, 'user'):
+        log_info('No username given.')
+        settings.user = input('Username: ')
+
+    # prompt for password if we were not supplied with it
+    if not hasattr(settings, 'password'):
+        if not hasattr(settings, 'passwordcmd'):
+            log_info('No password given.')
+            settings.password = getpass.getpass()
+        else:
+            process = subprocess.Popen(settings.passwordcmd, shell=True,
+                                       stdout=subprocess.PIPE)
+            password, _ = process.communicate()
+            settings.password = password.splitlines()[0]
+
+
 def list_bugs(buglist, settings):
     for bug in buglist:
         bugid = bug['id']
@@ -324,8 +348,7 @@ def attachment(settings):
     params = {}
     params['attachment_ids'] = [settings.attachid]
 
-    if not settings.skip_auth:
-        login(settings)
+    login(settings)
 
     result = settings.call_bz(settings.bz.Bug.attachments, params)
     result = result['attachments'][settings.attachid]
@@ -350,8 +373,7 @@ def attachment(settings):
 
 def get(settings):
     """ Fetch bug details given the bug id """
-    if not settings.skip_auth:
-        login(settings)
+    login(settings)
 
     log_info('Getting bug %s ..' % settings.bugid)
     params = {'ids': [settings.bugid]}
@@ -359,51 +381,6 @@ def get(settings):
 
     for bug in result['bugs']:
         show_bug_info(bug, settings)
-
-
-def login(settings):
-    """Authenticate a session.
-    """
-    settings.load_token()
-    if settings.bz_token is not None:
-        return
-
-    # prompt for username if we were not supplied with it
-    if not hasattr(settings, 'user'):
-        log_info('No username given.')
-        user = input('Username: ')
-    else:
-        user = settings.user
-
-    # prompt for password if we were not supplied with it
-    if not hasattr(settings, 'password'):
-        if not hasattr(settings, 'passwordcmd'):
-            log_info('No password given.')
-            password = getpass.getpass()
-        else:
-            process = subprocess.Popen(settings.passwordcmd, shell=True,
-                                       stdout=subprocess.PIPE)
-            password, _ = process.communicate()
-            password = password.splitlines()[0]
-    else:
-        password = settings.password
-
-    # perform login
-    params = {}
-    params['login'] = user
-    params['password'] = password
-    log_info('Logging in')
-    result = settings.call_bz(settings.bz.User.login, params)
-    if 'token' in result:
-        settings.save_token(result['token'])
-
-
-def logout(settings):
-    settings.load_token()
-    params = {}
-    log_info('logging out')
-    settings.call_bz(settings.bz.User.logout, params)
-    settings.destroy_token()
 
 
 def modify(settings):
@@ -660,8 +637,7 @@ the keywords given on the title (or the body if specified).
     for key in params:
         log_info('   {0:<20} = {1}'.format(key, params[key]))
 
-    if not settings.skip_auth:
-        login(settings)
+    login(settings)
 
     result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
 

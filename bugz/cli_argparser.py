@@ -15,12 +15,11 @@ def make_arg_parser():
     parser.add_argument('-b', '--base',
                         help='base URL of Bugzilla')
     parser.add_argument('-u', '--user',
-                        help='username for commands requiring authentication')
+                        help='username')
     parser.add_argument('-p', '--password',
-                        help='password for commands requiring authentication')
+                        help='password')
     parser.add_argument('--passwordcmd',
-                        help='password command to evaluate for '
-                        'commands requiring authentication')
+                        help='command to evaluate for the password')
     parser.add_argument('-q', '--quiet',
                         action='store_true',
                         help='quiet mode')
@@ -95,14 +94,6 @@ def make_arg_parser():
                             action="store_true",
                             help='do not show comments')
     get_parser.set_defaults(func=bugz.cli.get)
-
-    login_parser = subparsers.add_parser('login',
-                                         help='log into bugzilla')
-    login_parser.set_defaults(func=bugz.cli.login)
-
-    logout_parser = subparsers.add_parser('logout',
-                                          help='log out of bugzilla')
-    logout_parser.set_defaults(func=bugz.cli.logout)
 
     modify_parser = subparsers.add_parser('modify',
                                           argument_default=argparse.SUPPRESS,

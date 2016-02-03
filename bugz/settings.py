@@ -8,7 +8,6 @@ from bugz.configfile import get_config_option
 from bugz.exceptions import BugzError
 from bugz.log import log_debug, log_error, log_info
 from bugz.log import log_setDebugLevel, log_setQuiet
-from bugz.tokens import Tokens
 from bugz.utils import terminal_width
 
 
@@ -109,24 +108,6 @@ class Settings:
         parse_result = urllib.parse.urlparse(self.base)
         new_netloc = parse_result.netloc.split('@')[-1]
         self.safe_base = parse_result._replace(netloc=new_netloc).geturl()
-        self.tokens = Tokens()
-        self.bz_token = None
-
-        old_token_file = os.path.join(os.environ['HOME'], '.bugz_token')
-        try:
-            old_token = open(old_token_file).read().strip()
-            self.save_token(old_token)
-            os.remove(old_token_file)
-            print('Your ~/.bugz_token file was moved to ~/.bugz_tokens')
-            print('The token was assigned to the {0} connection'
-                  .format(self.connection))
-            print('If this is not correct, please edit ~/.bugz_tokens')
-            print('and adjust the name of the connection.')
-            print('This is the name enclosed in square brackets.')
-            print('The connections command lists known connections.')
-        except (IOError, OSError):
-            pass
-
         log_info("Using [{0}] ({1})".format(self.connection, self.safe_base))
 
         log_debug('Command line debug dump:', 3)
@@ -137,23 +118,13 @@ class Settings:
         for key in vars(self):
             log_debug('{0}, {1}'.format(key, getattr(self, key)), 3)
 
-    def load_token(self):
-        self.bz_token = self.tokens.get_token(self.connection)
-
-    def save_token(self, bz_token):
-        self.tokens.set_token(self.connection, bz_token)
-        self.tokens.save_tokens()
-
-    def destroy_token(self):
-        self.bz_token = None
-        self.tokens.remove_token(self.connection)
-        self.tokens.save_tokens()
-
     def call_bz(self, method, params):
         """Attempt to call method with args.
         """
-        if self.bz_token is not None:
-            params['Bugzilla_token'] = self.bz_token
+        if hasattr(self, 'user'):
+            params['Bugzilla_login'] = self.user
+        if hasattr(self, 'password'):
+            params['Bugzilla_password'] = self.password
         try:
             return method(params)
         except xmlrpc.client.Fault as fault:
