@@ -43,7 +43,7 @@ def login(settings):
     """Authenticate a session.
     """
 
-    if settings.skip_auth:
+    if settings.skip_auth or hasattr(settings, 'key'):
         return
 
     # prompt for username if we were not supplied with it

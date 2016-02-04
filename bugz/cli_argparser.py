@@ -20,6 +20,8 @@ def make_arg_parser():
                         help='password')
     parser.add_argument('--passwordcmd',
                         help='command to evaluate for the password')
+    parser.add_argument('-k', '--key',
+                        help='API key')
     parser.add_argument('-q', '--quiet',
                         action='store_true',
                         help='quiet mode')

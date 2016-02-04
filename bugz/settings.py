@@ -58,6 +58,12 @@ class Settings:
                                                      self.connection,
                                                      'passwordcmd')
 
+        if not hasattr(self, 'key'):
+            if config.has_option(self.connection, 'key'):
+                self.key = get_config_option(config.get,
+                                                     self.connection,
+                                                     'key')
+
         if not hasattr(self, 'product'):
             if config.has_option(self.connection, 'product'):
                 self.product = get_config_option(config.get,
@@ -121,10 +127,13 @@ class Settings:
     def call_bz(self, method, params):
         """Attempt to call method with args.
         """
-        if hasattr(self, 'user'):
-            params['Bugzilla_login'] = self.user
-        if hasattr(self, 'password'):
-            params['Bugzilla_password'] = self.password
+        if hasattr(self, 'key'):
+            params['Bugzilla_api_key'] = self.key
+        else:
+            if hasattr(self, 'user'):
+                params['Bugzilla_login'] = self.user
+            if hasattr(self, 'password'):
+                params['Bugzilla_password'] = self.password
         try:
             return method(params)
         except xmlrpc.client.Fault as fault:

@@ -72,7 +72,8 @@ user = myname@my.project.com
 password = secret2
 .PP
 These set your username and password for this bugzilla. If you do not
-provide these, you will be prompted for them.
+provide one or both of these and you do not use the key setting below,
+you will be prompted for the setting you do not provide.
 .PP
 passwordcmd = gpg --decrypt ~/.my-encrypted-password.gpg
 .PP
@@ -81,6 +82,14 @@ password command. This command will be run, and pybugz expects it to
 output the password to stdout. The example above uses gpg to decrypt an
 encrypted password stored in a file. The default setting is undefined,
 so it will not be used unless you define it.
+.PP
+key = string
+.PP
+This is your API key, which is an alternative way to authenticate for Bugzilla
+5.0 and newer.
+To use this, you must generate an API key in the preferences section of
+Bugzilla and set it to that value. This overrides the username and
+password settings. The default is undefined.
 .PP
 columns = 80
 .PP
