@@ -38,6 +38,10 @@ def get_config_option(get, section, option):
     try:
         value = get(section, option)
 
+    except configparser.InterpolationSyntaxError as error:
+        log_error('Syntax Error in configuration file: {0}'.format(error))
+        sys.exit(1)
+
     except ValueError as error:
         log_error('{0} is not in the right format: {1}'.format(option,
                   str(error)))
