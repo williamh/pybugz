@@ -39,6 +39,27 @@ from bugz.log import log_error, log_info
 from bugz.utils import block_edit, get_content_type
 
 
+def check_bugz_token():
+    tokenFound = os.path.isfile(os.path.expanduser('~/.bugz_token')) or \
+                 os.path.isfile(os.path.expanduser('~/.bugz_tokens'))
+    if not tokenFound:
+        return
+    print('This version of pybugz no longer supports tokens.')
+    print()
+    print('If the bugzilla you are accessing is 5.0 or newer, you can')
+    print('generate an api key by visiting the preferences section')
+    print('of the Bugzilla web interface.')
+    print('For bugzilla 3.6 or newer, you can use your username and password')
+    print()
+    print('Once you have decided how you want to authenticate,')
+    print('please configure the appropriate settings in ~/.bugzrc')
+    print('and remove ~/.bugz_token  and ~/.bugz_tokens')
+    print()
+    print('see man pybugz.d for ~/.bugzrc settings')
+    print('This decision was made because Bugzilla is deprecating tokens.')
+    print('https://www.bugzilla.org/docs/5.0/en/html/api/Bugzilla/WebService.html#LOGGING_IN')
+
+
 def login(settings):
     """Authenticate a session.
     """
@@ -660,6 +681,7 @@ def main():
 
     ConfigParser = load_config(getattr(args, 'config_file', None))
 
+    check_bugz_token()
     settings = Settings(args, ConfigParser)
 
     if not hasattr(args, 'func'):
