@@ -18,26 +18,27 @@ Classes
 """
 
 import getpass
+import json
 import os
 import re
 import subprocess
 import sys
 import textwrap
+
 import xmlrpc.client
+import urllib.parse
+
+from bugz.cli_argparser import make_arg_parser
+from bugz.configfile import load_config
+from bugz.exceptions import BugzError
+from bugz.log import log_error, log_info
+from bugz.settings import Settings
+from bugz.utils import block_edit, get_content_type
 
 try:
     import readline
 except ImportError:
     pass
-
-
-from bugz.cli_argparser import make_arg_parser
-from bugz.configfile import load_config
-from bugz.settings import Settings
-from bugz.exceptions import BugzError
-from bugz.log import log_error, log_info
-from bugz.utils import block_edit, get_content_type
-
 
 def check_bugz_token():
     tokenFound = os.path.isfile(os.path.expanduser('~/.bugz_token')) or \
@@ -85,26 +86,30 @@ def login(settings):
 
 
 def list_bugs(buglist, settings):
-    for bug in buglist:
-        bugid = bug['id']
-        status = bug['status']
-        priority = bug['priority']
-        severity = bug['severity']
-        assignee = bug['assigned_to'].split('@')[0]
-        desc = bug['summary']
-        line = '%s' % (bugid)
-        if hasattr(settings, 'show_status'):
-            line = '%s %-12s' % (line, status)
-        if hasattr(settings, 'show_priority'):
-            line = '%s %-12s' % (line, priority)
-        if hasattr(settings, 'show_severity'):
-            line = '%s %-12s' % (line, severity)
-        line = '%s %-20s' % (line, assignee)
-        line = '%s %s' % (line, desc)
-        print(line[:settings.columns])
+	fmt = settings.format
+	if fmt is None:
+		fmt = '{bug[id]}'
+		if hasattr(settings, 'show_status'):
+			fmt += ' {bug[status]:>12}'
+		if hasattr(settings, 'show_priority'):
+			fmt += ' {bug[priority]:>12}'
+		if hasattr(settings, 'show_severity'):
+			fmt += ' {bug[severity]:>12}'
+		fmt += ' {bug[short_assigned_to]:>20}'
+		fmt += ' {bug[summary]}'
 
-    log_info("%i bug(s) found." % len(buglist))
+	for bug in buglist:
+		bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
 
+		print(fmt.format(bug=bug)[:settings.columns])
+	log_info("%i bug(s) found." % len(buglist))
+
+def json_records(buglist):
+	for bug in buglist:
+		for k, v in list(bug.items()):
+			if isinstance(v, xmlrpc.client.DateTime):
+				bug[k] = str(v)
+		print(json.dumps(bug))
 
 def prompt_for_bug(settings):
     """ Prompt for the information for a bug
@@ -416,6 +421,9 @@ def modify(settings):
             raise BugzError('unable to read file: %s: %s' %
                             (settings.comment_from, error))
 
+    if hasattr(settings, 'assigned_to') and hasattr(settings, 'unassign'):
+        raise BugzError('--assigned-to and --unassign cannot be used together')
+
     if hasattr(settings, 'comment_editor'):
         settings.comment = block_edit('Enter comment:')
 
@@ -425,6 +433,8 @@ def modify(settings):
         params['alias'] = settings.alias
     if hasattr(settings, 'assigned_to'):
         params['assigned_to'] = settings.assigned_to
+    if hasattr(settings, 'unassign'):
+        params['reset_assigned_to'] = True
     if hasattr(settings, 'blocks_add'):
         if 'blocks' not in params:
             params['blocks'] = {}
@@ -628,6 +638,32 @@ def post(settings):
     result = settings.call_bz(settings.bz.Bug.create, params)
     log_info('Bug %d submitted' % result['id'])
 
+def products(settings):
+	products = fetch_products(settings)
+	fmt = settings.format
+	if fmt is None:
+		fmt = '{product[name]}'
+	if settings.json:
+		json_records(products)
+	else:
+		for product in products:
+			print(fmt.format(product=product)[:settings.columns])
+
+def components(settings):
+	products = fetch_products(settings)
+	fmt = settings.format
+	if fmt is None:
+		fmt = '{product[name]:>20} {component[name]:>20} {component[description]:>20}'
+	if settings.json:
+		json_records(products)
+	else:
+		for product in products:
+			for component in product['components']:
+				print(fmt.format(product=product, component=component)[:settings.columns])
+
+def fetch_products(settings):
+    product_ids = settings.call_bz(settings.bz.Product.get_accessible_products, dict())['ids']
+    return settings.call_bz(settings.bz.Product.get, dict(ids=product_ids))['products']
 
 def search(settings):
     """Performs a search on the bugzilla database with
@@ -647,12 +683,10 @@ the keywords given on the title (or the body if specified).
         if 'all' not in d['status']:
             params['status'] = d['status']
     elif 'search_statuses' in d:
-                params['status'] = d['search_statuses']
+        params['status'] =  [urllib.parse.unquote(s)
+            for s in d['search_statuses']]
     if 'terms' in d:
         params['summary'] = d['terms']
-
-    if not params:
-        raise BugzError('Please give search terms or options.')
 
     log_info('Searching for bugs meeting the following criteria:')
     for key in params:
@@ -662,8 +696,13 @@ the keywords given on the title (or the body if specified).
 
     result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
 
+    if hasattr(settings, 'not_status'):
+        result = list(b for b in result if b['status'] not in settings.not_status)
+
     if not len(result):
         log_info('No bugs found.')
+    elif settings.json:
+        json_records(result)
     else:
         list_bugs(result, settings)
 

@@ -185,6 +185,9 @@ def make_arg_parser():
     modify_parser.add_argument('-t', '--title',
                                dest='summary',
                                help='set title of bug')
+    modify_parser.add_argument('-u', '--unassign',
+                               dest='unassign', action='store_true',
+                               help='Reassign the bug to default owner')
     modify_parser.add_argument('-U', '--url',
                                help='set URL field of bug')
     modify_parser.add_argument('-v', '--version',
@@ -242,6 +245,34 @@ def make_arg_parser():
                              help='default answer to confirmation question')
     post_parser.set_defaults(func=bugz.cli.post)
 
+    products_parser = subparsers.add_parser('products',
+        argument_default=argparse.SUPPRESS, help='list available products')
+    products_parser.set_defaults(func=bugz.cli.products)
+    products_parser.add_argument(
+        '--json',
+        action='store_true',
+        help='format results as newline separated json records',
+        default=False)
+    products_parser.add_argument(
+        '--format',
+        type=str,
+        help='custom format. Format: {product[field]} (see --json)',
+        default=None)
+
+    components_parser = subparsers.add_parser('components',
+        argument_default=argparse.SUPPRESS, help='list available components')
+    components_parser.set_defaults(func=bugz.cli.components)
+    components_parser.add_argument(
+        '--json',
+        action='store_true',
+        help='format results as newline separated json records',
+        default=False)
+    components_parser.add_argument(
+        '--format',
+        type=str,
+        help='custom format. Format: {product[field]} (see --json)',
+        default=None)
+
     search_parser = subparsers.add_parser('search',
                                           argument_default=argparse.SUPPRESS,
                                           help='search for bugs in bugzilla')
@@ -287,6 +318,10 @@ def make_arg_parser():
                                action='append',
                                help='restrict by status '
                                '(one or more, use all for all statuses)')
+    search_parser.add_argument('-S', '--not-status',
+                               action='append',
+                               help='exclude by status '
+                               '(one or more, use all for all statuses)')
     search_parser.add_argument('-v', '--version',
                                action='append',
                                help='restrict by version (one or more)')
@@ -301,6 +336,17 @@ def make_arg_parser():
     search_parser.add_argument('--show-severity',
                                action='store_true',
                                help='show severity of bugs')
+    search_parser.add_argument(
+        '--format',
+        type=str,
+        help='custom format found bugs. Format: {bug[field]} (see --json)',
+        default=None)
+    search_parser.add_argument(
+        '--json',
+        action='store_true',
+        help='format results as newline separated json records',
+        default=False)
+
     search_parser.set_defaults(func=bugz.cli.search)
 
     return parser
