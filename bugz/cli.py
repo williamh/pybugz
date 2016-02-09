@@ -653,9 +653,6 @@ the keywords given on the title (or the body if specified).
     if 'terms' in d:
         params['summary'] = d['terms']
 
-    if not params:
-        raise BugzError('Please give search terms or options.')
-
     log_info('Searching for bugs meeting the following criteria:')
     for key in params:
         log_info('   {0:<20} = {1}'.format(key, params[key]))
@@ -664,6 +661,9 @@ the keywords given on the title (or the body if specified).
         login(settings)
 
     result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
+
+    if hasattr(settings, 'not_status'):
+        result = list(b for b in result if b['status'] not in settings.not_status)
 
     if not len(result):
         log_info('No bugs found.')
