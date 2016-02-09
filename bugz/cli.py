@@ -256,11 +256,15 @@ def show_bug_info(bug, settings):
         'cc': 'CC',
         'see_also': 'See Also',
     }
-    SkipFields = ['is_open', 'id', 'is_confirmed',
+    SkipFields = ['is_open', 'is_confirmed',
                   'is_creator_accessible', 'is_cc_accessible',
                   'update_token']
 
-    for field in bug:
+    FieldOrder = [
+        'id', 'product', 'component', 'summary', 'status', 'resolution',
+        'priority', 'creation_time', 'reporter',  'blocks', 'assigned_to']
+
+    for field in sorted(bug, key=lambda x: FieldOrder.index(x) if x in FieldOrder else 100):
         if field in SkipFields:
             continue
         if field in FieldMap:
