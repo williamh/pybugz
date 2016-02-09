@@ -308,6 +308,17 @@ def make_arg_parser():
     search_parser.add_argument('--show-severity',
                                action='store_true',
                                help='show severity of bugs')
+    search_parser.add_argument(
+        '--format',
+        type=str,
+        help='custom format found bugs. Format: {bug[field]} (see --json)',
+        default=None)
+    search_parser.add_argument(
+        '--json',
+        action='store_true',
+        help='format results as newline separated json records',
+        default=False)
+
     search_parser.set_defaults(func=bugz.cli.search)
 
     return parser

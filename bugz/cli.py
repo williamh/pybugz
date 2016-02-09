@@ -18,48 +18,52 @@ Classes
 """
 
 import getpass
+import json
 import os
 import re
 import subprocess
 import sys
 import textwrap
+
 import xmlrpc.client
+
+from bugz.cli_argparser import make_arg_parser
+from bugz.configfile import load_config
+from bugz.exceptions import BugzError
+from bugz.log import log_error, log_info
+from bugz.settings import Settings
+from bugz.utils import block_edit, get_content_type
 
 try:
     import readline
 except ImportError:
     pass
 
-
-from bugz.cli_argparser import make_arg_parser
-from bugz.configfile import load_config
-from bugz.settings import Settings
-from bugz.exceptions import BugzError
-from bugz.log import log_error, log_info
-from bugz.utils import block_edit, get_content_type
-
-
 def list_bugs(buglist, settings):
-    for bug in buglist:
-        bugid = bug['id']
-        status = bug['status']
-        priority = bug['priority']
-        severity = bug['severity']
-        assignee = bug['assigned_to'].split('@')[0]
-        desc = bug['summary']
-        line = '%s' % (bugid)
+    fmt = settings.format
+    if fmt is None:
+        fmt = '{bug[id]}'
         if hasattr(settings, 'show_status'):
-            line = '%s %-12s' % (line, status)
+            fmt += ' {bug[status]:>12}'
         if hasattr(settings, 'show_priority'):
-            line = '%s %-12s' % (line, priority)
+            fmt += ' {bug[priority]:>12}'
         if hasattr(settings, 'show_severity'):
-            line = '%s %-12s' % (line, severity)
-        line = '%s %-20s' % (line, assignee)
-        line = '%s %s' % (line, desc)
-        print(line[:settings.columns])
+            fmt += ' {bug[severity]:>12}'
+        fmt += ' {bug[short_assigned_to]:>20}'
+        fmt += ' {bug[summary]}'
 
+    for bug in buglist:
+        bug['short_assigned_to'] = bug['assigned_to'].split('@')[0]
+
+        print(fmt.format(bug=bug)[:settings.columns])
     log_info("%i bug(s) found." % len(buglist))
 
+def json_records(buglist):
+    for bug in buglist:
+        for k, v in list(bug.items()):
+            if isinstance(v, xmlrpc.client.DateTime):
+                bug[k] = str(v)
+        print(json.dumps(bug))
 
 def prompt_for_bug(settings):
     """ Prompt for the information for a bug
@@ -667,6 +671,8 @@ the keywords given on the title (or the body if specified).
 
     if not len(result):
         log_info('No bugs found.')
+    elif settings.json:
+        json_records(result)
     else:
         list_bugs(result, settings)
 
