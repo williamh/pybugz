@@ -201,6 +201,10 @@ def make_arg_parser():
     modify_parser.add_argument('-t', '--title',
                                dest='summary',
                                help='set title of bug')
+    modify_parser.add_argument('-u', '--unassign',
+                               action='store_true',
+                               dest='reset_assigned_to',
+                               help='Reassign the bug to the default owner')
     modify_parser.add_argument('-U', '--url',
                                help='set URL field of bug')
     modify_parser.add_argument('-v', '--version',

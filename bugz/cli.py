@@ -415,6 +415,10 @@ def modify(settings):
             raise BugzError('unable to read file: %s: %s' %
                             (settings.comment_from, error))
 
+    if hasattr(settings, 'assigned_to') and \
+            hasattr(settings, 'reset_assigned_to'):
+        raise BugzError('--assigned-to and --unassign cannot be used together')
+
     if hasattr(settings, 'comment_editor'):
         settings.comment = block_edit('Enter comment:')
 
