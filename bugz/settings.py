@@ -1,4 +1,3 @@
-import os
 import sys
 import urllib.error
 import urllib.parse
@@ -61,8 +60,8 @@ class Settings:
         if not hasattr(self, 'key'):
             if config.has_option(self.connection, 'key'):
                 self.key = get_config_option(config.get,
-                                                     self.connection,
-                                                     'key')
+                                             self.connection,
+                                             'key')
 
         if not hasattr(self, 'product'):
             if config.has_option(self.connection, 'product'):

@@ -41,7 +41,7 @@ from bugz.utils import block_edit, get_content_type
 
 def check_bugz_token():
     tokenFound = os.path.isfile(os.path.expanduser('~/.bugz_token')) or \
-                 os.path.isfile(os.path.expanduser('~/.bugz_tokens'))
+        os.path.isfile(os.path.expanduser('~/.bugz_tokens'))
     if not tokenFound:
         return
     print('This version of pybugz no longer supports tokens.')
@@ -57,7 +57,6 @@ def check_bugz_token():
     print()
     print('see man pybugz.d for ~/.bugzrc settings')
     print('This decision was made because Bugzilla is deprecating tokens.')
-    print('https://www.bugzilla.org/docs/5.0/en/html/api/Bugzilla/WebService.html#LOGGING_IN')
 
 
 def login(settings):
@@ -534,7 +533,8 @@ def post(settings):
                 if settings.description_from == '-':
                     settings.description = sys.stdin.read()
                 else:
-                    settings.description = open(settings.description_from, 'r').read()
+                    settings.description = \
+                        open(settings.description_from, 'r').read()
         except IOError as error:
             raise BugzError('Unable to read from file: %s: %s' %
                             (settings.description_from, error))
