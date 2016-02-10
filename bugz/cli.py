@@ -456,6 +456,14 @@ def modify(settings):
         params['component'] = settings.component
     if hasattr(settings, 'dupe_of'):
         params['dupe_of'] = settings.dupe_of
+    if hasattr(settings, 'deadline'):
+        params['deadline'] = settings.deadline
+    if hasattr(settings, 'estimated_time'):
+        params['estimated_time'] = settings.estimated_time
+    if hasattr(settings, 'remaining_time'):
+        params['remaining_time'] = settings.remaining_time
+    if hasattr(settings, 'work_time'):
+        params['work_time'] = settings.work_time
     if hasattr(settings, 'groups_add'):
         if 'groups' not in params:
             params['groups'] = {}
