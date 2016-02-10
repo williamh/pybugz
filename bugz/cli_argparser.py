@@ -142,10 +142,26 @@ def make_arg_parser():
                                'with this file as its contents.')
     modify_parser.add_argument('--component',
                                help='change the component for this bug')
+    modify_parser.add_argument('--deadline',
+                               help='deadline for bug (format YYYY-MM-DD)')
     modify_parser.add_argument('-d', '--duplicate',
                                dest='dupe_of',
                                type=int,
                                help='this bug is a duplicate')
+    modify_parser.add_argument('--estimated-time',
+                               dest='estimated_time',
+                               type=float,
+                               help='The total estimate of time required to '
+                               'fix the bug, in hours')
+    modify_parser.add_argument('--remaining-time',
+                               dest='remaining_time',
+                               type=float,
+                               help='How much work time is remaining to fix '
+                               'the bug, in hours')
+    modify_parser.add_argument('--work-time',
+                               dest='work_time',
+                               type=float,
+                               help='The number of hours spent on this bug')
     modify_parser.add_argument('--add-group',
                                action='append',
                                dest='groups_add',
