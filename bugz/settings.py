@@ -92,9 +92,9 @@ class Settings:
         log_setQuiet(self.quiet)
 
         if config.has_option(self.connection, 'search_statuses'):
-            self.search_statuses = get_config_option(config.get,
-                                                     self.connection,
-                                                     'search_statuses').split()
+            s = get_config_option(config.get, self.connection,
+                                  'search_statuses')
+            self.search_statuses = [x.strip() for x in s.split(',')]
 
         if not hasattr(self, 'skip_auth'):
             if config.has_option(self.connection, 'skip_auth'):
