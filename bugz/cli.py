@@ -415,6 +415,9 @@ def modify(settings):
             raise BugzError('unable to read file: %s: %s' %
                             (settings.comment_from, error))
 
+    if hasattr(settings, 'assigned_to') and hasattr(settings, 'unassign'):
+        raise BugzError('--assigned-to and --unassign cannot be used together')
+
     if hasattr(settings, 'comment_editor'):
         settings.comment = block_edit('Enter comment:')
 
@@ -424,6 +427,8 @@ def modify(settings):
         params['alias'] = settings.alias
     if hasattr(settings, 'assigned_to'):
         params['assigned_to'] = settings.assigned_to
+    if hasattr(settings, 'unassign'):
+        params['reset_assigned_to'] = True
     if hasattr(settings, 'blocks_add'):
         if 'blocks' not in params:
             params['blocks'] = {}
