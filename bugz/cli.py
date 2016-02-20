@@ -651,11 +651,9 @@ the keywords given on the title (or the body if specified).
     for key in d:
         if key in valid_keys:
             params[key] = d[key]
-    if 'status' in d:
-        if 'all' not in d['status']:
-            params['status'] = d['status']
-    elif 'search_statuses' in d:
-                params['status'] = d['search_statuses']
+    if 'search_statuses' in d:
+        if 'all' not in d['search_statuses']:
+            params['status'] = d['search_statuses']
     if 'terms' in d:
         params['summary'] = d['terms']
 
