@@ -255,9 +255,9 @@ def show_bug_info(bug, settings):
         'cc': 'CC',
         'see_also': 'See Also',
     }
-    SkipFields = ['is_open', 'id', 'is_confirmed',
-                  'is_creator_accessible', 'is_cc_accessible',
-                  'update_token']
+    SkipFields = ['assigned_to_detail', 'creator_detail', 'id',
+                  'is_confirmed', 'is_creator_accessible', 'is_cc_accessible',
+                  'is_open', 'update_token']
 
     for field in bug:
         if field in SkipFields:
