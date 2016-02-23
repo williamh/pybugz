@@ -255,7 +255,7 @@ def show_bug_info(bug, settings):
         'cc': 'CC',
         'see_also': 'See Also',
     }
-    SkipFields = ['assigned_to_detail', 'creator_detail', 'id',
+    SkipFields = ['assigned_to_detail', 'cc_detail', 'creator_detail', 'id',
                   'is_confirmed', 'is_creator_accessible', 'is_cc_accessible',
                   'is_open', 'update_token']
 
