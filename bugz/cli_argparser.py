@@ -2,7 +2,7 @@ import argparse
 
 import bugz.cli
 
-from bugz import __version__
+from bugz.definitions import __version__
 
 
 def make_arg_parser():

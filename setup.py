@@ -1,7 +1,7 @@
 import glob
 from setuptools import setup
 
-from bugz import __version__
+from bugz.definitions import __version__
 
 setup(
     name='pybugz',
