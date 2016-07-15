@@ -31,12 +31,12 @@ except ImportError:
     pass
 
 
-from bugz.cli_argparser import make_arg_parser
-from bugz.configfile import load_config
-from bugz.settings import Settings
-from bugz.exceptions import BugzError
-from bugz.log import log_error, log_info
-from bugz.utils import block_edit, get_content_type
+from pybugz.cli_argparser import make_arg_parser
+from pybugz.configfile import load_config
+from pybugz.settings import Settings
+from pybugz.exceptions import BugzError
+from pybugz.log import log_error, log_info
+from pybugz.utils import block_edit, get_content_type
 
 
 def check_bugz_token():

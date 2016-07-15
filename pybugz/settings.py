@@ -5,11 +5,11 @@ import urllib.parse
 import xml.parsers.expat
 import xmlrpc.client
 
-from bugz.configfile import get_config_option
-from bugz.exceptions import BugzError
-from bugz.log import log_debug, log_error, log_info
-from bugz.log import log_setDebugLevel, log_setQuiet
-from bugz.utils import terminal_width
+from pybugz.configfile import get_config_option
+from pybugz.exceptions import BugzError
+from pybugz.log import log_debug, log_error, log_info
+from pybugz.log import log_setDebugLevel, log_setQuiet
+from pybugz.utils import terminal_width
 
 
 class Settings:

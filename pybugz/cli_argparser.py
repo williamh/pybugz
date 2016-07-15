@@ -1,8 +1,8 @@
 import argparse
 
-import bugz.cli
+import pybugz.cli
 
-from bugz.definitions import __version__
+from pybugz.definitions import __version__
 
 
 def make_arg_parser():
@@ -70,7 +70,7 @@ def make_arg_parser():
                                dest='summary',
                                help='a short description of the '
                                'attachment (default: filename).')
-    attach_parser.set_defaults(func=bugz.cli.attach)
+    attach_parser.set_defaults(func=pybugz.cli.attach)
 
     attachment_parser = subparsers.add_parser('attachment',
                                               argument_default=argparse.SUPPRESS,
@@ -81,11 +81,11 @@ def make_arg_parser():
     attachment_parser.add_argument('-v', '--view',
                                    action="store_true",
                                    help='print attachment rather than save')
-    attachment_parser.set_defaults(func=bugz.cli.attachment)
+    attachment_parser.set_defaults(func=pybugz.cli.attachment)
 
     connections_parser = subparsers.add_parser('connections',
                                                help='list known bug trackers')
-    connections_parser.set_defaults(func=bugz.cli.connections)
+    connections_parser.set_defaults(func=pybugz.cli.connections)
 
     get_parser = subparsers.add_parser('get',
                                        argument_default=argparse.SUPPRESS,
@@ -98,7 +98,7 @@ def make_arg_parser():
     get_parser.add_argument("-n", "--no-comments",
                             action="store_true",
                             help='do not show comments')
-    get_parser.set_defaults(func=bugz.cli.get)
+    get_parser.set_defaults(func=pybugz.cli.get)
 
     modify_parser = subparsers.add_parser('modify',
                                           argument_default=argparse.SUPPRESS,
@@ -220,7 +220,7 @@ def make_arg_parser():
     modify_parser.add_argument('--invalid',
                                action='store_true',
                                help='mark bug as RESOLVED, INVALID')
-    modify_parser.set_defaults(func=bugz.cli.modify)
+    modify_parser.set_defaults(func=pybugz.cli.modify)
 
     post_parser = subparsers.add_parser('post',
                                         argument_default=argparse.SUPPRESS,
@@ -263,7 +263,7 @@ def make_arg_parser():
                              choices=['y', 'Y', 'n', 'N'],
                              default='y',
                              help='default answer to confirmation question')
-    post_parser.set_defaults(func=bugz.cli.post)
+    post_parser.set_defaults(func=pybugz.cli.post)
 
     search_parser = subparsers.add_parser('search',
                                           argument_default=argparse.SUPPRESS,
@@ -325,6 +325,6 @@ def make_arg_parser():
     search_parser.add_argument('--show-severity',
                                action='store_true',
                                help='show severity of bugs')
-    search_parser.set_defaults(func=bugz.cli.search)
+    search_parser.set_defaults(func=pybugz.cli.search)
 
     return parser

@@ -3,7 +3,7 @@ import glob
 import os
 import sys
 
-from bugz.log import log_error
+from pybugz.log import log_error
 
 
 def load_config(UserConfig=None):

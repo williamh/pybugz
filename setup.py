@@ -1,6 +1,6 @@
 from setuptools import setup,find_packages
 from glob import glob
-from bugz.definitions import __version__
+from pybugz.definitions import __version__
 
 # To use a consistent encoding
 from codecs import open
@@ -80,7 +80,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'bugz=bugz.cli:main'
+            'bugz=pybugz.cli:main'
         ]
     },
 )
