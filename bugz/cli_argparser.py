@@ -256,6 +256,8 @@ def make_arg_parser():
     post_parser.add_argument('--batch',
                              action="store_true",
                              help='do not prompt for any values')
+    post_parser.add_argument('--template',
+                             help='Use a template file for posting bugs')
     post_parser.add_argument('--default-confirm',
                              choices=['y', 'Y', 'n', 'N'],
                              default='y',
