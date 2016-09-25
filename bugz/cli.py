@@ -558,19 +558,32 @@ def post(settings):
     params = {}
 
     if hasattr(settings, 'template'):
+
+        # We are operating under the assumption that the custom fields
+        # can be in upper case. The default parser converts everything
+        # to lower case. The lambda just specifies that the keys from
+        # the config should be kept as is.
         tmpl = configparser.RawConfigParser()
         tmpl.optionxform = lambda option: option
-        tmpl.read(settings.template)
+
         try:
+            tmpl.read(settings.template)
             msection = tmpl['Default']['type']
             for key in tmpl[msection]:
-                try:
-                    params[key] = tmpl[msection][key]
-                    print('%-12s: %s' % (key, params[key]))
-                except:
-                    print('Could not parse %s!' % key) 
-        except:
-           printf('Could not parse Default type!')  
+                params[key] = tmpl[msection][key]
+                print('%-12s: %s' % (key, params[key]))
+        except configparser.DuplicateOptionError as error:
+            log_error(error)
+            sys.exit(1)
+        except configparser.DuplicateSectionError as error:
+            log_error(error)
+            sys.exit(1)
+        except configparser.MissingSectionHeaderError as error:
+            log_error(error)
+            sys.exit(1)
+        except configparser.ParsingError as error:
+            log_error(error)
+            sys.exit(1)
     else:
         # raise an exception if mandatory fields are not specified.
         if not hasattr(settings, 'product'):
