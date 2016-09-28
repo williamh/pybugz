@@ -559,12 +559,7 @@ def post(settings):
 
     if hasattr(settings, 'template'):
 
-        # We are operating under the assumption that the custom fields
-        # can be in upper case. The default parser converts everything
-        # to lower case. The lambda just specifies that the keys from
-        # the config should be kept as is.
-        tmpl = configparser.RawConfigParser()
-        tmpl.optionxform = lambda option: option
+        tmpl = configparser.ConfigParser()
 
         try:
             tmpl.read(settings.template)
