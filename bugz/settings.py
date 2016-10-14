@@ -1,3 +1,4 @@
+import ssl
 import sys
 import urllib.error
 import urllib.parse
@@ -105,10 +106,23 @@ class Settings:
             else:
                 self.skip_auth = False
 
+        if not hasattr(self, 'insecure'):
+            if config.has_option(self.connection, 'insecure'):
+                self.insecure = get_config_option(config.getboolean,
+                                                   self.connection,
+                                                   'insecure')
+            else:
+                self.insecure = False
+
         if getattr(self, 'encoding', None) is not None:
             log_info('The encoding option is deprecated.')
 
-        self.bz = xmlrpc.client.ServerProxy(self.base)
+        if self.insecure:
+            context=ssl._create_unverified_context()
+        else:
+            context = None
+
+        self.bz = xmlrpc.client.ServerProxy(self.base, context=context)
         self.connections = config.sections()
 
         parse_result = urllib.parse.urlparse(self.base)

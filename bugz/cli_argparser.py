@@ -36,6 +36,9 @@ def make_arg_parser():
     parser.add_argument('--skip-auth',
                         action='store_true',
                         help='skip Authentication.')
+    parser.add_argument('--insecure',
+                        action='store_true',
+                        help='do not verify ssl certificate')
     parser.add_argument('--version',
                         action='version',
                         help='show program version and exit',

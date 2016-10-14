@@ -130,6 +130,12 @@ search_statuses = confirmed, in_progress, unconfirmed
 .PP
 This sets the default statuses to be used in a search command. It is a
 space separated list of Bugzilla statuses.
+.PP
+insecure = true | false
+.PP
+If this is set to true, pybugz will not validate the ssl certificate
+used during an https connection to this site. Do not use this setting
+unless you know exactly what you are doing.
 .SH BUGS
 .PP
 The home page of this project is http://www.github.com/williamh/pybugz.
