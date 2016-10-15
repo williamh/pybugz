@@ -2,6 +2,7 @@ import ssl
 import sys
 import urllib.error
 import urllib.parse
+import xml.parsers.expat
 import xmlrpc.client
 
 from bugz.configfile import get_config_option
@@ -155,4 +156,6 @@ class Settings:
         except xmlrpc.client.ProtocolError as error:
             raise BugzError(error)
         except urllib.error.URLError as error:
+            raise BugzError(error)
+        except xml.parsers.expat.ExpatError as error:
             raise BugzError(error)
