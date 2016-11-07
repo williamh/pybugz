@@ -107,6 +107,14 @@ class Settings:
             else:
                 self.skip_auth = False
 
+        if not hasattr(self, 'interactive'):
+            if config.has_option(self.connection, 'interactive'):
+                self.interactive = get_config_option(config.getboolean,
+                                                   self.connection,
+                                                   'interactive')
+            else:
+                self.interactive = False
+
         if not hasattr(self, 'insecure'):
             if config.has_option(self.connection, 'insecure'):
                 self.insecure = get_config_option(config.getboolean,

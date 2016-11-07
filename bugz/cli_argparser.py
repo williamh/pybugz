@@ -39,6 +39,10 @@ def make_arg_parser():
     parser.add_argument('--insecure',
                         action='store_true',
                         help='do not verify ssl certificate')
+    parser.add_argument('--interactive',
+                        action='store_true',
+                        help='prompt for username and password if '
+                        'they are not specified')
     parser.add_argument('--version',
                         action='version',
                         help='show program version and exit',

@@ -59,28 +59,29 @@ def check_bugz_token():
     print('This decision was made because Bugzilla is deprecating tokens.')
 
 
-def login(settings):
+def check_auth(settings):
     """Authenticate a session.
     """
+    if settings.skip_auth:
+        for x in ['key', 'user', 'password']:
+            if hasattr(settings, x):
+                delattr(settings, x)
+    elif settings.interactive:
+        # prompt for username if we were not supplied with it
+        if not hasattr(settings, 'user'):
+            log_info('No username given.')
+            settings.user = input('Username: ')
 
-    if settings.skip_auth or hasattr(settings, 'key'):
-        return
-
-    # prompt for username if we were not supplied with it
-    if not hasattr(settings, 'user'):
-        log_info('No username given.')
-        settings.user = input('Username: ')
-
-    # prompt for password if we were not supplied with it
-    if not hasattr(settings, 'password'):
-        if not hasattr(settings, 'passwordcmd'):
-            log_info('No password given.')
-            settings.password = getpass.getpass()
-        else:
-            process = subprocess.Popen(settings.passwordcmd, shell=True,
-                                       stdout=subprocess.PIPE)
-            password, _ = process.communicate()
-            settings.password = password.splitlines()[0]
+        # prompt for password if we were not supplied with it
+        if not hasattr(settings, 'password'):
+            if not hasattr(settings, 'passwordcmd'):
+                log_info('No password given.')
+                settings.password = getpass.getpass()
+            else:
+                process = subprocess.Popen(settings.passwordcmd, shell=True,
+                        stdout=subprocess.PIPE)
+                password, _ = process.communicate()
+                settings.password = password.splitlines()[0]
 
 
 def list_bugs(buglist, settings):
@@ -354,7 +355,7 @@ def attach(settings):
     params['comment'] = comment
     if is_patch is not None:
         params['is_patch'] = is_patch
-    login(settings)
+    check_auth(settings)
     result = settings.call_bz(settings.bz.Bug.add_attachment, params)
     attachid = result['ids'][0]
     log_info('{0} ({1}) has been attached to bug {2}'.format(
@@ -368,7 +369,7 @@ def attachment(settings):
     params = {}
     params['attachment_ids'] = [settings.attachid]
 
-    login(settings)
+    check_auth(settings)
 
     result = settings.call_bz(settings.bz.Bug.attachments, params)
     result = result['attachments'][settings.attachid]
@@ -393,7 +394,7 @@ def attachment(settings):
 
 def get(settings):
     """ Fetch bug details given the bug id """
-    login(settings)
+    check_auth(settings)
 
     log_info('Getting bug %s ..' % settings.bugid)
     params = {'ids': [settings.bugid]}
@@ -523,7 +524,7 @@ def modify(settings):
 
     if len(params) < 2:
         raise BugzError('No changes were specified')
-    login(settings)
+    check_auth(settings)
     result = settings.call_bz(settings.bz.Bug.update, params)
     for bug in result['bugs']:
         changes = bug['changes']
@@ -538,7 +539,7 @@ def modify(settings):
 
 def post(settings):
     """Post a new bug"""
-    login(settings)
+    check_auth(settings)
     # load description from file if possible
     if hasattr(settings, 'description_from'):
         try:
@@ -668,7 +669,7 @@ the keywords given on the title (or the body if specified).
     for key in params:
         log_info('   {0:<20} = {1}'.format(key, params[key]))
 
-    login(settings)
+    check_auth(settings)
 
     result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
 
