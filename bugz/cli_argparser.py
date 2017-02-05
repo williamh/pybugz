@@ -280,6 +280,8 @@ def make_arg_parser():
                                help='The unique alias for this bug')
     search_parser.add_argument('-a', '--assigned-to',
                                help='email the bug is assigned to')
+    search_parser.add_argument('--cc',
+                               help='email in the CC list for the bug')
     search_parser.add_argument('-C', '--component',
                                action='append',
                                help='restrict by component (1 or more)')

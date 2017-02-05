@@ -649,7 +649,7 @@ the keywords given on the title (or the body if specified).
     valid_keys = ['alias', 'assigned_to', 'component', 'creator',
                   'limit', 'offset', 'op_sys', 'platform',
                   'priority', 'product', 'resolution', 'severity',
-                  'version', 'whiteboard']
+                  'version', 'whiteboard', 'cc']
 
     params = {}
     d = vars(settings)
