@@ -18,12 +18,21 @@ Classes
 """
 
 import getpass
+import json
 import os
 import re
 import subprocess
 import sys
 import textwrap
+
 import xmlrpc.client
+
+from bugz.cli_argparser import make_arg_parser
+from bugz.configfile import load_config
+from bugz.exceptions import BugzError
+from bugz.log import log_error, log_info
+from bugz.settings import Settings
+from bugz.utils import block_edit, get_content_type
 
 try:
     import readline
@@ -31,12 +40,6 @@ except ImportError:
     pass
 
 
-from bugz.cli_argparser import make_arg_parser
-from bugz.configfile import load_config
-from bugz.settings import Settings
-from bugz.exceptions import BugzError
-from bugz.log import log_error, log_info
-from bugz.utils import block_edit, get_content_type
 
 
 def check_bugz_token():
@@ -104,6 +107,14 @@ def list_bugs(buglist, settings):
         print(line[:settings.columns])
 
     log_info("%i bug(s) found." % len(buglist))
+
+
+def json_records(buglist):
+    for bug in buglist:
+        for k, v in list(bug.items()):
+            if isinstance(v, xmlrpc.client.DateTime):
+                bug[k] = str(v)
+        print(json.dumps(bug))
 
 
 def prompt_for_bug(settings):
@@ -640,6 +651,35 @@ def post(settings):
 
     result = settings.call_bz(settings.bz.Bug.create, params)
     log_info('Bug %d submitted' % result['id'])
+
+
+def products(settings):
+	product_objs = fetch_products(settings)
+	fmt = settings.format
+	if fmt is None:
+		fmt = '{product[name]}'
+	if settings.json:
+		json_records(product_objs)
+	else:
+		for product in product_objs:
+			print(fmt.format(product=product)[:settings.columns])
+
+def components(settings):
+	product_objs = fetch_products(settings)
+	fmt = settings.format
+	if fmt is None:
+		fmt = '{product[name]:>20} {component[name]:>20} {component[description]:>20}'
+	if settings.json:
+		json_records(product_objs)
+	else:
+		for product in product_objs:
+			for component in product['components']:
+				print(fmt.format(product=product, component=component)[:settings.columns])
+
+
+def fetch_products(settings):
+    product_ids = settings.call_bz(settings.bz.Product.get_accessible_products, dict())['ids']
+    return settings.call_bz(settings.bz.Product.get, dict(ids=product_ids))['products']
 
 
 def search(settings):
