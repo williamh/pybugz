@@ -87,6 +87,7 @@ def check_auth(settings):
 
 
 def list_bugs(buglist, settings):
+    maxbug = max([len(str(bug['id'])) for bug in buglist])
     for bug in buglist:
         bugid = bug['id']
         status = bug['status']
@@ -94,7 +95,7 @@ def list_bugs(buglist, settings):
         severity = bug['severity']
         assignee = bug['assigned_to'].split('@')[0]
         desc = bug['summary']
-        line = '%s' % (bugid)
+        line = '%-*s' % (maxbug, bugid)
         if hasattr(settings, 'show_status'):
             line = '%s %-12s' % (line, status)
         if hasattr(settings, 'show_priority'):
@@ -411,11 +412,16 @@ def get(settings):
     params = {'ids': settings.bugid}
     result = settings.call_bz(settings.bz.Bug.get, params)
 
-    bugCount = len(result['bugs'])
-    for idx, bug in enumerate(result['bugs']):
-        show_bug_info(bug, settings)
-        if idx + 1 != bugCount:
-            print()
+    bugs = result['bugs']
+    if settings.summary:
+        settings.show_status = True
+        list_bugs(bugs, settings)
+    else:
+       bugCount = len(bugs)
+       for idx, bug in enumerate(bugs):
+           show_bug_info(bug, settings)
+           if idx + 1 != bugCount:
+               print()
 
 
 def modify(settings):

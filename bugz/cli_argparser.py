@@ -103,6 +103,9 @@ def make_arg_parser():
     get_parser.add_argument("-n", "--no-comments",
                             action="store_true",
                             help='do not show comments')
+    get_parser.add_argument("-s", "--summary",
+                            action="store_true",
+                            help='show only minimal details, one bug per line')
     get_parser.set_defaults(func=bugz.cli.get)
 
     modify_parser = subparsers.add_parser('modify',

@@ -93,6 +93,13 @@ class Settings:
                 self.quiet = False
         log_setQuiet(self.quiet)
 
+        if not hasattr(self, 'summary'):
+            if config.has_option(self.connection, 'summary'):
+                self.summary = get_config_option(config.getboolean,
+                                                 self.connection, 'summary')
+            else:
+                self.summary = False
+
         if not hasattr(self, 'search_statuses'):
             if config.has_option(self.connection, 'search_statuses'):
                 s = get_config_option(config.get, self.connection,
