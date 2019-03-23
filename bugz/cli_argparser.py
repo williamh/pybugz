@@ -215,9 +215,9 @@ def make_arg_parser():
     modify_parser.add_argument('-U', '--url',
                                help='set URL field of bug')
     modify_parser.add_argument('-v', '--version',
-                               help='set the version for this bug'),
+                               help='set the version for this bug')
     modify_parser.add_argument('-w', '--whiteboard',
-                               help='set Status whiteboard'),
+                               help='set Status whiteboard')
     modify_parser.add_argument('--fixed',
                                action='store_true',
                                help='mark bug as RESOLVED, FIXED')

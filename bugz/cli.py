@@ -26,6 +26,7 @@ import textwrap
 import xmlrpc.client
 
 try:
+    # pylint: disable=unused-import
     import readline
 except ImportError:
     pass
@@ -129,7 +130,7 @@ def prompt_for_bug(settings):
 
     if not hasattr(settings, 'version'):
         line = input('Enter version (default: unspecified): ')
-        if len(line):
+        if line:
             settings.version = line
         else:
             settings.version = 'unspecified'
@@ -146,7 +147,7 @@ def prompt_for_bug(settings):
 
     if not hasattr(settings, 'description'):
         line = block_edit('Enter bug description: ')
-        if len(line):
+        if line:
             settings.description = line
     else:
         log_info('Enter bug description: %s' % settings.description)
@@ -154,7 +155,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'op_sys'):
         op_sys_msg = 'Enter operating system where this bug occurs: '
         line = input(op_sys_msg)
-        if len(line):
+        if line:
             settings.op_sys = line
     else:
         log_info('Enter operating system: %s' % settings.op_sys)
@@ -162,7 +163,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'platform'):
         platform_msg = 'Enter hardware platform where this bug occurs: '
         line = input(platform_msg)
-        if len(line):
+        if line:
             settings.platform = line
     else:
         log_info('Enter hardware platform: %s' % settings.platform)
@@ -170,7 +171,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'priority'):
         priority_msg = 'Enter priority (eg. Normal) (optional): '
         line = input(priority_msg)
-        if len(line):
+        if line:
             settings.priority = line
     else:
         log_info('Enter priority (optional): %s' % settings.priority)
@@ -178,7 +179,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'severity'):
         severity_msg = 'Enter severity (eg. normal) (optional): '
         line = input(severity_msg)
-        if len(line):
+        if line:
             settings.severity = line
     else:
         log_info('Enter severity (optional): %s' % settings.severity)
@@ -186,7 +187,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'alias'):
         alias_msg = 'Enter an alias for this bug (optional): '
         line = input(alias_msg)
-        if len(line):
+        if line:
             settings.alias = line
     else:
         log_info('Enter alias (optional): %s' % settings.alias)
@@ -194,7 +195,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'assigned_to'):
         assign_msg = 'Enter assignee (eg. liquidx@gentoo.org) (optional): '
         line = input(assign_msg)
-        if len(line):
+        if line:
             settings.assigned_to = line
     else:
         log_info('Enter assignee (optional): %s' % settings.assigned_to)
@@ -202,7 +203,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'cc'):
         cc_msg = 'Enter a CC list (comma separated) (optional): '
         line = input(cc_msg)
-        if len(line):
+        if line:
             settings.cc = re.split(r',\s*', line)
     else:
         log_info('Enter a CC list (optional): %s' % settings.cc)
@@ -210,7 +211,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'url'):
         url_msg = 'Enter a URL (optional): '
         line = input(url_msg)
-        if len(line):
+        if line:
             settings.url = line
     else:
         log_info('Enter a URL (optional): %s' % settings.url)
@@ -224,7 +225,7 @@ def prompt_for_bug(settings):
     if not hasattr(settings, 'append_command'):
         line = input('Append the output of the'
                      ' following command (leave blank for none): ')
-        if len(line):
+        if line:
             settings.append_command = line
     else:
         log_info('Append command (optional): %s' % settings.append_command)
@@ -284,10 +285,10 @@ def show_bug_info(bug, settings):
         bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
         print('%-12s: %d' % ('Attachments', len(bug_attachments)))
         print()
-        for attachment in bug_attachments:
-            aid = attachment['id']
-            desc = attachment['summary']
-            when = attachment['creation_time']
+        for attach_val in bug_attachments:
+            aid = attach_val['id']
+            desc = attach_val['summary']
+            when = attach_val['creation_time']
             print('[Attachment] [%s] [%s]' % (aid, desc))
 
     if not hasattr(settings, 'no_comments'):
@@ -528,7 +529,7 @@ def modify(settings):
     result = settings.call_bz(settings.bz.Bug.update, params)
     for bug in result['bugs']:
         changes = bug['changes']
-        if not len(changes):
+        if not changes:
             log_info('Added comment to bug %s' % bug['id'])
         else:
             log_info('Modified the following fields in bug %s' % bug['id'])
@@ -543,10 +544,10 @@ def post(settings):
     # load description from file if possible
     if hasattr(settings, 'description_from'):
         try:
-                if settings.description_from == '-':
-                    settings.description = sys.stdin.read()
-                else:
-                    settings.description = \
+            if settings.description_from == '-':
+                settings.description = sys.stdin.read()
+            else:
+                settings.description = \
                         open(settings.description_from, 'r').read()
         except IOError as error:
             raise BugzError('Unable to read from file: %s: %s' %
@@ -568,7 +569,7 @@ def post(settings):
     # append the output from append_command to the description
     append_command = getattr(settings, 'append_command', None)
     if append_command is not None and append_command != '':
-        append_command_output = subprocess.getoutput(append_command)
+        append_command_output = subprocess.getoutput(append_command) # pylint: disable=no-member
         settings.description = settings.description + '\n\n' + \
             '$ ' + append_command + '\n' + \
             append_command_output
@@ -673,7 +674,7 @@ the keywords given on the title (or the body if specified).
 
     result = settings.call_bz(settings.bz.Bug.search, params)['bugs']
 
-    if not len(result):
+    if not result:
         log_info('No bugs found.')
     else:
         list_bugs(result, settings)
