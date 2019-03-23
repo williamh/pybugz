@@ -95,6 +95,7 @@ def make_arg_parser():
                                        argument_default=argparse.SUPPRESS,
                                        help='get a bug from bugzilla')
     get_parser.add_argument('bugid',
+                            nargs='+',
                             help='the ID of the bug to retrieve')
     get_parser.add_argument("-a", "--no-attachments",
                             action="store_true",
@@ -109,6 +110,7 @@ def make_arg_parser():
                                           help='modify a bug '
                                           '(eg. post a comment)')
     modify_parser.add_argument('bugid',
+                               nargs='+',
                                help='the ID of the bug to modify')
     modify_parser.add_argument('--alias',
                                help='change the alias for this bug')

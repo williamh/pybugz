@@ -408,11 +408,14 @@ def get(settings):
     check_auth(settings)
 
     log_info('Getting bug %s ..' % settings.bugid)
-    params = {'ids': [settings.bugid]}
+    params = {'ids': settings.bugid}
     result = settings.call_bz(settings.bz.Bug.get, params)
 
-    for bug in result['bugs']:
+    bugCount = len(result['bugs'])
+    for idx, bug in enumerate(result['bugs']):
         show_bug_info(bug, settings)
+        if idx + 1 != bugCount:
+            print()
 
 
 def modify(settings):
@@ -435,7 +438,7 @@ def modify(settings):
         settings.comment = block_edit('Enter comment:')
 
     params = {}
-    params['ids'] = [settings.bugid]
+    params['ids'] = settings.bugid
     if hasattr(settings, 'alias'):
         params['alias'] = settings.alias
     if hasattr(settings, 'assigned_to'):
