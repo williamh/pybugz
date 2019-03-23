@@ -17,6 +17,7 @@ Classes
 
 """
 
+import collections
 import getpass
 import os
 import re
@@ -232,7 +233,8 @@ def prompt_for_bug(settings):
 
 
 def show_bug_info(bug, settings):
-    FieldMap = {
+    FieldMap = collections.OrderedDict( {
+        'id': 'Bug ID',
         'alias': 'Alias',
         'summary': 'Title',
         'status': 'Status',
@@ -244,7 +246,7 @@ def show_bug_info(bug, settings):
         'op_sys': 'OpSystem',
         'priority': 'Priority',
         'severity': 'Severity',
-        'target_milestone': 'TargetMilestone',
+        'target_milestone': 'Target Milestone',
         'assigned_to': 'AssignedTo',
         'url': 'URL',
         'whiteboard': 'Whiteboard',
@@ -256,12 +258,18 @@ def show_bug_info(bug, settings):
         'last_change_time': 'Updated',
         'cc': 'CC',
         'see_also': 'See Also',
-    }
-    SkipFields = ['assigned_to_detail', 'cc_detail', 'creator_detail', 'id',
+        'remaining_time': 'Remaining',
+        'actual_time': 'Actual',
+        'estimated_time': 'Estimated',
+        'classification': 'Class',
+    } )
+    SkipFields = frozenset(['assigned_to_detail', 'cc_detail', 'creator_detail',
                   'is_confirmed', 'is_creator_accessible', 'is_cc_accessible',
-                  'is_open', 'update_token']
+                  'is_open', 'update_token'])
 
-    for field in bug:
+    width = max( map( len, FieldMap.values() ) )
+    remainingFields = set(bug) - set(FieldMap) - SkipFields
+    for field in list(FieldMap) + sorted(remainingFields):
         if field in SkipFields:
             continue
         if field in FieldMap:
@@ -271,20 +279,21 @@ def show_bug_info(bug, settings):
         value = bug[field]
         if field in ['cc', 'see_also']:
             for x in value:
-                print('%-12s: %s' % (desc, x))
+                print('%-*s: %s' % (width, desc, x))
         elif isinstance(value, list):
             s = ', '.join(["%s" % x for x in value])
             if s:
-                print('%-12s: %s' % (desc, s))
+                print('%-*s: %s' % (width, desc, s))
         elif value is not None and value != '':
-            print('%-12s: %s' % (desc, value))
+            print('%-*s: %s' % (width, desc, value))
 
     if not hasattr(settings, 'no_attachments'):
         params = {'ids': [bug['id']]}
         bug_attachments = settings.call_bz(settings.bz.Bug.attachments, params)
         bug_attachments = bug_attachments['bugs']['%s' % bug['id']]
-        print('%-12s: %d' % ('Attachments', len(bug_attachments)))
-        print()
+        print('%-*s: %d' % (width, 'Attachments', len(bug_attachments)))
+        if bug_attachments:
+            print()
         for attach_val in bug_attachments:
             aid = attach_val['id']
             desc = attach_val['summary']
@@ -295,8 +304,9 @@ def show_bug_info(bug, settings):
         params = {'ids': [bug['id']]}
         bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-        print('%-12s: %d' % ('Comments', len(bug_comments)))
-        print()
+        print('%-*s: %d' % (width, 'Comments', len(bug_comments)))
+        if bug_comments:
+            print()
         i = 0
         wrapper = textwrap.TextWrapper(width=settings.columns,
                                        break_long_words=False,
