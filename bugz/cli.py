@@ -101,7 +101,7 @@ def list_bugs(buglist, settings):
             line = '%s %-12s' % (line, severity)
         line = '%s %-20s' % (line, assignee)
         line = '%s %s' % (line, desc)
-        print(line[:settings.columns])
+        print(line[:settings.columns] if settings.columns else line)
 
     log_info("%i bug(s) found." % len(buglist))
 
