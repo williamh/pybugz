@@ -183,6 +183,8 @@ def make_arg_parser():
                                help='change the priority for this bug')
     modify_parser.add_argument('--product',
                                help='change the product for this bug')
+    modify_parser.add_argument('--custom',
+                               help='change custom parameters for this bug')
     modify_parser.add_argument('-r', '--resolution',
                                help='set new resolution '
                                '(if status = RESOLVED)')

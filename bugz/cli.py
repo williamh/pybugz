@@ -513,6 +513,15 @@ def modify(settings):
         params['version'] = settings.version
     if hasattr(settings, 'whiteboard'):
         params['whiteboard'] = settings.whiteboard
+    if hasattr(settings, 'custom'):
+        custom_options = settings.custom.split(':')
+        for custom_option in custom_options:
+            try:
+                key,value = custom_option.split('=',1)
+                params[key] = value
+            except:
+                print("Badly formatted option :{}".format(custom_option))
+                pass
 
     if hasattr(settings, 'fixed'):
         params['status'] = 'RESOLVED'
