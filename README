@@ -90,6 +90,17 @@ or if we find that the bug is invalid, we can close it by using:
 
 $ bugz modify 130608 --invalid -c "Not reproducable"
 
+5) We can post a bug by simply invoking
+
+$bugz post
+This command will guide you through the bug creation process. However,
+this does not support custom fields. 
+
+For creating a bug with custom fields, you can could use the template support:
+$bugz post --template pybugz.tmpl 
+
+You can modify the supplied template file (or create one) to suit your needs.
+
 Other options
 -------------
 
