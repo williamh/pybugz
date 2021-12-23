@@ -1,6 +1,6 @@
 """ This module contains a set of routines for logging messages.
 
-    If someone wants to convert this to use python's built-in loggig,
+    If someone wants to convert this to use python's built-in logging,
     patches are welcome.
 """
 
