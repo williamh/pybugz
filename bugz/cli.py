@@ -17,6 +17,7 @@ Classes
 
 """
 
+import datetime
 import getpass
 import os
 import re
@@ -422,10 +423,6 @@ def modify(settings):
             hasattr(settings, 'reset_assigned_to'):
         raise BugzError('--assigned-to and --unassign cannot be used together')
 
-    if hasattr(settings, 'comment_editor'):
-        settings.comment = block_edit('Enter comment:',
-                           comment_from=settings.comment)
-
     params = {}
     params['ids'] = [settings.bugid]
     if hasattr(settings, 'alias'):
@@ -456,10 +453,6 @@ def modify(settings):
         if 'cc' not in params:
             params['cc'] = {}
         params['cc']['remove'] = settings.cc_remove
-    if hasattr(settings, 'comment'):
-        if 'comment' not in params:
-            params['comment'] = {}
-        params['comment']['body'] = settings.comment
     if hasattr(settings, 'component'):
         params['component'] = settings.component
     if hasattr(settings, 'dupe_of'):
@@ -525,9 +518,42 @@ def modify(settings):
         params['status'] = 'RESOLVED'
         params['resolution'] = 'INVALID'
 
+    check_auth(settings)
+
+    if hasattr(settings, 'comment_editor'):
+        quotes=''
+        if hasattr(settings, 'quote'):
+            bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
+            bug_comments = bug_comments['bugs']['%s' % settings.bugid]\
+                                       ['comments'][-settings.quote:]
+            wrapper = textwrap.TextWrapper(width=settings.columns,
+                                           break_long_words=False,
+                                           break_on_hyphens=False)
+            for comment in bug_comments:
+                what = comment['text']
+                if what is None:
+                    continue
+                who = comment['creator']
+                when = comment['time']
+                when = datetime.datetime.strptime(str(when), '%Y%m%dT%H:%M:%S')
+                quotes += 'On %s, %s wrote:\n' % (when.strftime('%+ UTC'), who)
+                for line in what.splitlines():
+                    if len(line) < settings.columns:
+                        quotes += '> %s\n' % line
+                    else:
+                        for shortline in wrapper.wrap(line):
+                            quotes += '> %s\n' % shortline
+        settings.comment = block_edit('Enter comment:',
+                           comment_from=settings.comment,
+                           quotes=quotes)
+
+    if hasattr(settings, 'comment'):
+        if 'comment' not in params:
+            params['comment'] = {}
+        params['comment']['body'] = settings.comment
+
     if len(params) < 2:
         raise BugzError('No changes were specified')
-    check_auth(settings)
     result = settings.call_bz(settings.bz.Bug.update, params)
     for bug in result['bugs']:
         changes = bug['changes']

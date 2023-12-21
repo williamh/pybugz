@@ -190,6 +190,9 @@ def make_arg_parser():
                                help='change the priority for this bug')
     modify_parser.add_argument('--product',
                                help='change the product for this bug')
+    modify_parser.add_argument('-Q', '--quote',
+                               action='count',
+                               help='quote most recent comment(s) with -C')
     modify_parser.add_argument('-r', '--resolution',
                                help='set new resolution '
                                '(if status = RESOLVED)')
