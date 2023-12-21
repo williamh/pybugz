@@ -415,13 +415,16 @@ def modify(settings):
         except IOError as error:
             raise BugzError('unable to read file: %s: %s' %
                             (settings.comment_from, error))
+    else:
+        settings.comment = ''
 
     if hasattr(settings, 'assigned_to') and \
             hasattr(settings, 'reset_assigned_to'):
         raise BugzError('--assigned-to and --unassign cannot be used together')
 
     if hasattr(settings, 'comment_editor'):
-        settings.comment = block_edit('Enter comment:')
+        settings.comment = block_edit('Enter comment:',
+                           comment_from=settings.comment)
 
     params = {}
     params['ids'] = [settings.bugid]

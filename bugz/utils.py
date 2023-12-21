@@ -109,7 +109,7 @@ def block_edit(comment, comment_from=''):
     initial_text = '\n'.join(['BUGZ: %s' % line
                               for line in comment.splitlines()])
     new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text,
-                             comment_from)
+                             comment_from=comment_from)
 
     if new_text.strip():
         return new_text
