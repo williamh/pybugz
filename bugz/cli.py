@@ -253,6 +253,7 @@ def show_bug_info(bug, settings):
         'priority': 'Priority',
         'severity': 'Severity',
         'target_milestone': 'TargetMilestone',
+        'assigned_to': 'AssignedTo',
         'assigned_to_detail': 'AssignedTo',
         'url': 'URL',
         'whiteboard': 'Whiteboard',
@@ -315,30 +316,70 @@ def show_bug_info(bug, settings):
         params = {'ids': [bug['id']]}
         bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
+        for comment in bug_comments:
+            comment['when'] = parsetime(comment['time'])
+            del comment['time']
+            comment['who'] = comment['creator']
+            del comment['creator']
+        bug_history = settings.call_bz(settings.bz.Bug.history, params)
+        assert(bug_history['bugs'][0]['id'] == bug['id'])
+        bug_history = bug_history['bugs'][0]['history']
+        for change in bug_history:
+            change['when'] = parsetime(change['when'])
+        bug_comments += bug_history
+        bug_comments.sort(key=lambda c: (c['when'], 'changes' in c))
         print()
         i = 0
         wrapper = textwrap.TextWrapper(width=settings.columns,
                                        break_long_words=False,
                                        break_on_hyphens=False)
         for comment in bug_comments:
-            if comment['creator'] in user_detail:
-                who = '%s <%s>' % (
-                      user_detail[comment['creator']]['real_name'],
-                      comment['creator'])
-            else:
-                who = comment['creator']
-            when = parsetime(comment['time'])
-            header_left = '%s %s' % (who, printtime(when, settings))
-            if i == 0:
-                header_right = 'Description'
-            else:
-                header_right = '[Comment %d]' % i
-            space = settings.columns - len(header_left) - len(header_right) - 3
-            if space < 0:
-                space = 0
-            print(header_left, ' ' * space, header_right)
-            print('-' * (settings.columns - 1))
+            # Header, who & when
+            if comment == bug_comments[0] or \
+               prev['when'] != comment['when'] or \
+               prev['who'] != comment['who']:
+                if comment['who'] in user_detail:
+                    who = '%s <%s>' % (
+                          user_detail[comment['who']]['real_name'],
+                          comment['who'])
+                else:
+                    who = comment['who']
+                when = comment['when']
+                header_left = '%s %s' % (who, printtime(when, settings))
+                if i == 0:
+                    header_right = 'Description'
+                elif 'changes' in comment:
+                    header_right = ''
+                else:
+                    header_right = '[Comment %d]' % i
+                space = settings.columns - len(header_left) - \
+                        len(header_right) - 3
+                if space < 0:
+                    space = 0
+                print(header_left, ' ' * space, header_right)
+                print('-' * (settings.columns - 1))
 
+            # A change from Bug.history
+            if 'changes' in comment:
+                for change in comment['changes']:
+                    if change['field_name'] in FieldMap:
+                       desc = FieldMap[change['field_name']]
+                    else:
+                       desc = change['field_name']
+                    if change['removed'] and change['added']:
+                       print('%s: %s → %s' % (desc, change['removed'],
+                                              change['added']))
+                    elif change['added']:
+                       print('%s: %s' % (desc, change['added']))
+                    elif change['removed']:
+                       print('REMOVED %s: %s ' % (desc, change['removed']))
+                    else:
+                       print(change)
+                prev = comment
+                print()
+                continue
+
+            # A comment from Bug.comments
             what = comment['text']
             if what is None:
                 what = ''
@@ -351,6 +392,7 @@ def show_bug_info(bug, settings):
                     for shortline in wrapper.wrap(line):
                         print(shortline)
             print()
+            prev = comment
             i += 1
 
 
