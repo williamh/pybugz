@@ -245,21 +245,21 @@ def show_bug_info(bug, settings):
         'priority': 'Priority',
         'severity': 'Severity',
         'target_milestone': 'TargetMilestone',
-        'assigned_to': 'AssignedTo',
+        'assigned_to_detail': 'AssignedTo',
         'url': 'URL',
         'whiteboard': 'Whiteboard',
         'keywords': 'Keywords',
         'depends_on': 'dependsOn',
         'blocks': 'Blocks',
         'creation_time': 'Reported',
-        'creator': 'Reporter',
+        'creator_detail': 'Reporter',
         'last_change_time': 'Updated',
-        'cc': 'CC',
+        'cc_detail': 'CC',
         'see_also': 'See Also',
     }
-    SkipFields = ['assigned_to_detail', 'cc_detail', 'creator_detail', 'id',
-                  'is_confirmed', 'is_creator_accessible', 'is_cc_accessible',
-                  'is_open', 'update_token']
+    SkipFields = ['assigned_to', 'cc', 'creator', 'id', 'is_confirmed',
+                  'is_creator_accessible', 'is_cc_accessible', 'is_open',
+                  'update_token']
 
     for field in bug:
         if field in SkipFields:
@@ -269,7 +269,12 @@ def show_bug_info(bug, settings):
         else:
             desc = field
         value = bug[field]
-        if field in ['cc', 'see_also']:
+        if field in ['assigned_to_detail', 'creator_detail']:
+           print('%-12s: %s <%s>' % (desc, value['real_name'], value['email']))
+        elif field == 'cc_detail':
+            for cc in value:
+                print('%-12s: %s <%s>' % (desc, cc['real_name'], cc['email']))
+        elif field == 'see_also':
             for x in value:
                 print('%-12s: %s' % (desc, x))
         elif isinstance(value, list):
