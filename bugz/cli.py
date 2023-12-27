@@ -329,10 +329,15 @@ def show_bug_info(bug, settings):
             else:
                 who = comment['creator']
             when = parsetime(comment['time'])
-            what = comment['text']
-            print('[Comment #%d] %s %s' % (i, who, printtime(when, settings)))
+            header_left = '%s %s' % (who, printtime(when, settings))
+            header_right = '[Comment %d]' % i
+            space = settings.columns - len(header_left) - len(header_right) - 3
+            if space < 0:
+                space = 0
+            print(header_left, ' ' * space, header_right)
             print('-' * (settings.columns - 1))
 
+            what = comment['text']
             if what is None:
                 what = ''
 
