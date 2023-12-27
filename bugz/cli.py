@@ -269,6 +269,7 @@ def show_bug_info(bug, settings):
                   'is_creator_accessible', 'is_cc_accessible', 'is_open',
                   'update_token']
     TimeFields = ['last_change_time', 'creation_time']
+    user_detail = {}
 
     for field in bug:
         if field in SkipFields:
@@ -283,9 +284,11 @@ def show_bug_info(bug, settings):
             value = bug[field]
         if field in ['assigned_to_detail', 'creator_detail']:
            print('%-12s: %s <%s>' % (desc, value['real_name'], value['email']))
+           user_detail[value['email']] = value
         elif field == 'cc_detail':
             for cc in value:
                 print('%-12s: %s <%s>' % (desc, cc['real_name'], cc['email']))
+                user_detail[cc['email']] = cc
         elif field == 'see_also':
             for x in value:
                 print('%-12s: %s' % (desc, x))
@@ -319,10 +322,15 @@ def show_bug_info(bug, settings):
                                        break_long_words=False,
                                        break_on_hyphens=False)
         for comment in bug_comments:
-            who = comment['creator']
+            if comment['creator'] in user_detail:
+                who = '%s <%s>' % (
+                      user_detail[comment['creator']]['real_name'],
+                      comment['creator'])
+            else:
+                who = comment['creator']
             when = parsetime(comment['time'])
             what = comment['text']
-            print('[Comment #%d] %s : %s' % (i, who, printtime(when, settings)))
+            print('[Comment #%d] %s %s' % (i, who, printtime(when, settings)))
             print('-' * (settings.columns - 1))
 
             if what is None:
