@@ -315,7 +315,6 @@ def show_bug_info(bug, settings):
         params = {'ids': [bug['id']]}
         bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-        print('%-12s: %d' % ('Comments', len(bug_comments)))
         print()
         i = 0
         wrapper = textwrap.TextWrapper(width=settings.columns,
