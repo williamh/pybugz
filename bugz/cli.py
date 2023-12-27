@@ -329,7 +329,10 @@ def show_bug_info(bug, settings):
                 who = comment['creator']
             when = parsetime(comment['time'])
             header_left = '%s %s' % (who, printtime(when, settings))
-            header_right = '[Comment %d]' % i
+            if i == 0:
+                header_right = 'Description'
+            else:
+                header_right = '[Comment %d]' % i
             space = settings.columns - len(header_left) - len(header_right) - 3
             if space < 0:
                 space = 0
