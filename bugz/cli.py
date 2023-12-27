@@ -231,6 +231,14 @@ def prompt_for_bug(settings):
         log_info('Append command (optional): %s' % settings.append_command)
 
 
+def parsetime(when):
+    return datetime.datetime.strptime(str(when), '%Y%m%dT%H:%M:%S')
+
+
+def printtime(dt, settings):
+    return dt.strftime(settings.timeformat)
+
+
 def show_bug_info(bug, settings):
     FieldMap = {
         'alias': 'Alias',
@@ -260,6 +268,7 @@ def show_bug_info(bug, settings):
     SkipFields = ['assigned_to', 'cc', 'creator', 'id', 'is_confirmed',
                   'is_creator_accessible', 'is_cc_accessible', 'is_open',
                   'update_token']
+    TimeFields = ['last_change_time', 'creation_time']
 
     for field in bug:
         if field in SkipFields:
@@ -268,7 +277,10 @@ def show_bug_info(bug, settings):
             desc = FieldMap[field]
         else:
             desc = field
-        value = bug[field]
+        if field in TimeFields:
+            value = printtime(parsetime(bug[field]), settings)
+        else:
+            value = bug[field]
         if field in ['assigned_to_detail', 'creator_detail']:
            print('%-12s: %s <%s>' % (desc, value['real_name'], value['email']))
         elif field == 'cc_detail':
@@ -308,9 +320,9 @@ def show_bug_info(bug, settings):
                                        break_on_hyphens=False)
         for comment in bug_comments:
             who = comment['creator']
-            when = comment['time']
+            when = parsetime(comment['time'])
             what = comment['text']
-            print('[Comment #%d] %s : %s' % (i, who, when))
+            print('[Comment #%d] %s : %s' % (i, who, printtime(when, settings)))
             print('-' * (settings.columns - 1))
 
             if what is None:
@@ -539,9 +551,9 @@ def modify(settings):
                 if what is None:
                     continue
                 who = comment['creator']
-                when = comment['time']
-                when = datetime.datetime.strptime(str(when), '%Y%m%dT%H:%M:%S')
-                quotes += 'On %s, %s wrote:\n' % (when.strftime('%+ UTC'), who)
+                when = parsetime(comment['time'])
+                quotes += 'On %s, %s wrote:\n' % (printtime(when, settings),
+                                                  who)
                 for line in what.splitlines():
                     if len(line) < settings.columns:
                         quotes += '> %s\n' % line

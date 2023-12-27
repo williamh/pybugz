@@ -14,6 +14,8 @@ def make_arg_parser():
                         'configuration file')
     parser.add_argument('-b', '--base',
                         help='base URL of Bugzilla')
+    parser.add_argument('-t', '--timeformat',
+                        help='Time format (default: %%+ UTC), see strftime(3)')
     parser.add_argument('-u', '--user',
                         help='username')
     parser.add_argument('-p', '--password',
