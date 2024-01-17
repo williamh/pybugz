@@ -438,33 +438,55 @@ def attach(settings):
 
 
 def attachment(settings):
-    """ Download or view an attachment given the id."""
-    log_info('Getting attachment %s' % settings.attachid)
+    """ Download or view an attachment(s) given the attachment or bug id."""
 
     params = {}
-    params['attachment_ids'] = [settings.attachid]
+    if hasattr(settings, 'bug'):
+        params['ids'] = [settings.id]
+        log_info('Getting attachment(s) for bug %s' % settings.id)
+    else:
+        params['attachment_ids'] = [settings.id]
+        log_info('Getting attachment %s' % settings.id)
 
     check_auth(settings)
+    results = settings.call_bz(settings.bz.Bug.attachments, params)
 
-    result = settings.call_bz(settings.bz.Bug.attachments, params)
-    result = result['attachments'][settings.attachid]
+    if hasattr(settings, 'bug'):
+        results = results['bugs'][settings.id]
+    else:
+        results = [ results['attachments'][settings.id] ]
+
+    if hasattr(settings, 'patch_only'):
+        results = list(filter(lambda x : x['is_patch'], results))
+
+    if hasattr(settings, 'skip_obsolete'):
+        results = list(filter(lambda x : not x['is_obsolete'], results))
+
+    if not results:
+        return
+
+    if hasattr(settings, 'most_recent'):
+        results = [ results[-1] ]
+
     view = hasattr(settings, 'view')
-
     action = {True: 'Viewing', False: 'Saving'}
-    log_info('%s attachment: "%s"' %
-             (action[view], result['file_name']))
-    safe_filename = os.path.basename(re.sub(r'\.\.', '',
+
+    for result in results:
+        log_info('%s%s attachment: "%s"' % (action[view],
+            ' obsolete' if result['is_obsolete'] else '',
+            result['file_name']))
+        safe_filename = os.path.basename(re.sub(r'\.\.', '',
                                             result['file_name']))
 
-    if view:
-        print(result['data'].data.decode('utf-8'))
-    else:
-        if os.path.exists(result['file_name']):
-            raise RuntimeError('Filename already exists')
+        if view:
+            print(result['data'].data.decode('utf-8'))
+        else:
+            if os.path.exists(result['file_name']):
+                raise RuntimeError('Filename already exists')
 
-        fd = open(safe_filename, 'wb')
-        fd.write(result['data'].data)
-        fd.close()
+            fd = open(safe_filename, 'wb')
+            fd.write(result['data'].data)
+            fd.close()
 
 
 def get(settings):
