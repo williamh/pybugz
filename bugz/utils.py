@@ -24,8 +24,23 @@ DEFAULT_NUM_COLS = 80
 
 
 def get_content_type(filename):
-    return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+    # Keep in sync with Lib/mimetypes.py
+    encoding_map = {
+            'bzip2': 'application/x-bzip2',
+            'compress': 'application/x-compress',
+            'gzip': 'application/gzip',
+            'xz': 'application/x-xz',
+            }
+    # Last addition was brotli, rest have been since 3.4
+    if sys.version_info[0:2] >= (3, 9):
+        encoding_map['br'] = 'application/x-brotli'
 
+    mimetype, encoding = mimetypes.guess_type(filename) or ('application/octet-stream', None)
+
+    # guess_type returns encoding of the file separately from the encoded file. Leading .txt.gz having
+    # the mime of text/plain, this isn't desirable so return the mimetype of the encoding
+    # https://github.com/williamh/pybugz/issues/113
+    return mimetype if encoding is None else encoding_map[encoding]
 
 def raw_input_block():
     """ Allows multiple line input until a Ctrl+D is detected.
