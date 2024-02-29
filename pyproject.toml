@@ -1,0 +1,47 @@
+[build-system]
+requires = ["flit_core >=3.8,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "pybugz"
+description = "python interface to bugzilla"
+readme = "README"
+license = {file = "LICENSE"}
+requires-python = ">=3.3"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3 :: Only",
+]
+authors = [
+	{name = "Alastair Tse", email = "alastair@liquidx.net"},
+    {name = "Santiago M. Mola", email = "cooldwind@gmail.com"},
+    {name = "William Hubbs", email = "w.d.hubbs@gmail.com"},
+    {name = "Mike Gilbert", email = "floppym@gentoo.org"},
+    {name = "Benjamin Behringer", email = "mail@benjamin-behringer.de"},
+	{name = "Arthur Zamarin", email = "arthurzam@gentoo.org"},
+]
+maintainers = [
+    {name = "William Hubbs", email = "w.d.hubbs@gmail.com"},
+	{name = "Arthur Zamarin", email = "arthurzam@gentoo.org"},
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "http://github.com/williamh/pybugz"
+Source = "http://github.com/williamh/pybugz"
+
+[project.scripts]
+bugz = "bugz.cli:main"
+
+[tool.flit.module]
+name = "bugz"
+
+[tool.flit.external-data]
+directory = "data"
+
+[tool.flit.sdist]
+include = ["lbugz"]

@@ -9,7 +9,6 @@ Simple command-line interface to bugzilla to allow:
 Requirements
 ------------
 - Python 3.3 or later
-- setuptools
 
 Classes
 -------
