@@ -2,6 +2,7 @@ import mimetypes
 import os
 import re
 import sys
+import shutil
 import tempfile
 
 try:
@@ -62,29 +63,7 @@ def raw_input_block():
 
 def terminal_width():
     """Return estimated terminal width."""
-    if sys.platform == 'win32':
-        return win32utils.get_console_size()[0]
-    width = DEFAULT_NUM_COLS
-    try:
-        import struct
-        import fcntl
-        import termios
-        s = struct.pack('HHHH', 0, 0, 0, 0)
-        x = fcntl.ioctl(1, termios.TIOCGWINSZ, s)
-        width = struct.unpack('HHHH', x)[1]
-    except IOError:
-        pass
-
-    if width <= 0:
-        try:
-            width = int(os.environ['COLUMNS'])
-        except:
-            pass
-
-    if width <= 0:
-        width = DEFAULT_NUM_COLS
-
-    return width
+    return shutil.get_terminal_size().columns
 
 
 def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
