@@ -123,6 +123,11 @@ class Settings:
             else:
                 self.insecure = False
 
+        if not hasattr(self, 'limit'):
+            if config.has_option(self.connection, 'limit'):
+                self.limit = get_config_option(config.get, self.connection,
+                                               'limit')
+
         if getattr(self, 'encoding', None) is not None:
             log_info('The encoding option is deprecated.')
 
