@@ -714,4 +714,6 @@ def main():
 
 
 if __name__ == "__main__":
+    if sys.version_info >= (3, 7):
+        sys.stdout.reconfigure(encoding='utf-8')
     main()
