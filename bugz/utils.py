@@ -5,11 +5,6 @@ import sys
 import shutil
 import tempfile
 
-try:
-    import readline
-except ImportError:
-    readline = None
-
 BUGZ_COMMENT_TEMPLATE = """
 BUGZ: ---------------------------------------------------
 %s

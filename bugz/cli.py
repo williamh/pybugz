@@ -24,12 +24,6 @@ import sys
 import textwrap
 import xmlrpc.client
 
-try:
-    import readline
-except ImportError:
-    pass
-
-
 from bugz.cli_argparser import make_arg_parser
 from bugz.configfile import load_config
 from bugz.settings import Settings
