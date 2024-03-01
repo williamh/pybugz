@@ -542,11 +542,11 @@ def post(settings):
     # load description from file if possible
     if hasattr(settings, 'description_from'):
         try:
-                if settings.description_from == '-':
-                    settings.description = sys.stdin.read()
-                else:
-                    settings.description = \
-                        open(settings.description_from, 'r').read()
+            if settings.description_from == '-':
+                settings.description = sys.stdin.read()
+            else:
+                settings.description = \
+                    open(settings.description_from, 'r').read()
         except IOError as error:
             raise BugzError('Unable to read from file: %s: %s' %
                             (settings.description_from, error))

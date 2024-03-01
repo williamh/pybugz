@@ -27,13 +27,13 @@ DEFAULT_NUM_COLS = 80
 def get_content_type(filename):
     # Keep in sync with Lib/mimetypes.py
     encoding_map = {
-            'bzip2': 'application/x-bzip2',
-            'compress': 'application/x-compress',
-            'gzip': 'application/gzip',
-            'xz': 'application/x-xz',
-            }
+        'bzip2': 'application/x-bzip2',
+        'compress': 'application/x-compress',
+        'gzip': 'application/gzip',
+        'xz': 'application/x-xz',
+    }
     # Last addition was brotli, rest have been since 3.4
-    if sys.version_info[0:2] >= (3, 9):
+    if sys.version_info >= (3, 9):
         encoding_map['br'] = 'application/x-brotli'
 
     mimetype, encoding = mimetypes.guess_type(filename) or ('application/octet-stream', None)
