@@ -14,6 +14,8 @@ def make_arg_parser():
                         'configuration file')
     parser.add_argument('-b', '--base',
                         help='base URL of Bugzilla')
+    parser.add_argument('-t', '--timeformat',
+                        help='Time format (default: %%+ UTC), see strftime(3)')
     parser.add_argument('-u', '--user',
                         help='username')
     parser.add_argument('-p', '--password',
@@ -78,13 +80,25 @@ def make_arg_parser():
 
     attachment_parser = subparsers.add_parser('attachment',
                                               argument_default=argparse.SUPPRESS,
-                                              help='get an attachment '
+                                              help='get an attachment(s) '
                                               'from Bugzilla')
-    attachment_parser.add_argument('attachid',
-                                   help='the ID of the attachment')
+    attachment_parser.add_argument('id',
+                                   help='the ID of the attachment or bug')
+    attachment_parser.add_argument('-b', '--bug',
+                                   action='store_true',
+                                   help='the ID is a bug')
+    attachment_parser.add_argument('-r', '--most-recent',
+                                   action='store_true',
+                                   help='get only most recent attachment')
+    attachment_parser.add_argument('-p', '--patch-only',
+                                   action='store_true',
+                                   help='get only patch attachment(s)')
+    attachment_parser.add_argument('-o', '--skip-obsolete',
+                                   action='store_true',
+                                   help='get only not obsolete attachment(s)')
     attachment_parser.add_argument('-v', '--view',
                                    action="store_true",
-                                   help='print attachment rather than save')
+                                   help='print attachment(s) rather than save')
     attachment_parser.set_defaults(func=bugz.cli.attachment)
 
     connections_parser = subparsers.add_parser('connections',
@@ -190,6 +204,9 @@ def make_arg_parser():
                                help='change the priority for this bug')
     modify_parser.add_argument('--product',
                                help='change the product for this bug')
+    modify_parser.add_argument('-Q', '--quote',
+                               action='count',
+                               help='quote most recent comment(s) with -C')
     modify_parser.add_argument('-r', '--resolution',
                                help='set new resolution '
                                '(if status = RESOLVED)')

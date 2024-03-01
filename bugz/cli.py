@@ -16,6 +16,7 @@ Classes
 
 """
 
+import datetime
 import getpass
 import os
 import re
@@ -223,6 +224,14 @@ def prompt_for_bug(settings):
         log_info('Append command (optional): %s' % settings.append_command)
 
 
+def parsetime(when):
+    return datetime.datetime.strptime(str(when), '%Y%m%dT%H:%M:%S')
+
+
+def printtime(dt, settings):
+    return dt.strftime(settings.timeformat)
+
+
 def show_bug_info(bug, settings):
     FieldMap = {
         'alias': 'Alias',
@@ -238,20 +247,23 @@ def show_bug_info(bug, settings):
         'severity': 'Severity',
         'target_milestone': 'TargetMilestone',
         'assigned_to': 'AssignedTo',
+        'assigned_to_detail': 'AssignedTo',
         'url': 'URL',
         'whiteboard': 'Whiteboard',
         'keywords': 'Keywords',
         'depends_on': 'dependsOn',
         'blocks': 'Blocks',
         'creation_time': 'Reported',
-        'creator': 'Reporter',
+        'creator_detail': 'Reporter',
         'last_change_time': 'Updated',
-        'cc': 'CC',
+        'cc_detail': 'CC',
         'see_also': 'See Also',
     }
-    SkipFields = ['assigned_to_detail', 'cc_detail', 'creator_detail', 'id',
-                  'is_confirmed', 'is_creator_accessible', 'is_cc_accessible',
-                  'is_open', 'update_token']
+    SkipFields = ['assigned_to', 'cc', 'creator', 'id', 'is_confirmed',
+                  'is_creator_accessible', 'is_cc_accessible', 'is_open',
+                  'update_token']
+    TimeFields = ['last_change_time', 'creation_time']
+    user_detail = {}
 
     for field in bug:
         if field in SkipFields:
@@ -260,8 +272,18 @@ def show_bug_info(bug, settings):
             desc = FieldMap[field]
         else:
             desc = field
-        value = bug[field]
-        if field in ['cc', 'see_also']:
+        if field in TimeFields:
+            value = printtime(parsetime(bug[field]), settings)
+        else:
+            value = bug[field]
+        if field in ['assigned_to_detail', 'creator_detail']:
+           print('%-12s: %s <%s>' % (desc, value['real_name'], value['email']))
+           user_detail[value['email']] = value
+        elif field == 'cc_detail':
+            for cc in value:
+                print('%-12s: %s <%s>' % (desc, cc['real_name'], cc['email']))
+                user_detail[cc['email']] = cc
+        elif field == 'see_also':
             for x in value:
                 print('%-12s: %s' % (desc, x))
         elif isinstance(value, list):
@@ -287,19 +309,71 @@ def show_bug_info(bug, settings):
         params = {'ids': [bug['id']]}
         bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
         bug_comments = bug_comments['bugs']['%s' % bug['id']]['comments']
-        print('%-12s: %d' % ('Comments', len(bug_comments)))
+        for comment in bug_comments:
+            comment['when'] = parsetime(comment['time'])
+            del comment['time']
+            comment['who'] = comment['creator']
+            del comment['creator']
+        bug_history = settings.call_bz(settings.bz.Bug.history, params)
+        assert(bug_history['bugs'][0]['id'] == bug['id'])
+        bug_history = bug_history['bugs'][0]['history']
+        for change in bug_history:
+            change['when'] = parsetime(change['when'])
+        bug_comments += bug_history
+        bug_comments.sort(key=lambda c: (c['when'], 'changes' in c))
         print()
         i = 0
         wrapper = textwrap.TextWrapper(width=settings.columns,
                                        break_long_words=False,
                                        break_on_hyphens=False)
         for comment in bug_comments:
-            who = comment['creator']
-            when = comment['time']
-            what = comment['text']
-            print('[Comment #%d] %s : %s' % (i, who, when))
-            print('-' * (settings.columns - 1))
+            # Header, who & when
+            if comment == bug_comments[0] or \
+               prev['when'] != comment['when'] or \
+               prev['who'] != comment['who']:
+                if comment['who'] in user_detail:
+                    who = '%s <%s>' % (
+                          user_detail[comment['who']]['real_name'],
+                          comment['who'])
+                else:
+                    who = comment['who']
+                when = comment['when']
+                header_left = '%s %s' % (who, printtime(when, settings))
+                if i == 0:
+                    header_right = 'Description'
+                elif 'changes' in comment:
+                    header_right = ''
+                else:
+                    header_right = '[Comment %d]' % i
+                space = settings.columns - len(header_left) - \
+                        len(header_right) - 3
+                if space < 0:
+                    space = 0
+                print(header_left, ' ' * space, header_right)
+                print('-' * (settings.columns - 1))
 
+            # A change from Bug.history
+            if 'changes' in comment:
+                for change in comment['changes']:
+                    if change['field_name'] in FieldMap:
+                       desc = FieldMap[change['field_name']]
+                    else:
+                       desc = change['field_name']
+                    if change['removed'] and change['added']:
+                       print('%s: %s → %s' % (desc, change['removed'],
+                                              change['added']))
+                    elif change['added']:
+                       print('%s: %s' % (desc, change['added']))
+                    elif change['removed']:
+                       print('REMOVED %s: %s ' % (desc, change['removed']))
+                    else:
+                       print(change)
+                prev = comment
+                print()
+                continue
+
+            # A comment from Bug.comments
+            what = comment['text']
             if what is None:
                 what = ''
 
@@ -311,6 +385,7 @@ def show_bug_info(bug, settings):
                     for shortline in wrapper.wrap(line):
                         print(shortline)
             print()
+            prev = comment
             i += 1
 
 
@@ -356,33 +431,55 @@ def attach(settings):
 
 
 def attachment(settings):
-    """ Download or view an attachment given the id."""
-    log_info('Getting attachment %s' % settings.attachid)
+    """ Download or view an attachment(s) given the attachment or bug id."""
 
     params = {}
-    params['attachment_ids'] = [settings.attachid]
+    if hasattr(settings, 'bug'):
+        params['ids'] = [settings.id]
+        log_info('Getting attachment(s) for bug %s' % settings.id)
+    else:
+        params['attachment_ids'] = [settings.id]
+        log_info('Getting attachment %s' % settings.id)
 
     check_auth(settings)
+    results = settings.call_bz(settings.bz.Bug.attachments, params)
 
-    result = settings.call_bz(settings.bz.Bug.attachments, params)
-    result = result['attachments'][settings.attachid]
+    if hasattr(settings, 'bug'):
+        results = results['bugs'][settings.id]
+    else:
+        results = [ results['attachments'][settings.id] ]
+
+    if hasattr(settings, 'patch_only'):
+        results = list(filter(lambda x : x['is_patch'], results))
+
+    if hasattr(settings, 'skip_obsolete'):
+        results = list(filter(lambda x : not x['is_obsolete'], results))
+
+    if not results:
+        return
+
+    if hasattr(settings, 'most_recent'):
+        results = [ results[-1] ]
+
     view = hasattr(settings, 'view')
-
     action = {True: 'Viewing', False: 'Saving'}
-    log_info('%s attachment: "%s"' %
-             (action[view], result['file_name']))
-    safe_filename = os.path.basename(re.sub(r'\.\.', '',
+
+    for result in results:
+        log_info('%s%s attachment: "%s"' % (action[view],
+            ' obsolete' if result['is_obsolete'] else '',
+            result['file_name']))
+        safe_filename = os.path.basename(re.sub(r'\.\.', '',
                                             result['file_name']))
 
-    if view:
-        print(result['data'].data.decode('utf-8'))
-    else:
-        if os.path.exists(result['file_name']):
-            raise RuntimeError('Filename already exists')
+        if view:
+            print(result['data'].data.decode('utf-8'))
+        else:
+            if os.path.exists(result['file_name']):
+                raise RuntimeError('Filename already exists')
 
-        fd = open(safe_filename, 'wb')
-        fd.write(result['data'].data)
-        fd.close()
+            fd = open(safe_filename, 'wb')
+            fd.write(result['data'].data)
+            fd.close()
 
 
 def get(settings):
@@ -408,13 +505,12 @@ def modify(settings):
         except IOError as error:
             raise BugzError('unable to read file: %s: %s' %
                             (settings.comment_from, error))
+    else:
+        settings.comment = ''
 
     if hasattr(settings, 'assigned_to') and \
             hasattr(settings, 'reset_assigned_to'):
         raise BugzError('--assigned-to and --unassign cannot be used together')
-
-    if hasattr(settings, 'comment_editor'):
-        settings.comment = block_edit('Enter comment:')
 
     params = {}
     params['ids'] = [settings.bugid]
@@ -446,10 +542,6 @@ def modify(settings):
         if 'cc' not in params:
             params['cc'] = {}
         params['cc']['remove'] = settings.cc_remove
-    if hasattr(settings, 'comment'):
-        if 'comment' not in params:
-            params['comment'] = {}
-        params['comment']['body'] = settings.comment
     if hasattr(settings, 'component'):
         params['component'] = settings.component
     if hasattr(settings, 'dupe_of'):
@@ -515,9 +607,42 @@ def modify(settings):
         params['status'] = 'RESOLVED'
         params['resolution'] = 'INVALID'
 
+    check_auth(settings)
+
+    if hasattr(settings, 'comment_editor'):
+        quotes=''
+        if hasattr(settings, 'quote'):
+            bug_comments = settings.call_bz(settings.bz.Bug.comments, params)
+            bug_comments = bug_comments['bugs']['%s' % settings.bugid]\
+                                       ['comments'][-settings.quote:]
+            wrapper = textwrap.TextWrapper(width=settings.columns,
+                                           break_long_words=False,
+                                           break_on_hyphens=False)
+            for comment in bug_comments:
+                what = comment['text']
+                if what is None:
+                    continue
+                who = comment['creator']
+                when = parsetime(comment['time'])
+                quotes += 'On %s, %s wrote:\n' % (printtime(when, settings),
+                                                  who)
+                for line in what.splitlines():
+                    if len(line) < settings.columns:
+                        quotes += '> %s\n' % line
+                    else:
+                        for shortline in wrapper.wrap(line):
+                            quotes += '> %s\n' % shortline
+        settings.comment = block_edit('Enter comment:',
+                           comment_from=settings.comment,
+                           quotes=quotes)
+
+    if hasattr(settings, 'comment'):
+        if 'comment' not in params:
+            params['comment'] = {}
+        params['comment']['body'] = settings.comment
+
     if len(params) < 2:
         raise BugzError('No changes were specified')
-    check_auth(settings)
     result = settings.call_bz(settings.bz.Bug.update, params)
     for bug in result['bugs']:
         changes = bug['changes']

@@ -43,6 +43,14 @@ class Settings:
                                                    self.connection,
                                                    'component')
 
+        if not hasattr(self, 'timeformat'):
+            if config.has_option(self.connection, 'timeformat'):
+                self.timeformat = get_config_option(config.get,
+                                                   self.connection,
+                                                   'timeformat')
+            else:
+                self.timeformat = '%+ UTC'
+
         if not hasattr(self, 'user'):
             if config.has_option(self.connection, 'user'):
                 self.user = get_config_option(config.get,

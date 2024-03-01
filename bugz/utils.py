@@ -61,7 +61,8 @@ def terminal_width():
     return shutil.get_terminal_size().columns
 
 
-def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
+def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:',
+                  quotes=''):
     """Launch an editor with some default text.
 
     Lifted from Mercurial 0.9.
@@ -69,6 +70,7 @@ def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
     """
     (fd, name) = tempfile.mkstemp("bugz")
     f = os.fdopen(fd, "w")
+    f.write(quotes)
     f.write(comment_from)
     f.write(initial_text)
     f.close()
@@ -87,7 +89,7 @@ def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
     return ''
 
 
-def block_edit(comment, comment_from=''):
+def block_edit(comment, comment_from='', quotes=''):
     editor = (os.environ.get('BUGZ_EDITOR') or os.environ.get('EDITOR'))
 
     if not editor:
@@ -98,7 +100,8 @@ def block_edit(comment, comment_from=''):
     initial_text = '\n'.join(['BUGZ: %s' % line
                               for line in comment.splitlines()])
     new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text,
-                             comment_from)
+                             comment_from=comment_from,
+                             quotes=quotes)
 
     if new_text.strip():
         return new_text
