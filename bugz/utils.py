@@ -1,4 +1,3 @@
-import mimetypes
 import os
 import re
 import sys
@@ -21,10 +20,6 @@ DEFAULT_NUM_COLS = 80
 #
 # Auxiliary functions
 #
-
-
-def get_content_type(filename):
-    return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
 
 
 def raw_input_block():

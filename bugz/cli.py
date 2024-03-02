@@ -19,6 +19,7 @@ Classes
 
 import datetime
 import getpass
+import mimetypes
 import os
 import re
 import subprocess
@@ -37,7 +38,7 @@ from bugz.configfile import load_config
 from bugz.settings import Settings
 from bugz.exceptions import BugzError
 from bugz.log import log_error, log_info
-from bugz.utils import block_edit, get_content_type
+from bugz.utils import block_edit
 
 
 def check_bugz_token():
@@ -408,8 +409,19 @@ def attach(settings):
     if not os.path.exists(filename):
         raise BugzError('File not found: %s' % filename)
 
+    if is_patch is None and \
+      (filename.endswith('.diff') or filename.endswith('.patch')):
+        content_type = 'text/plain'
+        is_patch = 1
+
     if content_type is None:
-        content_type = get_content_type(filename)
+        content_type = mimetypes.guess_type(filename)[0]
+
+    if content_type is None:
+        if is_patch is None:
+            content_type = 'application/octet-stream'
+        else:
+            content_type = 'text/plain'
 
     if comment is None:
         comment = block_edit('Enter optional long description of attachment')
