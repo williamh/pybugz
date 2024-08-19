@@ -28,10 +28,9 @@ operation is similar in style to cvs/svn where a subcommand is
 required for operation. 
 
 To explain how it works, I will use a typical workflow for Gentoo
-development. 
+development.
 
-1) Searching bugzilla for bugs I can fix, I'll run the command:
----------------------------------------------------------------
+### Searching for bugs
 ```
 $ bugz search "version bump" --assigned-to liquidx@gentoo.org
 
@@ -41,8 +40,9 @@ $ bugz search "version bump" --assigned-to liquidx@gentoo.org
  125468 liquidx              version bump for dev-libs/g-wrap-1.9.6
  130608 liquidx              app-dicts/stardict version bump: 2.4.7
 ```
-2) Narrow down on bug #101968, I can execute:
----------------------------------------------
+
+### Getting a specific bug's details
+
 ```
 $ bugz get 101968
 
@@ -65,9 +65,8 @@ Attachments : 1
 [Comment #1] dushistov@----.ru : 2006-04-20 07:36 PST
 ...
 ```
-3) Now this bug has an attachment submitted by the user, so I can
-   easily pull that attachment in:
------------------------------------------------------------------
+### Pulling an attachment
+
 ```
 $ bugz attachment 87844
 
@@ -75,13 +74,14 @@ $ bugz attachment 87844
  * Getting attachment 87844
  * Saving attachment: "stardict-2.4.7.ebuild"
 ```
-4) If the ebuild is suitable, we can commit it using our normal
-   repoman tools, and close the bug.
----------------------------------------------------------------
+
+### Modifying the bug
+If the ebuild is good, it can be commited using the usual tools.
+Then one might close the bug like this:
 
 	$ bugz modify 130608 --fixed -c "Thanks for the ebuild. Committed to portage" 
 
-or if we find that the bug is invalid, we can close it by using:
+If the bug is invalid, we can close it by running:
 
 	$ bugz modify 130608 --invalid -c "Not reproducable"
 
