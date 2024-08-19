@@ -85,7 +85,7 @@ If the bug is invalid, we can close it by running:
 
 	$ bugz modify 130608 --invalid -c "Not reproducable"
 
-Other options
+Other options & getting help
 -------------
 
 bugz has an extensive help system for commands and options.
