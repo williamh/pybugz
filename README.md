@@ -16,9 +16,10 @@ Features
 
 * Searching bugzilla
 * Listing details of a bug including comments and attachments
-* Downloading/viewing attachments from bugzilla
-* Posting bugs, comments, and making changes to an existing bug.
-* Adding attachments to a bug.
+* Downloading/viewing attachments
+* Posting bugs & comments
+* Making changes to existing bugs
+* Adding attachments to bugs
 
 Usage/Workflow
 --------------
