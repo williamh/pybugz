@@ -6,11 +6,6 @@ command line utility to interact with it. This is mainly done to help
 me with closing bugs on Gentoo Bugzilla by grabbing patches, ebuilds
 and so on.
 
-Author
-------
-
-Alastair Tse <alastair@liquidx.net>. Copyright (c) 2006 under GPL-2.
-
 Requirements
 ------------
 
@@ -114,3 +109,8 @@ directory.
 
 For more information about this configuration system, see the
 pybugz.d (5) man page.
+
+Author
+------
+
+Alastair Tse <alastair@liquidx.net>. Copyright (c) 2006 under GPL-2.
