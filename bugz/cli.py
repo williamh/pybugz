@@ -184,6 +184,14 @@ def prompt_for_bug(settings):
     else:
         log_info('Enter alias (optional): %s' % settings.alias)
 
+    if not hasattr(settings, 'cf_stabilisation_atoms'):
+        package_list_msg = 'Enter the Package list for this bug (optional): '
+        line = input(package_list_msg)
+        if len(line):
+            settings.cf_stabilisation_atoms = line
+    elif settings.component == "Stabilisation":
+        log_info('Enter a Package list (optional): %s' % settings.cf_stabilisation_atoms)
+
     if not hasattr(settings, 'assigned_to'):
         assign_msg = 'Enter assignee (eg. liquidx@gentoo.org) (optional): '
         line = input(assign_msg)
@@ -248,6 +256,8 @@ def show_bug_info(bug, settings):
         'last_change_time': 'Updated',
         'cc': 'CC',
         'see_also': 'See Also',
+        'cf_runtime_testing_required': 'Runtime testing required',
+        'cf_stabilisation_atoms': 'Package list',
     }
     SkipFields = ['assigned_to_detail', 'cc_detail', 'creator_detail', 'id',
                   'is_confirmed', 'is_creator_accessible', 'is_cc_accessible',
@@ -420,6 +430,8 @@ def modify(settings):
     params['ids'] = [settings.bugid]
     if hasattr(settings, 'alias'):
         params['alias'] = settings.alias
+    if hasattr(settings, 'cf_stabilisation_atoms'):
+        params['cf_stabilisation_atoms'] = settings.cf_stabilisation_atoms
     if hasattr(settings, 'assigned_to'):
         params['assigned_to'] = settings.assigned_to
     if hasattr(settings, 'blocks_add'):
@@ -584,6 +596,8 @@ def post(settings):
         print('%-12s: %s' % ('Severity', settings.severity))
     if hasattr(settings, 'alias'):
         print('%-12s: %s' % ('Alias', settings.alias))
+    if hasattr(settings, 'cf_stabilisation_atoms'):
+        print ('%-12s: %s' % ('Package list', settings.cf_stabilisation_atoms))
     if hasattr(settings, 'assigned_to'):
         print('%-12s: %s' % ('Assigned to', settings.assigned_to))
     if hasattr(settings, 'cc'):
@@ -630,6 +644,8 @@ def post(settings):
         params['cc'] = settings.cc
     if hasattr(settings, 'url'):
         params['url'] = settings.url
+    if hasattr(settings, 'cf_stabilisation_atoms'):
+        params['cf_stabilisation_atoms'] = settings.cf_stabilisation_atoms
 
     result = settings.call_bz(settings.bz.Bug.create, params)
     log_info('Bug %d submitted' % result['id'])
@@ -639,10 +655,10 @@ def search(settings):
     """Performs a search on the bugzilla database with
 the keywords given on the title (or the body if specified).
     """
-    valid_keys = ['alias', 'assigned_to', 'component', 'creator',
-                  'limit', 'offset', 'op_sys', 'platform',
-                  'priority', 'product', 'resolution', 'severity',
-                  'version', 'whiteboard', 'cc']
+    valid_keys = ['alias', 'assigned_to', 'cc', 'component', 'creator',
+                  'limit', 'offset', 'op_sys', 'platform', 'priority',
+                  'product', 'resolution', 'severity', 'version',
+                  'whiteboard', 'cf_stabilisation_atoms']
 
     params = {}
     d = vars(settings)
