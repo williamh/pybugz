@@ -23,6 +23,7 @@ import subprocess
 import sys
 import textwrap
 import xmlrpc.client
+import configparser
 
 from bugz.cli_argparser import make_arg_parser
 from bugz.configfile import load_config
@@ -506,6 +507,15 @@ def modify(settings):
         params['version'] = settings.version
     if hasattr(settings, 'whiteboard'):
         params['whiteboard'] = settings.whiteboard
+    if hasattr(settings, 'custom'):
+        custom_options = settings.custom.split(':')
+        for custom_option in custom_options:
+            try:
+                key,value = custom_option.split('=',1)
+                params[key] = value
+            except:
+                print("Badly formatted option :{}".format(custom_option))
+                pass
 
     if hasattr(settings, 'fixed'):
         params['status'] = 'RESOLVED'
@@ -545,18 +555,90 @@ def post(settings):
             raise BugzError('Unable to read from file: %s: %s' %
                             (settings.description_from, error))
 
-    if not hasattr(settings, 'batch'):
+    if not hasattr(settings, 'batch') and not hasattr(settings, 'template'):
         prompt_for_bug(settings)
 
-    # raise an exception if mandatory fields are not specified.
-    if not hasattr(settings, 'product'):
-        raise RuntimeError('Product not specified')
-    if not hasattr(settings, 'component'):
-        raise RuntimeError('Component not specified')
-    if not hasattr(settings, 'summary'):
-        raise RuntimeError('Title not specified')
-    if not hasattr(settings, 'description'):
-        raise RuntimeError('Description not specified')
+    params = {}
+
+    if hasattr(settings, 'template'):
+
+        tmpl = configparser.ConfigParser()
+
+        try:
+            tmpl.read(settings.template)
+            msection = tmpl['Default']['type']
+            for key in tmpl[msection]:
+                params[key] = tmpl[msection][key]
+                print('%-12s: %s' % (key, params[key]))
+        except configparser.DuplicateOptionError as error:
+            log_error(error)
+            sys.exit(1)
+        except configparser.DuplicateSectionError as error:
+            log_error(error)
+            sys.exit(1)
+        except configparser.MissingSectionHeaderError as error:
+            log_error(error)
+            sys.exit(1)
+        except configparser.ParsingError as error:
+            log_error(error)
+            sys.exit(1)
+    else:
+        # raise an exception if mandatory fields are not specified.
+        if not hasattr(settings, 'product'):
+            raise RuntimeError('Product not specified')
+        if not hasattr(settings, 'component'):
+            raise RuntimeError('Component not specified')
+        if not hasattr(settings, 'summary'):
+            raise RuntimeError('Title not specified')
+        if not hasattr(settings, 'description'):
+            raise RuntimeError('Description not specified')
+        print('-' * (settings.columns - 1))
+        print('%-12s: %s' % ('Product', settings.product))
+        print('%-12s: %s' % ('Component', settings.component))
+        print('%-12s: %s' % ('Title', settings.summary))
+        if hasattr(settings, 'version'):
+            print('%-12s: %s' % ('Version', settings.version))
+        print('%-12s: %s' % ('Description', settings.description))
+        if hasattr(settings, 'op_sys'):
+            print('%-12s: %s' % ('Operating System', settings.op_sys))
+        if hasattr(settings, 'platform'):
+            print('%-12s: %s' % ('Platform', settings.platform))
+        if hasattr(settings, 'priority'):
+            print('%-12s: %s' % ('Priority', settings.priority))
+        if hasattr(settings, 'severity'):
+            print('%-12s: %s' % ('Severity', settings.severity))
+        if hasattr(settings, 'alias'):
+            print('%-12s: %s' % ('Alias', settings.alias))
+        if hasattr(settings, 'assigned_to'):
+            print('%-12s: %s' % ('Assigned to', settings.assigned_to))
+        if hasattr(settings, 'cc'):
+            print('%-12s: %s' % ('CC', settings.cc))
+        if hasattr(settings, 'url'):
+            print('%-12s: %s' % ('URL', settings.url))
+        print('-' * (settings.columns - 1))
+        params['product'] = settings.product
+        params['component'] = settings.component
+        if hasattr(settings, 'version'):
+            params['version'] = settings.version
+        params['summary'] = settings.summary
+        if hasattr(settings, 'description'):
+            params['description'] = settings.description
+        if hasattr(settings, 'op_sys'):
+            params['op_sys'] = settings.op_sys
+        if hasattr(settings, 'platform'):
+            params['platform'] = settings.platform
+        if hasattr(settings, 'priority'):
+            params['priority'] = settings.priority
+        if hasattr(settings, 'severity'):
+            params['severity'] = settings.severity
+        if hasattr(settings, 'alias'):
+            params['alias'] = settings.alias
+        if hasattr(settings, 'assigned_to'):
+            params['assigned_to'] = settings.assigned_to
+        if hasattr(settings, 'cc'):
+            params['cc'] = settings.cc
+        if hasattr(settings, 'url'):
+            params['url'] = settings.url
 
     # append the output from append_command to the description
     append_command = getattr(settings, 'append_command', None)
@@ -565,35 +647,6 @@ def post(settings):
         settings.description = settings.description + '\n\n' + \
             '$ ' + append_command + '\n' + \
             append_command_output
-
-    # print submission confirmation
-    print('-' * (settings.columns - 1))
-    print('%-12s: %s' % ('Product', settings.product))
-    print('%-12s: %s' % ('Component', settings.component))
-    print('%-12s: %s' % ('Title', settings.summary))
-    if hasattr(settings, 'version'):
-        print('%-12s: %s' % ('Version', settings.version))
-    print('%-12s: %s' % ('Description', settings.description))
-    if hasattr(settings, 'op_sys'):
-        print('%-12s: %s' % ('Operating System', settings.op_sys))
-    if hasattr(settings, 'platform'):
-        print('%-12s: %s' % ('Platform', settings.platform))
-    if hasattr(settings, 'priority'):
-        print('%-12s: %s' % ('Priority', settings.priority))
-    if hasattr(settings, 'severity'):
-        print('%-12s: %s' % ('Severity', settings.severity))
-    if hasattr(settings, 'alias'):
-        print('%-12s: %s' % ('Alias', settings.alias))
-    if hasattr(settings, 'assigned_to'):
-        print('%-12s: %s' % ('Assigned to', settings.assigned_to))
-    if hasattr(settings, 'cc'):
-        print('%-12s: %s' % ('CC', settings.cc))
-    if hasattr(settings, 'url'):
-        print('%-12s: %s' % ('URL', settings.url))
-    # fixme: groups
-    # fixme: status
-    # fixme: Milestone
-    print('-' * (settings.columns - 1))
 
     if not hasattr(settings, 'batch'):
         if settings.default_confirm in ['Y', 'y']:
@@ -606,30 +659,6 @@ def post(settings):
             log_info('Submission aborted')
             return
 
-    params = {}
-    params['product'] = settings.product
-    params['component'] = settings.component
-    if hasattr(settings, 'version'):
-        params['version'] = settings.version
-    params['summary'] = settings.summary
-    if hasattr(settings, 'description'):
-        params['description'] = settings.description
-    if hasattr(settings, 'op_sys'):
-        params['op_sys'] = settings.op_sys
-    if hasattr(settings, 'platform'):
-        params['platform'] = settings.platform
-    if hasattr(settings, 'priority'):
-        params['priority'] = settings.priority
-    if hasattr(settings, 'severity'):
-        params['severity'] = settings.severity
-    if hasattr(settings, 'alias'):
-        params['alias'] = settings.alias
-    if hasattr(settings, 'assigned_to'):
-        params['assigned_to'] = settings.assigned_to
-    if hasattr(settings, 'cc'):
-        params['cc'] = settings.cc
-    if hasattr(settings, 'url'):
-        params['url'] = settings.url
 
     result = settings.call_bz(settings.bz.Bug.create, params)
     log_info('Bug %d submitted' % result['id'])
