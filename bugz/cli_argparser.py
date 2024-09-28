@@ -317,6 +317,10 @@ def make_arg_parser():
                                dest='search_statuses',
                                help='restrict by status '
                                '(one or more, use all for all statuses)')
+    search_parser.add_argument('-S', '--not-status',
+                               action='append',
+                               help='exclude by status '
+                               '(one or more, use all for all statuses)')
     search_parser.add_argument('-v', '--version',
                                action='append',
                                help='restrict by version (one or more)')
