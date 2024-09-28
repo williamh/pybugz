@@ -68,10 +68,9 @@ def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
     @rtype: string
     """
     (fd, name) = tempfile.mkstemp("bugz")
-    f = os.fdopen(fd, "w")
-    f.write(comment_from)
-    f.write(initial_text)
-    f.close()
+    with os.fdopen(fd, "w") as f:
+        f.write(comment_from)
+        f.write(initial_text)
 
     editor = (os.environ.get("BUGZ_EDITOR") or os.environ.get("EDITOR"))
     if editor:
@@ -79,7 +78,8 @@ def launch_editor(initial_text, comment_from='', comment_prefix='BUGZ:'):
         if result != 0:
             raise RuntimeError('Unable to launch editor: %s' % editor)
 
-        new_text = open(name).read()
+        with open(name) as f:
+            new_text = f.read()
         new_text = re.sub('(?m)^%s.*\n' % comment_prefix, '', new_text)
         os.unlink(name)
         return new_text

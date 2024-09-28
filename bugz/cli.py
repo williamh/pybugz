@@ -338,9 +338,8 @@ def attach(settings):
     params = {}
     params['ids'] = [bugid]
 
-    fd = open(filename, 'rb')
-    params['data'] = xmlrpc.client.Binary(fd.read())
-    fd.close()
+    with open(filename, 'rb') as fd:
+        params['data'] = xmlrpc.client.Binary(fd.read())
 
     params['file_name'] = os.path.basename(filename)
     params['summary'] = summary
@@ -380,9 +379,8 @@ def attachment(settings):
         if os.path.exists(result['file_name']):
             raise RuntimeError('Filename already exists')
 
-        fd = open(safe_filename, 'wb')
-        fd.write(result['data'].data)
-        fd.close()
+        with open(safe_filename, 'wb') as fd:
+            fd.write(result['data'].data)
 
 
 def get(settings):
@@ -404,7 +402,8 @@ def modify(settings):
             if settings.comment_from == '-':
                 settings.comment = sys.stdin.read()
             else:
-                settings.comment = open(settings.comment_from, 'r').read()
+                with open(settings.comment_from, 'r') as fd:
+                    settings.comment = fd.read()
         except IOError as error:
             raise BugzError('unable to read file: %s: %s' %
                             (settings.comment_from, error))
@@ -539,8 +538,8 @@ def post(settings):
             if settings.description_from == '-':
                 settings.description = sys.stdin.read()
             else:
-                settings.description = \
-                    open(settings.description_from, 'r').read()
+                with open(settings.description_from, 'r') as fd:
+                    settings.description = fd.read()
         except IOError as error:
             raise BugzError('Unable to read from file: %s: %s' %
                             (settings.description_from, error))
