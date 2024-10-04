@@ -126,10 +126,7 @@ class Settings:
         if getattr(self, 'encoding', None) is not None:
             log_info('The encoding option is deprecated.')
 
-        if self.insecure:
-            context=ssl._create_unverified_context()
-        else:
-            context = None
+        context=ssl._create_unverified_context() if self.insecure else None
 
         self.bz = xmlrpc.client.ServerProxy(self.base, context=context)
         self.connections = config.sections()

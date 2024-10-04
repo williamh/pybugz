@@ -100,7 +100,4 @@ def block_edit(comment, comment_from=''):
     new_text = launch_editor(BUGZ_COMMENT_TEMPLATE % initial_text,
                              comment_from)
 
-    if new_text.strip():
-        return new_text
-    else:
-        return ''
+    return new_text if new_text.strip() else ''
