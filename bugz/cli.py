@@ -122,7 +122,7 @@ def prompt_for_bug(settings):
 
     if not hasattr(settings, 'version'):
         line = input('Enter version (default: unspecified): ')
-            settings.version = line or 'unspecified'
+        settings.version = line or 'unspecified'
     else:
         log_info('Enter version: %s' % settings.version)
 
