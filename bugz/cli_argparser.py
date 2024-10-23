@@ -260,6 +260,8 @@ def make_arg_parser():
                              help='load description from file')
     post_parser.add_argument('--append-command',
                              help='append output from command to description')
+    post_parser.add_argument('--package-list',
+                             help='stabilization package list')
     post_parser.add_argument('--batch',
                              action="store_true",
                              help='do not prompt for any values')
