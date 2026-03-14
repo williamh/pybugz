@@ -18,16 +18,12 @@ def load_config(UserConfig=None):
     try:
         parser.read(DefaultConfigs + SystemConfigs + [UserConfig])
 
-    except configparser.DuplicateOptionError as error:
-        log_error(error)
-        sys.exit(1)
-    except configparser.DuplicateSectionError as error:
-        log_error(error)
-        sys.exit(1)
-    except configparser.MissingSectionHeaderError as error:
-        log_error(error)
-        sys.exit(1)
-    except configparser.ParsingError as error:
+    except (
+        configparser.DuplicateOptionError,
+        configparser.DuplicateSectionError,
+        configparser.MissingSectionHeaderError,
+        configparser.ParsingError,
+    ) as error:
         log_error(error)
         sys.exit(1)
 
