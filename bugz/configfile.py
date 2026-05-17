@@ -10,10 +10,15 @@ def load_config(UserConfig=None):
     parser = configparser.ConfigParser(default_section='default')
     DefaultConfigs = sorted(glob.glob(sys.prefix + '/share/pybugz.d/*.conf'))
     SystemConfigs = sorted(glob.glob('/etc/pybugz.d/*.conf'))
-    if UserConfig is not None:
+
+    if UserConfig is not None:  # Custom config path
         UserConfig = os.path.expanduser(UserConfig)
-    else:
-        UserConfig = os.path.expanduser('~/.bugzrc')
+    elif os.getenv("XDG_CONFIG_HOME"):  # XDG_CONFIG_HOME
+        UserConfig = os.path.join(os.getenv("XDG_CONFIG_HOME"), "bugzrc")
+    elif os.path.isdir(os.path.expanduser("~/.config")):  # ~/.config
+        UserConfig = os.path.join(os.path.expanduser("~/.config"), "bugzrc")
+    else:  # Fallback
+        UserConfig = os.path.expanduser("~/.bugzrc")
 
     try:
         parser.read(DefaultConfigs + SystemConfigs + [UserConfig])
