@@ -287,6 +287,10 @@ def make_arg_parser():
                                help='restrict by component (1 or more)')
     search_parser.add_argument('-r', '--creator',
                                help='email of the person who created the bug')
+    search_parser.add_argument('-k', '--keywords',
+                               action='append',
+                               help='restrict by keywords '
+                               '(one or more, all must match)')
     search_parser.add_argument('-l', '--limit',
                                type=int,
                                help='Limit the number of records '
